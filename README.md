@@ -198,6 +198,4 @@ python src/training/train.py
 python src/export/export_tflite.py
 ```
 
----
 
-Dibuat untuk PBL — semoga bermanfaat buat komunitas tunarungu Indonesia. 🤟
