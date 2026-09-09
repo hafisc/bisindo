@@ -1,0 +1,52 @@
+# ── Flutter / Dart ────────────────────────────────────────────────────────────
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+mobile/.dart_tool/
+mobile/build/
+mobile/.packages
+mobile/pubspec.lock
+mobile/android/.gradle
+mobile/android/local.properties
+mobile/android/app/google-services.json       # Firebase config — jangan di-commit
+mobile/ios/GoogleService-Info.plist           # Firebase config — jangan di-commit
+mobile/ios/.symlinks/
+mobile/ios/Pods/
+mobile/ios/Runner.xcworkspace/xcuserdata/
+mobile/coverage/
+
+# Generated files (regenerate with build_runner)
+mobile/lib/**/*.g.dart
+mobile/lib/**/*.freezed.dart
+mobile/lib/core/di/injection.config.dart
+
+# ── Python / ML ───────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+ml/venv/
+ml/.venv/
+ml/env/
+ml/.env
+ml/data/raw/*/                               # dataset tidak di-commit (besar)
+ml/data/processed/
+ml/models/*.h5
+ml/models/*.tflite                           # model final masuk ke mobile/assets
+.ipynb_checkpoints/
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+Thumbs.db
+
+# ── Secrets ───────────────────────────────────────────────────────────────────
+*.env
+*.env.local
+.env.*
+!.env.example

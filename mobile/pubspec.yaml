@@ -1,0 +1,96 @@
+name: bisindo_translator
+description: "BISINDO Sign Language Translator App"
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.8.1 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # ── State Management ──────────────────────────────────────────
+  flutter_bloc: ^9.1.1
+  equatable: ^2.0.7
+
+  # ── Navigation ────────────────────────────────────────────────
+  go_router: ^15.1.2
+
+  # ── Dependency Injection ──────────────────────────────────────
+  get_it: ^8.0.3
+  injectable: ^2.5.0
+
+  # ── Firebase ──────────────────────────────────────────────────
+  firebase_core: ^3.13.1
+  firebase_auth: ^5.5.2
+  cloud_firestore: ^5.6.7
+  firebase_storage: ^12.4.5
+
+  # ── Network ───────────────────────────────────────────────────
+  dio: ^5.8.0
+
+  # ── Local Storage ────────────────────────────────────────────
+  shared_preferences: ^2.5.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # ── Camera & ML ───────────────────────────────────────────────
+  camera: ^0.11.1
+  tflite_flutter: ^0.11.0
+  image: ^4.5.4
+
+  # ── Text to Speech ────────────────────────────────────────────
+  flutter_tts: ^4.2.0
+
+  # ── Functional Programming ───────────────────────────────────
+  dartz: ^0.10.1
+  fpdart: ^1.1.0
+
+  # ── Code Generation ───────────────────────────────────────────
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # ── UI & Assets ───────────────────────────────────────────────
+  flutter_svg: ^2.0.17
+  cached_network_image: ^3.4.1
+  lottie: ^3.3.1
+  shimmer: ^3.0.0
+  gap: ^3.0.1
+  flutter_screenutil: ^5.9.3
+  google_fonts: ^6.2.1
+
+  # ── Utils ─────────────────────────────────────────────────────
+  intl: ^0.20.2
+  connectivity_plus: ^6.1.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+  # ── Code Generation ───────────────────────────────────────────
+  build_runner: ^2.4.15
+  injectable_generator: ^2.7.0
+  freezed: ^2.5.7
+  json_serializable: ^6.9.5
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/models/
+    - assets/animations/
+    - assets/icons/
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700

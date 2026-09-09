@@ -1,0 +1,117 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:injectable/injectable.dart';
+
+// Pages — will be added as features are built
+// import '../../features/auth/presentation/pages/splash_page.dart';
+
+/// App-wide route names as constants.
+abstract class AppRoutes {
+  static const String splash = '/';
+  static const String onboarding = '/onboarding';
+  static const String login = '/login';
+  static const String register = '/register';
+  static const String home = '/home';
+  static const String scan = '/scan';
+  static const String dictionary = '/dictionary';
+  static const String dictionaryDetail = '/dictionary/:id';
+  static const String history = '/history';
+  static const String profile = '/profile';
+  static const String editProfile = '/profile/edit';
+}
+
+@singleton
+class AppRouter {
+  GoRouter get config => _router;
+
+  final GoRouter _router = GoRouter(
+    initialLocation: AppRoutes.splash,
+    debugLogDiagnostics: true,
+    routes: [
+      GoRoute(
+        path: AppRoutes.splash,
+        name: 'splash',
+        builder: (context, state) => const _PlaceholderPage(title: 'Splash'),
+      ),
+      GoRoute(
+        path: AppRoutes.onboarding,
+        name: 'onboarding',
+        builder: (context, state) =>
+            const _PlaceholderPage(title: 'Onboarding'),
+      ),
+      GoRoute(
+        path: AppRoutes.login,
+        name: 'login',
+        builder: (context, state) => const _PlaceholderPage(title: 'Login'),
+      ),
+      GoRoute(
+        path: AppRoutes.register,
+        name: 'register',
+        builder: (context, state) => const _PlaceholderPage(title: 'Register'),
+      ),
+      ShellRoute(
+        builder: (context, state, child) => _PlaceholderShell(child: child),
+        routes: [
+          GoRoute(
+            path: AppRoutes.home,
+            name: 'home',
+            builder: (context, state) =>
+                const _PlaceholderPage(title: 'Beranda'),
+          ),
+          GoRoute(
+            path: AppRoutes.scan,
+            name: 'scan',
+            builder: (context, state) =>
+                const _PlaceholderPage(title: 'Scanner'),
+          ),
+          GoRoute(
+            path: AppRoutes.dictionary,
+            name: 'dictionary',
+            builder: (context, state) =>
+                const _PlaceholderPage(title: 'Kamus'),
+          ),
+          GoRoute(
+            path: AppRoutes.history,
+            name: 'history',
+            builder: (context, state) =>
+                const _PlaceholderPage(title: 'Riwayat'),
+          ),
+          GoRoute(
+            path: AppRoutes.profile,
+            name: 'profile',
+            builder: (context, state) =>
+                const _PlaceholderPage(title: 'Profil'),
+          ),
+        ],
+      ),
+    ],
+  );
+}
+
+// ── Temporary placeholder widgets — replace as features are built ─────────────
+
+class _PlaceholderPage extends StatelessWidget {
+  final String title;
+  const _PlaceholderPage({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: Center(
+        child: Text(
+          title,
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+      ),
+    );
+  }
+}
+
+class _PlaceholderShell extends StatelessWidget {
+  final Widget child;
+  const _PlaceholderShell({required this.child});
+
+  @override
+  Widget build(BuildContext context) => child;
+}
