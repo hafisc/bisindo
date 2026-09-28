@@ -15,7 +15,14 @@ void main() async {
   ]);
 
   // Initialize Firebase
-  await Firebase.initializeApp();
+  // ⚠️ Pastikan google-services.json sudah ada di android/app/
+  // sebelum enable ini. Download dari Firebase Console.
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    // Jalan tanpa Firebase dulu selama development awal
+    debugPrint('[Firebase] Tidak bisa init — pastikan google-services.json sudah ada: $e');
+  }
 
   // Initialize dependency injection
   configureDependencies();

@@ -37,7 +37,7 @@ dependencies:
 
   # ── Camera & ML ───────────────────────────────────────────────
   camera: ^0.11.1
-  tflite_flutter: ^0.11.0
+  # tflite_flutter: ^0.11.0  # Aktifkan saat model .tflite sudah siap
   image: ^4.5.4
 
   # ── Text to Speech ────────────────────────────────────────────
@@ -84,13 +84,5 @@ flutter:
     - assets/animations/
     - assets/icons/
 
-  fonts:
-    - family: Poppins
-      fonts:
-        - asset: assets/fonts/Poppins-Regular.ttf
-        - asset: assets/fonts/Poppins-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Poppins-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/Poppins-Bold.ttf
-          weight: 700
+  # Font Poppins diload otomatis oleh package google_fonts
+  # Tidak perlu deklarasi manual di sini

@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:injectable/injectable.dart';
 
-// Pages — will be added as features are built
-// import '../../features/auth/presentation/pages/splash_page.dart';
+import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/onboarding_page.dart';
+import '../../features/auth/presentation/pages/register_page.dart';
 
 /// App-wide route names as constants.
 abstract class AppRoutes {
@@ -25,7 +26,7 @@ class AppRouter {
   GoRouter get config => _router;
 
   final GoRouter _router = GoRouter(
-    initialLocation: AppRoutes.splash,
+    initialLocation: AppRoutes.onboarding,
     debugLogDiagnostics: true,
     routes: [
       GoRoute(
@@ -36,18 +37,17 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.onboarding,
         name: 'onboarding',
-        builder: (context, state) =>
-            const _PlaceholderPage(title: 'Onboarding'),
+        builder: (context, state) => const OnboardingPage(),
       ),
       GoRoute(
         path: AppRoutes.login,
         name: 'login',
-        builder: (context, state) => const _PlaceholderPage(title: 'Login'),
+        builder: (context, state) => const LoginPage(),
       ),
       GoRoute(
         path: AppRoutes.register,
         name: 'register',
-        builder: (context, state) => const _PlaceholderPage(title: 'Register'),
+        builder: (context, state) => const RegisterPage(),
       ),
       ShellRoute(
         builder: (context, state, child) => _PlaceholderShell(child: child),
