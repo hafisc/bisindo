@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/scan/presentation/pages/scan_page.dart';
 
 /// App-wide route names as constants.
 abstract class AppRoutes {
@@ -61,14 +62,12 @@ class AppRouter {
           GoRoute(
             path: AppRoutes.scan,
             name: 'scan',
-            builder: (context, state) =>
-                const _PlaceholderPage(title: 'Scanner'),
+            builder: (context, state) => const ScanPage(),
           ),
           GoRoute(
             path: AppRoutes.dictionary,
             name: 'dictionary',
-            builder: (context, state) =>
-                const _PlaceholderPage(title: 'Kamus'),
+            builder: (context, state) => const _PlaceholderPage(title: 'Kamus'),
           ),
           GoRoute(
             path: AppRoutes.history,
@@ -99,10 +98,7 @@ class _PlaceholderPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: Center(
-        child: Text(
-          title,
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
+        child: Text(title, style: Theme.of(context).textTheme.headlineMedium),
       ),
     );
   }
