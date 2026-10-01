@@ -63,6 +63,7 @@ dependencies:
   # ── Utils ─────────────────────────────────────────────────────
   intl: ^0.20.2
   connectivity_plus: ^7.3.1
+  flutter_image_compress: ^2.5.1
 
 dev_dependencies:
   flutter_test:
