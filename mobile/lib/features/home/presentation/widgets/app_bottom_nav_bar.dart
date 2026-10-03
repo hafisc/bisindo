@@ -21,9 +21,11 @@ class AppBottomNavBar extends StatelessWidget {
   });
 
   static const double _barHeight = 64;
-  static const double _scanSize = 58;
+  static const double _scanSize = 60;
   // Bagian tombol Scan yang menonjol di atas bar.
-  static const double _overflow = 15;
+  static const double _overflow = 18;
+  // Posisi label teks tab, dipakai juga untuk label Scan supaya sebaris.
+  static const double _labelTop = _overflow + 14 + 25 + 3;
 
   @override
   Widget build(BuildContext context) {
@@ -42,9 +44,13 @@ class AppBottomNavBar extends StatelessWidget {
             child: DecoratedBox(
               decoration: const BoxDecoration(
                 color: AppPalette.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+                border: Border(
+                  top: BorderSide(color: Color(0xFFE8EEF6), width: 1),
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Color(0x140F172A),
+                    color: Color(0x1A0F172A),
                     blurRadius: 20,
                     offset: Offset(0, -4),
                   ),
@@ -94,6 +100,23 @@ class AppBottomNavBar extends StatelessWidget {
             right: 0,
             child: Center(child: _ScanButton(onTap: onScanTap)),
           ),
+          Positioned(
+            top: _labelTop,
+            left: 0,
+            right: 0,
+            child: IgnorePointer(
+              child: Text(
+                AppStrings.navScan,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 11,
+                  height: 1.2,
+                  fontWeight: FontWeight.w700,
+                  color: AppPalette.primary,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -128,17 +151,17 @@ class _NavItem extends StatelessWidget {
             children: [
               Icon(
                 isActive ? activeIcon : icon,
-                size: 24,
-                color: isActive ? AppPalette.primary : const Color(0xFF64748B),
+                size: 25,
+                color: isActive ? AppPalette.primary : AppPalette.gray600,
               ),
               const SizedBox(height: 3),
               Text(
                 label,
                 style: GoogleFonts.poppins(
-                  fontSize: 10.5,
+                  fontSize: 11,
                   height: 1.2,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? AppPalette.primary : AppPalette.gray400,
+                  color: isActive ? AppPalette.primary : AppPalette.gray600,
                 ),
               ),
             ],
@@ -178,8 +201,8 @@ class _ScanButton extends StatelessWidget {
           child: const Stack(
             alignment: Alignment.center,
             children: [
-              Icon(Icons.crop_free_rounded, size: 28, color: Colors.white),
-              Icon(Icons.back_hand_outlined, size: 11, color: Colors.white),
+              Icon(Icons.crop_free_rounded, size: 32, color: Colors.white),
+              Icon(Icons.back_hand_rounded, size: 15, color: Colors.white),
             ],
           ),
         ),

@@ -14,7 +14,7 @@ class HomeTipsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppPalette.lightGray,
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -23,8 +23,20 @@ class HomeTipsCard extends StatelessWidget {
           constraints: const BoxConstraints(minHeight: 100),
           padding: const EdgeInsets.fromLTRB(18, 14, 12, 14),
           decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFFFFF8E1), Color(0xFFFFEFC2)],
+            ),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFFE8EEF6)),
+            border: Border.all(color: const Color(0xFFFAD27A), width: 1.2),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x26F59E0B),
+                blurRadius: 14,
+                offset: Offset(0, 5),
+              ),
+            ],
           ),
           child: Row(
             children: [
@@ -53,7 +65,7 @@ class HomeTipsCard extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         height: 1.65,
-                        color: AppPalette.gray600,
+                        color: AppPalette.gray800,
                       ),
                     ),
                   ],
@@ -62,7 +74,7 @@ class HomeTipsCard extends StatelessWidget {
               const Icon(
                 Icons.chevron_right_rounded,
                 size: 24,
-                color: AppPalette.gray400,
+                color: Color(0xFFD97706),
               ),
             ],
           ),
