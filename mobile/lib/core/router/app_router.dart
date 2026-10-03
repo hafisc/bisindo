@@ -5,6 +5,8 @@ import 'package:injectable/injectable.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/home/presentation/pages/main_shell_page.dart';
 import '../../features/scan/presentation/pages/scan_page.dart';
 
 /// App-wide route names as constants.
@@ -27,7 +29,9 @@ class AppRouter {
   GoRouter get config => _router;
 
   final GoRouter _router = GoRouter(
-    initialLocation: AppRoutes.onboarding,
+    // SEMENTARA: langsung ke Beranda karena Login belum selesai.
+    // Kembalikan ke AppRoutes.onboarding setelah alur Login jadi.
+    initialLocation: AppRoutes.home,
     debugLogDiagnostics: true,
     routes: [
       GoRoute(
@@ -50,19 +54,21 @@ class AppRouter {
         name: 'register',
         builder: (context, state) => const RegisterPage(),
       ),
+      // Scan dibuka layar penuh (tanpa bottom nav) karena kamera butuh
+      // seluruh layar. Dibuka lewat context.push dari Beranda / tombol tengah.
+      GoRoute(
+        path: AppRoutes.scan,
+        name: 'scan',
+        builder: (context, state) => const ScanPage(),
+      ),
       ShellRoute(
-        builder: (context, state, child) => _PlaceholderShell(child: child),
+        builder: (context, state, child) =>
+            MainShellPage(location: state.uri.path, child: child),
         routes: [
           GoRoute(
             path: AppRoutes.home,
             name: 'home',
-            builder: (context, state) =>
-                const _PlaceholderPage(title: 'Beranda'),
-          ),
-          GoRoute(
-            path: AppRoutes.scan,
-            name: 'scan',
-            builder: (context, state) => const ScanPage(),
+            builder: (context, state) => const HomePage(),
           ),
           GoRoute(
             path: AppRoutes.dictionary,
@@ -104,10 +110,3 @@ class _PlaceholderPage extends StatelessWidget {
   }
 }
 
-class _PlaceholderShell extends StatelessWidget {
-  final Widget child;
-  const _PlaceholderShell({required this.child});
-
-  @override
-  Widget build(BuildContext context) => child;
-}
