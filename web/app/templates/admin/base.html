@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Admin{% endblock %} | BISINDO Translator</title>
+  <meta name="description" content="Halaman admin BISINDO Translator untuk memantau pengguna dan log deteksi.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+{% from "admin/_macros.html" import icon %}
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='img/bisindo-logo.webp') }}" alt="BISINDO Translator">
+      <small>Panel Admin</small>
+    </div>
+
+    <nav class="nav" aria-label="Menu admin">
+      <a id="nav-dashboard" href="{{ url_for('admin.dashboard') }}" class="{{ 'active' if request.endpoint == 'admin.dashboard' }}">
+        {{ icon("dashboard") }} Dashboard
+      </a>
+      <a id="nav-users" href="{{ url_for('admin.users') }}" class="{{ 'active' if request.endpoint == 'admin.users' }}">
+        {{ icon("users") }} Pengguna
+      </a>
+      <a id="nav-logs" href="{{ url_for('admin.logs') }}" class="{{ 'active' if request.endpoint == 'admin.logs' }}">
+        {{ icon("logs") }} Log Deteksi
+      </a>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="who">{{ session.get("admin_name", "Admin") }}</div>
+      <div class="role">Administrator</div>
+      <form method="post" action="{{ url_for('admin.logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button id="btn-logout" type="submit" class="btn ghost small">Keluar</button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}" role="status">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+</body>
+</html>

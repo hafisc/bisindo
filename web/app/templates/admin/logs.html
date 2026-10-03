@@ -1,0 +1,78 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import icon, confidence_badge, initial, pager %}
+
+{% block title %}Log Deteksi{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>Log Deteksi</h1>
+    <p>Catatan hasil deteksi huruf dari aplikasi mobile.</p>
+  </div>
+</header>
+
+<section class="card">
+  <form class="toolbar" method="get" action="{{ url_for('admin.logs') }}" role="search">
+    <select id="filter-letter" name="letter" aria-label="Filter huruf">
+      <option value="">Semua huruf</option>
+      {% for item in letters %}
+        <option value="{{ item }}" {{ 'selected' if item == letter }}>Huruf {{ item }}</option>
+      {% endfor %}
+    </select>
+    <input id="search-logs" type="text" name="q" value="{{ search }}" placeholder="Cari nama atau email pengguna" aria-label="Cari pengguna">
+    <button type="submit" class="btn">Terapkan</button>
+    {% if letter or search %}<a class="btn ghost" href="{{ url_for('admin.logs') }}">Reset</a>{% endif %}
+  </form>
+
+  {% if pagination.items %}
+  <div class="table-wrap">
+    <table id="table-logs">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Waktu</th>
+          <th>Pengguna</th>
+          <th>Huruf</th>
+          <th>Confidence</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in pagination.items %}
+        <tr>
+          <td class="muted">{{ pagination.first + loop.index0 }}</td>
+          <td class="muted">{{ log.created_at | wib }}</td>
+          <td>
+            {% if log.user %}
+            <div class="person">
+              <div class="avatar">{{ initial(log.user.name) }}</div>
+              <div>
+                <span class="strong">{{ log.user.name }}</span>
+                <small>{{ log.user.email }}</small>
+              </div>
+            </div>
+            {% else %}
+              <span class="muted">Tanpa akun</span>
+            {% endif %}
+          </td>
+          <td><span class="letter-chip">{{ log.letter }}</span></td>
+          <td>{{ confidence_badge(log.confidence) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ pager(pagination) }}
+  {% else %}
+  <div class="empty">
+    <div class="ring">{{ icon("logs") }}</div>
+    {% if letter or search %}
+      <strong>Tidak ada log yang cocok</strong>
+      Coba ubah atau reset filter.
+    {% else %}
+      <strong>Belum ada log deteksi</strong>
+      Hasil deteksi dari aplikasi mobile akan tampil di sini.
+    {% endif %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

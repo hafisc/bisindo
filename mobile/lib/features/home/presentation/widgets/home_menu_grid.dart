@@ -21,7 +21,9 @@ class HomeMenuGrid extends StatelessWidget {
   });
 
   static const Color _blueTile = Color(0xFFE3EEFD);
-  static const Color _grayTile = Color(0xFFEEF0F5);
+  static const Color _amberTile = Color(0xFFFEF3C7);
+  static const Color _purpleTile = Color(0xFFEDE9FE);
+  static const Color _redTile = Color(0xFFFEE2E2);
 
   @override
   Widget build(BuildContext context) {
@@ -43,11 +45,11 @@ class HomeMenuGrid extends StatelessWidget {
         Expanded(
           child: _MenuCard(
             label: AppStrings.homeMenuLearn,
-            tileColor: _blueTile,
+            tileColor: _amberTile,
             icon: const Icon(
               Icons.school_rounded,
               size: 36,
-              color: AppPalette.primary,
+              color: Color(0xFFF59E0B),
             ),
             onTap: onLearnTap,
           ),
@@ -56,11 +58,11 @@ class HomeMenuGrid extends StatelessWidget {
         Expanded(
           child: _MenuCard(
             label: AppStrings.homeMenuHistory,
-            tileColor: _blueTile,
+            tileColor: _purpleTile,
             icon: const Icon(
               Icons.access_time_filled_rounded,
               size: 34,
-              color: AppPalette.primary,
+              color: Color(0xFF8B5CF6),
             ),
             onTap: onHistoryTap,
           ),
@@ -69,7 +71,7 @@ class HomeMenuGrid extends StatelessWidget {
         Expanded(
           child: _MenuCard(
             label: AppStrings.homeMenuFavorite,
-            tileColor: _grayTile,
+            tileColor: _redTile,
             icon: const Icon(
               Icons.favorite_rounded,
               size: 34,

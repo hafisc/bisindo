@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Masuk Admin | BISINDO Translator</title>
+  <meta name="description" content="Masuk ke panel admin BISINDO Translator.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body class="login-page">
+  <main class="card login-card">
+    <img src="{{ url_for('static', filename='img/bisindo-logo.webp') }}" alt="BISINDO Translator">
+    <h1>Panel Admin</h1>
+    <p class="sub">Masuk untuk melihat data pengguna dan log deteksi.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}" role="alert">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="post" autocomplete="off">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" type="text" name="username" required autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password" required>
+      </div>
+      <button id="btn-login" type="submit" class="btn">Masuk</button>
+    </form>
+  </main>
+</body>
+</html>

@@ -52,6 +52,13 @@ class AppStrings {
       'Latih gesture setiap hari\nuntuk meningkatkan akurasi deteksi.';
   static const String featureComingSoon = 'Fitur ini segera hadir.';
 
+  // ── Notification ──────────────────────────────────────────────
+  static const String notificationTitle = 'Notifikasi';
+  static const String notificationMarkAllRead = 'Tandai dibaca';
+  static const String notificationEmptyTitle = 'Belum ada notifikasi';
+  static const String notificationEmptyBody =
+      'Pemberitahuan terbaru akan muncul di sini.';
+
   // ── Scanner ───────────────────────────────────────────────────
   static const String scannerTitle = 'Penerjemah';
   static const String scannerHint = 'Arahkan kamera ke tangan Anda';
