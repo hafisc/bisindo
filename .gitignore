@@ -36,6 +36,12 @@ ml/models/*.h5
 ml/models/*.tflite                           # model final masuk ke mobile/assets
 .ipynb_checkpoints/
 
+# ── Web Flask ─────────────────────────────────────────────────────────────────
+web/.venv/
+web/instance/                                # database SQLite lokal
+web/.pytest_cache/
+*.db
+
 # ── IDE ───────────────────────────────────────────────────────────────────────
 .vscode/settings.json
 .idea/
