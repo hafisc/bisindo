@@ -7,6 +7,7 @@ import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/pages/main_shell_page.dart';
+import '../../features/home/presentation/pages/notification_page.dart';
 import '../../features/scan/presentation/pages/scan_page.dart';
 
 /// App-wide route names as constants.
@@ -17,6 +18,7 @@ abstract class AppRoutes {
   static const String register = '/register';
   static const String home = '/home';
   static const String scan = '/scan';
+  static const String notifications = '/notifications';
   static const String dictionary = '/dictionary';
   static const String dictionaryDetail = '/dictionary/:id';
   static const String history = '/history';
@@ -61,6 +63,13 @@ class AppRouter {
         name: 'scan',
         builder: (context, state) => const ScanPage(),
       ),
+      // Notifikasi dibuka dari lonceng Beranda lewat context.push, tanpa
+      // bottom nav, dan bisa kembali dengan tombol back.
+      GoRoute(
+        path: AppRoutes.notifications,
+        name: 'notifications',
+        builder: (context, state) => const NotificationPage(),
+      ),
       ShellRoute(
         builder: (context, state, child) =>
             MainShellPage(location: state.uri.path, child: child),
@@ -74,6 +83,15 @@ class AppRouter {
             path: AppRoutes.dictionary,
             name: 'dictionary',
             builder: (context, state) => const _PlaceholderPage(title: 'Kamus'),
+            routes: [
+              GoRoute(
+                path: ':id',
+                name: 'dictionaryDetail',
+                builder: (context, state) => _PlaceholderPage(
+                  title: 'Detail Kamus ${state.pathParameters['id']}',
+                ),
+              ),
+            ],
           ),
           GoRoute(
             path: AppRoutes.history,
@@ -86,6 +104,14 @@ class AppRouter {
             name: 'profile',
             builder: (context, state) =>
                 const _PlaceholderPage(title: 'Profil'),
+            routes: [
+              GoRoute(
+                path: 'edit',
+                name: 'editProfile',
+                builder: (context, state) =>
+                    const _PlaceholderPage(title: 'Edit Profil'),
+              ),
+            ],
           ),
         ],
       ),

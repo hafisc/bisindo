@@ -1,0 +1,62 @@
+{% macro icon(name) -%}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  {%- if name == "dashboard" -%}
+    <rect x="3" y="3" width="7.5" height="9" rx="2"/><rect x="13.5" y="3" width="7.5" height="5.5" rx="2"/><rect x="13.5" y="11.5" width="7.5" height="9.5" rx="2"/><rect x="3" y="15.5" width="7.5" height="5.5" rx="2"/>
+  {%- elif name == "users" -%}
+    <circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.7a3.5 3.5 0 0 1 0 6.6"/><path d="M18 14.8c2 .6 3.1 2.3 3.5 5.2"/>
+  {%- elif name == "logs" -%}
+    <path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>
+  {%- elif name == "scan" -%}
+    <path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 14.5c0-2 .3-4.5.8-6.5M12.2 14.5V7M15 14.5V9"/>
+  {%- elif name == "sun" -%}
+    <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+  {%- elif name == "target" -%}
+    <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/>
+  {%- elif name == "search" -%}
+    <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+  {%- elif name == "logout" -%}
+    <path d="M9 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3M16 17l5-5-5-5M21 12H9"/>
+  {%- endif -%}
+</svg>
+{%- endmacro %}
+
+{% macro confidence_badge(value) -%}
+  {%- set cls = "high" if value >= 0.9 else ("mid" if value >= 0.8 else "low") -%}
+  <span class="badge {{ cls }}">{{ value | percent }}</span>
+{%- endmacro %}
+
+{% macro initial(name) -%}
+  {{ (name or "?")[:1] | upper }}
+{%- endmacro %}
+
+{% macro pager(p) %}
+{% if p.total %}
+<div class="pager">
+  <div class="info">Menampilkan {{ p.first }}-{{ p.last }} dari {{ p.total }} data</div>
+  {% if p.pages > 1 %}
+  {% set args = request.args.to_dict() %}
+  <nav aria-label="Halaman">
+    {% if p.has_prev %}
+      <a href="{{ url_for(request.endpoint, **dict(args, page=p.prev_num)) }}">Sebelumnya</a>
+    {% else %}
+      <span class="page disabled">Sebelumnya</span>
+    {% endif %}
+    {% for n in p.iter_pages(left_edge=1, left_current=1, right_current=2, right_edge=1) %}
+      {% if n is none %}
+        <span class="page gap">...</span>
+      {% elif n == p.page %}
+        <span class="page current" aria-current="page">{{ n }}</span>
+      {% else %}
+        <a href="{{ url_for(request.endpoint, **dict(args, page=n)) }}">{{ n }}</a>
+      {% endif %}
+    {% endfor %}
+    {% if p.has_next %}
+      <a href="{{ url_for(request.endpoint, **dict(args, page=p.next_num)) }}">Berikutnya</a>
+    {% else %}
+      <span class="page disabled">Berikutnya</span>
+    {% endif %}
+  </nav>
+  {% endif %}
+</div>
+{% endif %}
+{% endmacro %}
