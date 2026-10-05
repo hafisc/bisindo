@@ -5,6 +5,9 @@ import 'package:injectable/injectable.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/history/presentation/pages/history_page.dart';
+import '../../features/home/presentation/pages/main_wrapper_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 
 /// App-wide route names as constants.
 abstract class AppRoutes {
@@ -26,7 +29,7 @@ class AppRouter {
   GoRouter get config => _router;
 
   final GoRouter _router = GoRouter(
-    initialLocation: AppRoutes.onboarding,
+    initialLocation: AppRoutes.history,
     debugLogDiagnostics: true,
     routes: [
       GoRoute(
@@ -50,7 +53,7 @@ class AppRouter {
         builder: (context, state) => const RegisterPage(),
       ),
       ShellRoute(
-        builder: (context, state, child) => _PlaceholderShell(child: child),
+        builder: (context, state, child) => MainWrapperPage(child: child),
         routes: [
           GoRoute(
             path: AppRoutes.home,
@@ -73,22 +76,18 @@ class AppRouter {
           GoRoute(
             path: AppRoutes.history,
             name: 'history',
-            builder: (context, state) =>
-                const _PlaceholderPage(title: 'Riwayat'),
+            builder: (context, state) => const HistoryPage(),
           ),
           GoRoute(
             path: AppRoutes.profile,
             name: 'profile',
-            builder: (context, state) =>
-                const _PlaceholderPage(title: 'Profil'),
+            builder: (context, state) => const ProfilePage(),
           ),
         ],
       ),
     ],
   );
 }
-
-// ── Temporary placeholder widgets — replace as features are built ─────────────
 
 class _PlaceholderPage extends StatelessWidget {
   final String title;
@@ -106,12 +105,4 @@ class _PlaceholderPage extends StatelessWidget {
       ),
     );
   }
-}
-
-class _PlaceholderShell extends StatelessWidget {
-  final Widget child;
-  const _PlaceholderShell({required this.child});
-
-  @override
-  Widget build(BuildContext context) => child;
 }
