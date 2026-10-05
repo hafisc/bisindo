@@ -24,8 +24,6 @@ class AppBottomNavBar extends StatelessWidget {
   static const double _scanSize = 60;
   // Bagian tombol Scan yang menonjol di atas bar.
   static const double _overflow = 18;
-  // Posisi label teks tab, dipakai juga untuk label Scan supaya sebaris.
-  static const double _labelTop = _overflow + 14 + 25 + 3;
 
   @override
   Widget build(BuildContext context) {
@@ -99,23 +97,6 @@ class AppBottomNavBar extends StatelessWidget {
             left: 0,
             right: 0,
             child: Center(child: _ScanButton(onTap: onScanTap)),
-          ),
-          Positioned(
-            top: _labelTop,
-            left: 0,
-            right: 0,
-            child: IgnorePointer(
-              child: Text(
-                AppStrings.navScan,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: 11,
-                  height: 1.2,
-                  fontWeight: FontWeight.w700,
-                  color: AppPalette.primary,
-                ),
-              ),
-            ),
           ),
         ],
       ),
