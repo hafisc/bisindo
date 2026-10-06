@@ -5,10 +5,9 @@ import 'package:injectable/injectable.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
-import '../../features/home/presentation/pages/home_page.dart';
-import '../../features/home/presentation/pages/main_shell_page.dart';
-import '../../features/home/presentation/pages/notification_page.dart';
-import '../../features/scan/presentation/pages/scan_page.dart';
+import '../../features/history/presentation/pages/history_page.dart';
+import '../../features/home/presentation/pages/main_wrapper_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 
 /// App-wide route names as constants.
 abstract class AppRoutes {
@@ -31,9 +30,7 @@ class AppRouter {
   GoRouter get config => _router;
 
   final GoRouter _router = GoRouter(
-    // SEMENTARA: langsung ke Beranda karena Login belum selesai.
-    // Kembalikan ke AppRoutes.onboarding setelah alur Login jadi.
-    initialLocation: AppRoutes.home,
+    initialLocation: AppRoutes.history,
     debugLogDiagnostics: true,
     routes: [
       GoRoute(
@@ -71,8 +68,7 @@ class AppRouter {
         builder: (context, state) => const NotificationPage(),
       ),
       ShellRoute(
-        builder: (context, state, child) =>
-            MainShellPage(location: state.uri.path, child: child),
+        builder: (context, state, child) => MainWrapperPage(child: child),
         routes: [
           GoRoute(
             path: AppRoutes.home,
@@ -96,30 +92,18 @@ class AppRouter {
           GoRoute(
             path: AppRoutes.history,
             name: 'history',
-            builder: (context, state) =>
-                const _PlaceholderPage(title: 'Riwayat'),
+            builder: (context, state) => const HistoryPage(),
           ),
           GoRoute(
             path: AppRoutes.profile,
             name: 'profile',
-            builder: (context, state) =>
-                const _PlaceholderPage(title: 'Profil'),
-            routes: [
-              GoRoute(
-                path: 'edit',
-                name: 'editProfile',
-                builder: (context, state) =>
-                    const _PlaceholderPage(title: 'Edit Profil'),
-              ),
-            ],
+            builder: (context, state) => const ProfilePage(),
           ),
         ],
       ),
     ],
   );
 }
-
-// ── Temporary placeholder widgets — replace as features are built ─────────────
 
 class _PlaceholderPage extends StatelessWidget {
   final String title;
@@ -135,4 +119,3 @@ class _PlaceholderPage extends StatelessWidget {
     );
   }
 }
-
