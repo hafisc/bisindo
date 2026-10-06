@@ -1,16 +1,25 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:camera/camera.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../data/services/prediction_socket.dart';
 
-class ScanController extends ChangeNotifier {
+class ScanController extends ChangeNotifier with WidgetsBindingObserver {
   ScanController({PredictionSocket? predictionSocket})
-      : _predictionSocket = predictionSocket ?? PredictionSocket();
+      : _predictionSocket = predictionSocket ?? PredictionSocket() {
+    // Daftarkan listener saat controller dibuat
+    WidgetsBinding.instance.addObserver(this);
+
+    // Pantau perubahan status koneksi untuk ditampilkan di UI.
+    _statusSub = _predictionSocket.statusStream.listen((status) {
+      socketStatus = status;
+      notifyListeners();
+    });
+  }
 
   final PredictionSocket _predictionSocket;
+  StreamSubscription<SocketStatus>? _statusSub;
 
   // -- State Variabel untuk UI --
   CameraController? cameraController;
@@ -18,6 +27,7 @@ class ScanController extends ChangeNotifier {
   String detectedLetter = '-';
   double confidence = 0.0;
   String resultText = '';
+  SocketStatus socketStatus = SocketStatus.idle;
 
   // -- State Internal --
   bool _isProcessingFrame = false;
@@ -40,7 +50,7 @@ class ScanController extends ChangeNotifier {
 
       final controller = CameraController(
         camera,
-        ResolutionPreset.medium,
+        ResolutionPreset.low,
         enableAudio: false,
         imageFormatGroup: ImageFormatGroup.jpeg,
       );
@@ -50,12 +60,7 @@ class ScanController extends ChangeNotifier {
       cameraController = controller;
       notifyListeners();
 
-      try {
-        await _predictionSocket.connect(onResult: _updatePrediction);
-      } on SocketException {
-      } on WebSocketException {
-      } on TimeoutException {
-      }
+      await _connectSocket();
 
       await controller.startImageStream(_processCameraImage);
     } on CameraException catch (error) {
@@ -64,6 +69,25 @@ class ScanController extends ChangeNotifier {
     } catch (_) {
       cameraError = 'Gagal mengakses kamera.';
       notifyListeners();
+    }
+  }
+
+  Future<void> _connectSocket() async {
+    try {
+      debugPrint('[CONTROLLER] Mencoba terhubung ke WebSocket...');
+      await _predictionSocket.connect(onResult: _updatePrediction);
+    } catch (e) {
+      debugPrint('[CONTROLLER ERROR CONNECT] $e');
+    }
+  }
+
+  /// AUTO-CONNECT: Hubungkan ulang saat app kembali dari background atau
+  /// saat app kembali aktif. Aman dipanggil berulang karena socket akan
+  /// mengabaikan jika sudah terhubung.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _connectSocket();
     }
   }
 
@@ -78,6 +102,8 @@ class ScanController extends ChangeNotifier {
     _isProcessingFrame = true;
     try {
       await _predictionSocket.sendFrame(image);
+    } catch (e) {
+      debugPrint('[CONTROLLER ERROR SEND] $e');
     } finally {
       _isProcessingFrame = false;
     }
@@ -115,9 +141,12 @@ class ScanController extends ChangeNotifier {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _statusSub?.cancel();
     cameraController?.stopImageStream();
     cameraController?.dispose();
     _predictionSocket.close();
+    _predictionSocket.dispose();
     super.dispose();
   }
 }
