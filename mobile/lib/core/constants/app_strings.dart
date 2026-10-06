@@ -37,6 +37,28 @@ class AppStrings {
   static const String navHistory = 'Riwayat';
   static const String navProfile = 'Profil';
 
+  // ── Home ──────────────────────────────────────────────────────
+  static const String homeGreeting = 'Halo, ';
+  static const String homeSubtitle = 'Jembatan komunikasi, untuk\nsemua orang.';
+  static const String homeBannerTitle =
+      'Mulai terjemahkan\nbahasa isyarat sekarang!';
+  static const String homeScanNow = 'Scan Sekarang';
+  static const String homeMenuDictionary = 'Kamus\nBISINDO';
+  static const String homeMenuLearn = 'Mode\nBelajar';
+  static const String homeMenuHistory = 'Riwayat\nTranslasi';
+  static const String homeMenuFavorite = 'Favorit';
+  static const String homeTipsTitle = 'Tips Hari Ini';
+  static const String homeTipsBody =
+      'Latih gesture setiap hari\nuntuk meningkatkan akurasi deteksi.';
+  static const String featureComingSoon = 'Fitur ini segera hadir.';
+
+  // ── Notification ──────────────────────────────────────────────
+  static const String notificationTitle = 'Notifikasi';
+  static const String notificationMarkAllRead = 'Tandai dibaca';
+  static const String notificationEmptyTitle = 'Belum ada notifikasi';
+  static const String notificationEmptyBody =
+      'Pemberitahuan terbaru akan muncul di sini.';
+
   // ── Scanner ───────────────────────────────────────────────────
   static const String scannerTitle = 'Penerjemah';
   static const String scannerHint = 'Arahkan kamera ke tangan Anda';
