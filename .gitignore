@@ -30,8 +30,10 @@ ml/venv/
 ml/.venv/
 ml/env/
 ml/.env
-ml/data/raw/*/                               # dataset tidak di-commit (besar)
-ml/data/processed/
+ml/data/raw/*
+!ml/data/raw/.gitkeep
+ml/data/processed/*
+!ml/data/processed/.gitkeep
 ml/models/*.h5
 ml/models/*.tflite                           # model final masuk ke mobile/assets
 .ipynb_checkpoints/
