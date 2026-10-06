@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../controllers/scan_controller.dart';
+import '../widgets/connection_status_indicator.dart';
 import '../widgets/detection_info_overlay.dart';
 import '../widgets/scan_action_bar.dart';
 import '../widgets/scan_camera_view.dart';
@@ -51,6 +52,7 @@ class _ScanPageState extends State<ScanPage> {
                       letter: _controller.detectedLetter,
                       confidence: _controller.confidence,
                     ),
+                    ConnectionStatusIndicator(status: _controller.socketStatus),
                     const Spacer(),
                     ScanActionBar(
                       resultText: _controller.resultText,
