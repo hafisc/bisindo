@@ -17,6 +17,7 @@ abstract class AppRoutes {
   static const String register = '/register';
   static const String home = '/home';
   static const String scan = '/scan';
+  static const String notifications = '/notifications';
   static const String dictionary = '/dictionary';
   static const String dictionaryDetail = '/dictionary/:id';
   static const String history = '/history';
@@ -52,26 +53,41 @@ class AppRouter {
         name: 'register',
         builder: (context, state) => const RegisterPage(),
       ),
+      // Scan dibuka layar penuh (tanpa bottom nav) karena kamera butuh
+      // seluruh layar. Dibuka lewat context.push dari Beranda / tombol tengah.
+      GoRoute(
+        path: AppRoutes.scan,
+        name: 'scan',
+        builder: (context, state) => const ScanPage(),
+      ),
+      // Notifikasi dibuka dari lonceng Beranda lewat context.push, tanpa
+      // bottom nav, dan bisa kembali dengan tombol back.
+      GoRoute(
+        path: AppRoutes.notifications,
+        name: 'notifications',
+        builder: (context, state) => const NotificationPage(),
+      ),
       ShellRoute(
         builder: (context, state, child) => MainWrapperPage(child: child),
         routes: [
           GoRoute(
             path: AppRoutes.home,
             name: 'home',
-            builder: (context, state) =>
-                const _PlaceholderPage(title: 'Beranda'),
-          ),
-          GoRoute(
-            path: AppRoutes.scan,
-            name: 'scan',
-            builder: (context, state) =>
-                const _PlaceholderPage(title: 'Scanner'),
+            builder: (context, state) => const HomePage(),
           ),
           GoRoute(
             path: AppRoutes.dictionary,
             name: 'dictionary',
-            builder: (context, state) =>
-                const _PlaceholderPage(title: 'Kamus'),
+            builder: (context, state) => const _PlaceholderPage(title: 'Kamus'),
+            routes: [
+              GoRoute(
+                path: ':id',
+                name: 'dictionaryDetail',
+                builder: (context, state) => _PlaceholderPage(
+                  title: 'Detail Kamus ${state.pathParameters['id']}',
+                ),
+              ),
+            ],
           ),
           GoRoute(
             path: AppRoutes.history,
@@ -98,10 +114,7 @@ class _PlaceholderPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: Center(
-        child: Text(
-          title,
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
+        child: Text(title, style: Theme.of(context).textTheme.headlineMedium),
       ),
     );
   }

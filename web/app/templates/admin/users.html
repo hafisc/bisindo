@@ -1,0 +1,66 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import icon, initial, pager %}
+
+{% block title %}Pengguna{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>Pengguna</h1>
+    <p>Daftar akun yang terdaftar di aplikasi.</p>
+  </div>
+</header>
+
+<section class="card">
+  <form class="toolbar" method="get" action="{{ url_for('admin.users') }}" role="search">
+    <input id="search-users" type="text" name="q" value="{{ search }}" placeholder="Cari nama atau email" aria-label="Cari pengguna">
+    <button type="submit" class="btn">Cari</button>
+    {% if search %}<a class="btn ghost" href="{{ url_for('admin.users') }}">Reset</a>{% endif %}
+  </form>
+
+  {% if pagination.items %}
+  <div class="table-wrap">
+    <table id="table-users">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Pengguna</th>
+          <th>Terdaftar</th>
+          <th class="num">Jumlah deteksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in pagination.items %}
+        <tr>
+          <td class="muted">{{ pagination.first + loop.index0 }}</td>
+          <td>
+            <div class="person">
+              <div class="avatar">{{ initial(user.name) }}</div>
+              <div>
+                <span class="strong">{{ user.name }}</span>
+                <small>{{ user.email }}</small>
+              </div>
+            </div>
+          </td>
+          <td class="muted">{{ user.created_at | wib }}</td>
+          <td class="num strong">{{ totals.get(user.id, 0) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ pager(pagination) }}
+  {% else %}
+  <div class="empty">
+    <div class="ring">{{ icon("users") }}</div>
+    {% if search %}
+      <strong>Tidak ada pengguna yang cocok</strong>
+      Tidak ditemukan hasil untuk "{{ search }}".
+    {% else %}
+      <strong>Belum ada pengguna terdaftar</strong>
+      Akun baru dari aplikasi mobile akan tampil di sini.
+    {% endif %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import icon, confidence_badge %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>Dashboard</h1>
+    <p>Ringkasan aktivitas aplikasi BISINDO Translator.</p>
+  </div>
+</header>
+
+<section class="stat-grid" aria-label="Statistik singkat">
+  <div class="card stat">
+    <div class="icon blue">{{ icon("users") }}</div>
+    <div>
+      <div class="label">Total pengguna</div>
+      <div class="value" id="stat-users">{{ stats.total_users }}</div>
+    </div>
+  </div>
+  <div class="card stat">
+    <div class="icon purple">{{ icon("scan") }}</div>
+    <div>
+      <div class="label">Total deteksi</div>
+      <div class="value" id="stat-logs">{{ stats.total_logs }}</div>
+    </div>
+  </div>
+  <div class="card stat">
+    <div class="icon amber">{{ icon("sun") }}</div>
+    <div>
+      <div class="label">Deteksi hari ini</div>
+      <div class="value" id="stat-today">{{ stats.today_logs }}</div>
+    </div>
+  </div>
+  <div class="card stat">
+    <div class="icon green">{{ icon("target") }}</div>
+    <div>
+      <div class="label">Rata-rata confidence</div>
+      <div class="value" id="stat-confidence">{{ stats.avg_confidence | percent }}</div>
+    </div>
+  </div>
+</section>
+
+<section class="grid-2">
+  <div class="card card-pad">
+    <h2>Deteksi 7 hari terakhir</h2>
+    {% if stats.total_logs == 0 %}
+      <div class="empty compact">
+        <strong>Belum ada data deteksi</strong>
+        Grafik akan muncul setelah ada hasil deteksi yang tercatat.
+      </div>
+    {% else %}
+      <div class="bars" id="chart-daily">
+        {% for item in daily %}
+        <div class="bar-col{{ ' today' if item.is_today }}" title="{{ item.date }}: {{ item.total }} deteksi">
+          <div class="bar-total">{{ item.total }}</div>
+          <div class="bar-track"><div class="bar" style="height: {{ item.percent }}%"></div></div>
+          <div class="bar-label">{{ item.label }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="card card-pad">
+    <h2>Huruf paling sering terdeteksi</h2>
+    {% if top_letters %}
+      <div class="rank" id="top-letters">
+        {% for item in top_letters %}
+        <div class="rank-row">
+          <div class="rank-letter">{{ item.letter }}</div>
+          <div class="rank-bar"><span style="width: {{ item.percent }}%"></span></div>
+          <div class="rank-count">{{ item.total }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty compact">
+        <strong>Belum ada data</strong>
+        Peringkat huruf muncul setelah ada deteksi.
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="card">
+  <div class="card-pad" style="padding-bottom: 6px;">
+    <h2 style="display:flex; justify-content:space-between; align-items:center; margin:0;">
+      Deteksi terbaru
+      <a href="{{ url_for('admin.logs') }}" style="font-size:13px; font-weight:600;">Lihat semua</a>
+    </h2>
+  </div>
+  {% if latest_logs %}
+    <div class="table-wrap">
+      <table id="table-latest">
+        <thead>
+          <tr><th>Waktu</th><th>Pengguna</th><th>Huruf</th><th>Confidence</th></tr>
+        </thead>
+        <tbody>
+          {% for log in latest_logs %}
+          <tr>
+            <td class="muted">{{ log.created_at | wib }}</td>
+            <td>{{ log.user.name if log.user else "Tanpa akun" }}</td>
+            <td><span class="letter-chip">{{ log.letter }}</span></td>
+            <td>{{ confidence_badge(log.confidence) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty">
+      <div class="ring">{{ icon("scan") }}</div>
+      <strong>Belum ada log deteksi</strong>
+      Hasil deteksi dari aplikasi mobile akan tampil di sini.
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
