@@ -6,8 +6,11 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/history/presentation/pages/history_page.dart';
+import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/pages/main_wrapper_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/scan/presentation/pages/scan_page.dart';
+import '../../features/home/presentation/pages/notification_page.dart';
 
 /// App-wide route names as constants.
 abstract class AppRoutes {
