@@ -97,7 +97,13 @@ class _ScanPageState extends State<ScanPage> {
                     ),
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => context.go('/home'),
+                      onPressed: () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.go('/home');
+                        }
+                      },
                     ),
                   ),
                 ),

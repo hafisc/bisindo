@@ -32,7 +32,7 @@ class MainWrapperPage extends StatelessWidget {
         context.go(AppRoutes.dictionary);
         break;
       case 2:
-        context.go(AppRoutes.scan);
+        context.push(AppRoutes.scan);
         break;
       case 3:
         context.go(AppRoutes.history);
