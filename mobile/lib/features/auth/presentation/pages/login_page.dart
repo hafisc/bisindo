@@ -46,8 +46,9 @@ class _LoginPageState extends State<LoginPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
+      body: SizedBox.expand(
+        child: Stack(
+          children: [
           // ── Dekorasi blob biru muda pojok kiri bawah
           Positioned(
             left: -60,
@@ -73,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-          
+
           // ── Dekorasi blob biru muda pojok kanan atas
           Positioned(
             right: -50,
@@ -102,54 +103,42 @@ class _LoginPageState extends State<LoginPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const SizedBox(height: 12),
-
+                          const SizedBox(
+                            height: 24,
+                          ), // Kembali ke posisi normal
                           // Logo
                           Image.asset(
                             'assets/images/bisindo-logo.webp',
-                            height: 50, // sedikit lebih kecil agar pas
+                            height: 50,
                             fit: BoxFit.contain,
                           ),
-                          
-                          const SizedBox(height: 16),
 
+                          const SizedBox(
+                            height: 24,
+                          ), // More breathing room after logo
                           // Judul
                           Text(
                             'Selamat Datang!',
                             style: GoogleFonts.poppins(
-                              fontSize: 26,
+                              fontSize: 28, // Slightly larger title
                               fontWeight: FontWeight.w700,
                               color: const Color(0xFF0F172A),
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 8),
                           Text(
                             'Masuk untuk melanjutkan\nke aplikasi BISINDO Translator.',
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               color: const Color(0xFF64748B),
-                              height: 1.4,
+                              height: 1.5,
                             ),
                           ),
 
-                          const SizedBox(height: 16),
-
-                          // Ilustrasi
-                          Center(
-                            child: SizedBox(
-                              height: size.height * 0.25, // ukuran sedikit dikecilkan
-                              child: Image.asset(
-                                'assets/images/onboarding_1.png',
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 20),
-
+                          const SizedBox(height: 48), // Big gap before inputs
                           // Email field
                           AuthTextField(
-                            hintText: 'Email atau nomor handphone',
+                            hintText: 'Email',
                             prefixIcon: Icons.mail_outline_rounded,
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
@@ -161,8 +150,9 @@ class _LoginPageState extends State<LoginPage> {
                             },
                           ),
 
-                          const SizedBox(height: 12),
-
+                          const SizedBox(
+                            height: 16,
+                          ), // Increased spacing between fields
                           // Password field
                           AuthTextField(
                             hintText: 'Password',
@@ -178,8 +168,9 @@ class _LoginPageState extends State<LoginPage> {
                             },
                           ),
 
-                          const SizedBox(height: 12),
-
+                          const SizedBox(
+                            height: 16,
+                          ), // Increased spacing before options
                           // Ingat saya + Lupa password
                           Row(
                             children: [
@@ -239,10 +230,12 @@ class _LoginPageState extends State<LoginPage> {
                           Row(
                             children: [
                               const Expanded(
-                                  child: Divider(color: Color(0xFFE2E8F0))),
+                                child: Divider(color: Color(0xFFE2E8F0)),
+                              ),
                               Padding(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 12),
+                                  horizontal: 12,
+                                ),
                                 child: Text(
                                   'atau',
                                   style: GoogleFonts.poppins(
@@ -252,7 +245,8 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                               const Expanded(
-                                  child: Divider(color: Color(0xFFE2E8F0))),
+                                child: Divider(color: Color(0xFFE2E8F0)),
+                              ),
                             ],
                           ),
 
@@ -306,7 +300,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ],
       ),
+      ),
     );
   }
 }
-

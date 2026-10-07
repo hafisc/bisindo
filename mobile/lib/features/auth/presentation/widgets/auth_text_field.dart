@@ -44,11 +44,11 @@ class _AuthTextFieldState extends State<AuthTextField> {
         hintText: widget.hintText,
         hintStyle: GoogleFonts.poppins(
           fontSize: 14,
-          color: const Color(0xFF94A3B8),
+          color: const Color(0xFF64748B), // Darker hint for clarity
         ),
         prefixIcon: Icon(
           widget.prefixIcon,
-          color: const Color(0xFF94A3B8),
+          color: const Color(0xFF64748B), // Darker icon
           size: 20,
         ),
         suffixIcon: widget.isPassword
@@ -57,25 +57,25 @@ class _AuthTextFieldState extends State<AuthTextField> {
                   _obscureText
                       ? Icons.visibility_outlined
                       : Icons.visibility_off_outlined,
-                  color: const Color(0xFF94A3B8),
+                  color: const Color(0xFF64748B), // Darker icon
                   size: 20,
                 ),
                 onPressed: () => setState(() => _obscureText = !_obscureText),
               )
             : null,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: const Color(0xFFF1F5F9), // More distinct gray fill
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 14,
+          vertical: 16, // Slightly taller padding for better touch target
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: const BorderSide(color: Color(0xFF94A3B8)), // Stronger border
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: const BorderSide(color: Color(0xFF94A3B8)), // Stronger border
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

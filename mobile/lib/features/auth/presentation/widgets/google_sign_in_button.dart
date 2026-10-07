@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+const String _googleSvg = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z"/>
+  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+  <path fill="none" d="M0 0h48v48H0z"/>
+</svg>''';
 
 class GoogleSignInButton extends StatelessWidget {
   final String label;
@@ -28,14 +37,17 @@ class GoogleSignInButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Google logo menggunakan teks multicolor (G)
-            _GoogleIcon(),
+            SvgPicture.string(
+              _googleSvg,
+              width: 24,
+              height: 24,
+            ),
             const SizedBox(width: 10),
             Text(
               label,
               style: GoogleFonts.poppins(
                 fontSize: 15,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 color: const Color(0xFF0F172A),
               ),
             ),
@@ -44,82 +56,4 @@ class GoogleSignInButton extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Ikon G Google dengan warna aslinya menggunakan RichText
-class _GoogleIcon extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox(
-      width: 24,
-      height: 24,
-      child: CustomPaint(painter: _GoogleLogoPainter()),
-    );
-  }
-}
-
-class _GoogleLogoPainter extends CustomPainter {
-  const _GoogleLogoPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double cx = size.width / 2;
-    final double cy = size.height / 2;
-    final double r = size.width / 2;
-
-    // Blue arc (top-right portion)
-    final paintBlue = Paint()
-      ..color = const Color(0xFF4285F4)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.width * 0.18
-      ..strokeCap = StrokeCap.round;
-
-    // Red arc
-    final paintRed = Paint()
-      ..color = const Color(0xFFEA4335)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.width * 0.18
-      ..strokeCap = StrokeCap.round;
-
-    // Yellow arc
-    final paintYellow = Paint()
-      ..color = const Color(0xFFFBBC05)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.width * 0.18
-      ..strokeCap = StrokeCap.round;
-
-    // Green arc
-    final paintGreen = Paint()
-      ..color = const Color(0xFF34A853)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.width * 0.18
-      ..strokeCap = StrokeCap.round;
-
-    final rect = Rect.fromCircle(center: Offset(cx, cy), radius: r * 0.72);
-
-    // Red (top-left)
-    canvas.drawArc(rect, 3.4, 1.2, false, paintRed);
-    // Yellow (bottom-left)
-    canvas.drawArc(rect, 4.6, 0.9, false, paintYellow);
-    // Green (bottom-right)
-    canvas.drawArc(rect, 5.5, 0.9, false, paintGreen);
-    // Blue (right side + top-right)
-    canvas.drawArc(rect, 6.4, 0.96, false, paintBlue);
-
-    // Horizontal bar inside G
-    final paintBarBlue = Paint()
-      ..color = const Color(0xFF4285F4)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.width * 0.18
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawLine(
-      Offset(cx, cy),
-      Offset(cx + r * 0.72, cy),
-      paintBarBlue,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
