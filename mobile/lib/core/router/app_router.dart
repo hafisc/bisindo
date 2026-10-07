@@ -33,7 +33,7 @@ class AppRouter {
   GoRouter get config => _router;
 
   final GoRouter _router = GoRouter(
-    initialLocation: AppRoutes.history,
+    initialLocation: AppRoutes.home,
     debugLogDiagnostics: true,
     routes: [
       GoRoute(

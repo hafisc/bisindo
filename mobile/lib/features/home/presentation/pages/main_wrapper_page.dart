@@ -49,60 +49,91 @@ class MainWrapperPage extends StatelessWidget {
 
     return Scaffold(
       body: child,
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: AppPalette.white,
+      extendBody: true, // Allows body background to flow under the notch
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Color(0x0F0F172A),
-              blurRadius: 20,
-              offset: Offset(0, -4),
+              color: AppPalette.primary.withValues(alpha: 0.35),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(
-                  context: context,
-                  index: 0,
-                  icon: Icons.home_outlined,
-                  activeIcon: Icons.home_rounded,
-                  label: 'Beranda',
-                  isSelected: selectedIndex == 0,
-                ),
-                _buildNavItem(
-                  context: context,
-                  index: 1,
-                  icon: Icons.menu_book_outlined,
-                  activeIcon: Icons.menu_book_rounded,
-                  label: 'Kamus',
-                  isSelected: selectedIndex == 1,
-                ),
-                _buildCenterScanItem(
-                  context: context,
-                  isSelected: selectedIndex == 2,
-                ),
-                _buildNavItem(
-                  context: context,
-                  index: 3,
-                  icon: Icons.history_outlined,
-                  activeIcon: Icons.history_rounded,
-                  label: 'Riwayat',
-                  isSelected: selectedIndex == 3,
-                ),
-                _buildNavItem(
-                  context: context,
-                  index: 4,
-                  icon: Icons.person_outline_rounded,
-                  activeIcon: Icons.person_rounded,
-                  label: 'Profil',
-                  isSelected: selectedIndex == 4,
-                ),
-              ],
+        child: FloatingActionButton(
+          onPressed: () => _onItemTapped(2, context),
+          backgroundColor: AppPalette.primary,
+          elevation: 0,
+          shape: const CircleBorder(),
+          child: const Stack(
+            alignment: Alignment.center,
+            children: [
+              Icon(
+                Icons.crop_free_rounded, // Camera/scan box
+                color: Colors.white,
+                size: 30,
+              ),
+              Icon(
+                Icons.back_hand_rounded, // Small hand inside
+                color: Colors.white,
+                size: 14,
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: AppPalette.white,
+        elevation: 0, // We'll rely on the crisp border instead of unreliable shadow
+        surfaceTintColor: Colors.transparent,
+        padding: EdgeInsets.zero,
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8,
+        child: CustomPaint(
+          painter: _NotchBorderPainter(),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(
+                    context: context,
+                    index: 0,
+                    icon: Icons.home_outlined,
+                    activeIcon: Icons.home_rounded,
+                    label: 'Beranda',
+                    isSelected: selectedIndex == 0,
+                  ),
+                  _buildNavItem(
+                    context: context,
+                    index: 1,
+                    icon: Icons.menu_book_outlined,
+                    activeIcon: Icons.menu_book_rounded,
+                    label: 'Kamus',
+                    isSelected: selectedIndex == 1,
+                  ),
+                  const SizedBox(width: 56), // Empty space for the docked FAB
+                  _buildNavItem(
+                    context: context,
+                    index: 3,
+                    icon: Icons.history_outlined,
+                    activeIcon: Icons.history_rounded,
+                    label: 'Riwayat',
+                    isSelected: selectedIndex == 3,
+                  ),
+                  _buildNavItem(
+                    context: context,
+                    index: 4,
+                    icon: Icons.person_outline_rounded,
+                    activeIcon: Icons.person_rounded,
+                    label: 'Profil',
+                    isSelected: selectedIndex == 4,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -111,6 +142,7 @@ class MainWrapperPage extends StatelessWidget {
   }
 
   Widget _buildNavItem({
+
     required BuildContext context,
     required int index,
     required IconData icon,
@@ -152,26 +184,61 @@ class MainWrapperPage extends StatelessWidget {
   }) {
     return GestureDetector(
       onTap: () => _onItemTapped(2, context),
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: AppPalette.primary,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppPalette.primary.withValues(alpha: 0.35),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: const Icon(
-          Icons.center_focus_strong_rounded,
-          color: Colors.white,
-          size: 24,
+      child: Transform.translate(
+        offset: const Offset(0, -10), // Lift the button up so it aligns better with other icons
+        child: Container(
+          width: 56, // Slightly larger to emphasize it's the primary action
+          height: 56,
+          decoration: BoxDecoration(
+            color: AppPalette.primary,
+            shape: BoxShape.circle,
+            border: Border.all(color: AppPalette.white, width: 4), // Add a white border to make it pop out of the nav bar
+            boxShadow: [
+              BoxShadow(
+                color: AppPalette.primary.withValues(alpha: 0.35),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.back_hand_rounded, // Hand icon to indicate sign language scanning
+            color: Colors.white,
+            size: 26,
+          ),
         ),
       ),
     );
   }
+}
+
+class _NotchBorderPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFE2E8F0) // Subtle gray border (AppPalette.gray200)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    // The BottomAppBar is horizontal.
+    // FloatingActionButton radius is 28 (56/2), notch margin is 8.
+    // So the cutout radius is roughly 36.
+    final center = size.width / 2;
+    final notchRadius = 36.0;
+
+    // Left line
+    canvas.drawLine(const Offset(0, 0), Offset(center - notchRadius, 0), paint);
+
+    // Right line
+    canvas.drawLine(Offset(center + notchRadius, 0), Offset(size.width, 0), paint);
+
+    // Draw the notch arc (a semi-circle dipping down)
+    final rect = Rect.fromCircle(center: Offset(center, 0), radius: notchRadius);
+    // Sweep angle is PI (half circle). We start from 0 (right) and go to PI (left).
+    // Actually, in Flutter, 0 is 3 o'clock. PI is 9 o'clock.
+    canvas.drawArc(rect, 0, 3.14159, false, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

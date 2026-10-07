@@ -18,87 +18,47 @@ class HistoryPage extends ConsumerWidget {
     final filteredItems = historyState.filteredItems;
 
     return Scaffold(
-      backgroundColor: AppPalette.lightGray,
+      backgroundColor: const Color(0xFFF8FAFC), // AppPalette.lightGray
       appBar: AppBar(
-        backgroundColor: AppPalette.white,
+        backgroundColor: const Color(0xFFF8FAFC),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
         title: Text(
           'Riwayat Translasi',
           style: GoogleFonts.poppins(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
             color: AppPalette.navy,
           ),
         ),
-        actions: [
-          if (historyState.items.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(right: 12.0),
-              child: TextButton.icon(
-                onPressed: () {
-                  DeleteConfirmDialog.show(
-                    context: context,
-                    title: 'Hapus Semua Riwayat',
-                    message:
-                        'Apakah Anda yakin ingin menghapus seluruh riwayat terjemahan? Tindakan ini tidak dapat dibatalkan.',
-                    confirmText: 'Hapus Semua',
-                    onConfirm: () => historyNotifier.clearAll(),
-                  );
-                },
-                icon: const Icon(
-                  Icons.delete_outline_rounded,
-                  size: 18,
-                  color: AppPalette.coral,
-                ),
-                label: Text(
-                  'Hapus Semua',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppPalette.coral,
-                  ),
-                ),
-                style: TextButton.styleFrom(
-                  backgroundColor: AppPalette.coral.withValues(alpha: 0.08),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-        ],
       ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Description & Subtitle
-            Container(
-              width: double.infinity,
-              color: AppPalette.white,
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            // Header Description & Filter Pills
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Lihat kembali hasil terjemahan yang pernah kamu lakukan.',
+                    'Lihat kembali hasil terjemahan\nyang pernah kamu lakukan.',
                     style: GoogleFonts.poppins(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w400,
-                      color: AppPalette.gray600,
+                      color: const Color(0xFF64748B), // Slightly darker gray for better readability
+                      height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 16),
-
+                  const SizedBox(height: 24),
                   // Filter Pills Row (Semua, Teks, Suara)
                   _buildFilterPills(context, historyState, historyNotifier),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
-
-            const SizedBox(height: 8),
 
             // History List or Empty State
             Expanded(
@@ -108,7 +68,7 @@ class HistoryPage extends ConsumerWidget {
                       ? _buildEmptyState(historyState.activeFilter)
                       : ListView.builder(
                           physics: const BouncingScrollPhysics(),
-                          padding: const EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                           itemCount: filteredItems.length,
                           itemBuilder: (context, index) {
                             final item = filteredItems[index];
@@ -136,31 +96,25 @@ class HistoryPage extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppPalette.lightGray,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppPalette.gray200, width: 1),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1), // AppPalette.gray200
       ),
       child: Row(
-        children: filters.map((filter) {
+        children: filters.asMap().entries.map((entry) {
+          final index = entry.key;
+          final filter = entry.value;
           final isSelected = state.activeFilter == filter;
+          
           return Expanded(
             child: GestureDetector(
               onTap: () => notifier.setFilter(filter),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
                   color: isSelected ? AppPalette.primary : Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: AppPalette.primary.withValues(alpha: 0.25),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : [],
                 ),
                 alignment: Alignment.center,
                 child: Text(
@@ -168,7 +122,7 @@ class HistoryPage extends ConsumerWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: isSelected ? AppPalette.white : AppPalette.gray600,
+                    color: isSelected ? Colors.white : const Color(0xFF64748B),
                   ),
                 ),
               ),
@@ -187,14 +141,14 @@ class HistoryPage extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppPalette.white,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1),
-        boxShadow: const [
+        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x050F172A),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
-            offset: Offset(0, 3),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -227,28 +181,26 @@ class HistoryPage extends ConsumerWidget {
           );
         },
         child: Padding(
-          padding: const EdgeInsets.all(14.0),
+          padding: const EdgeInsets.all(16.0),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Icon Avatar with Soft Background
+              // Icon Avatar
               Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppPalette.softBlue,
+                width: 52,
+                height: 52,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF1F5F9),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: Icon(
-                    item.category == 'Suara'
-                        ? Icons.volume_up_rounded
-                        : Icons.pan_tool_rounded,
-                    color: AppPalette.primary,
-                    size: 22,
+                  child: Text(
+                    item.type == 'Huruf' ? '✋🏽' : '☝🏽',
+                    style: const TextStyle(fontSize: 26),
                   ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 16),
 
               // Content Column
               Expanded(
@@ -261,9 +213,9 @@ class HistoryPage extends ConsumerWidget {
                           child: Text(
                             item.title,
                             style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: AppPalette.navy,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF0F172A), // AppPalette.darkBlue
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -291,77 +243,75 @@ class HistoryPage extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
 
-                    // Mode & Subtitle
+                    // Timestamp
+                    Text(
+                      _formatTimestamp(item.timestamp),
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF94A3B8), // AppPalette.gray400
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+
+                    // Mode Subtitle
                     Text(
                       item.mode,
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: AppPalette.gray400,
+                        color: const Color(0xFFCBD5E1), // Very faint text
                       ),
                     ),
                   ],
                 ),
               ),
 
-              // Timestamp & Menu Options
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    _formatTimestamp(item.timestamp),
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w400,
-                      color: AppPalette.gray400,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  PopupMenuButton<String>(
-                    icon: const Icon(
-                      Icons.more_vert_rounded,
-                      color: AppPalette.gray400,
-                      size: 20,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    onSelected: (value) {
-                      if (value == 'delete' && item.id != null) {
-                        DeleteConfirmDialog.show(
-                          context: context,
-                          title: 'Hapus Item',
-                          message:
-                              'Apakah Anda yakin ingin menghapus "${item.title}" dari riwayat?',
-                          onConfirm: () => notifier.deleteItem(item.id!),
-                        );
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.delete_outline_rounded,
-                              color: AppPalette.coral,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Hapus',
-                              style: GoogleFonts.poppins(
-                                fontSize: 13,
-                                color: AppPalette.coral,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+              // Menu Options
+              PopupMenuButton<String>(
+                icon: const Icon(
+                  Icons.more_vert_rounded,
+                  color: Color(0xFF64748B), // AppPalette.gray600
+                  size: 24,
+                ),
+                padding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                onSelected: (value) {
+                  if (value == 'delete' && item.id != null) {
+                    DeleteConfirmDialog.show(
+                      context: context,
+                      title: 'Hapus Item',
+                      message:
+                          'Apakah Anda yakin ingin menghapus "${item.title}" dari riwayat?',
+                      onConfirm: () => notifier.deleteItem(item.id!),
+                    );
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.delete_outline_rounded,
+                          color: AppPalette.coral,
+                          size: 18,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Text(
+                          'Hapus',
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color: AppPalette.coral,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -382,7 +332,7 @@ class HistoryPage extends ConsumerWidget {
             Container(
               width: 90,
               height: 90,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppPalette.softBlue,
                 shape: BoxShape.circle,
               ),
@@ -397,7 +347,7 @@ class HistoryPage extends ConsumerWidget {
               'Belum Ada Riwayat',
               style: GoogleFonts.poppins(
                 fontSize: 18,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.bold,
                 color: AppPalette.navy,
               ),
             ),
@@ -410,7 +360,7 @@ class HistoryPage extends ConsumerWidget {
               style: GoogleFonts.poppins(
                 fontSize: 13,
                 fontWeight: FontWeight.w400,
-                color: AppPalette.gray400,
+                color: const Color(0xFF94A3B8),
               ),
             ),
           ],

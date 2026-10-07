@@ -3,10 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_palette.dart';
-import '../../../history/presentation/providers/history_provider.dart';
 import '../providers/profile_provider.dart';
 import '../widgets/logout_dialog.dart';
-import '../widgets/profile_info_tile.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -14,147 +12,196 @@ class ProfilePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileState = ref.watch(profileNotifierProvider);
-    final historyState = ref.watch(historyNotifierProvider);
     final user = profileState.profile;
 
     return Scaffold(
-      backgroundColor: AppPalette.lightGray,
+      backgroundColor: const Color(0xFFF1F5F9), // Slightly darker background for better card contrast
       appBar: AppBar(
-        backgroundColor: AppPalette.white,
+        backgroundColor: const Color(0xFFF1F5F9),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
+        centerTitle: false,
         automaticallyImplyLeading: false,
         title: Text(
-          'Profil Pengguna',
+          'Profil',
           style: GoogleFonts.poppins(
-            fontSize: 20,
+            fontSize: 24,
             fontWeight: FontWeight.w700,
-            color: AppPalette.navy,
+            color: AppPalette.darkBlue,
           ),
         ),
-        centerTitle: false,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Profile Header Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppPalette.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x0D0F172A),
-                      blurRadius: 16,
-                      offset: Offset(0, 4),
+              // Avatar and Name Row
+              Row(
+                children: [
+                  // Avatar
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: const BoxDecoration(
+                      color: AppPalette.gray200,
+                      shape: BoxShape.circle,
                     ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    // Avatar with Gradient Ring & Edit Badge
-                    Stack(
-                      alignment: Alignment.center,
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/images/avatar_default.png',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  // Name, Email, Edit Button
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: 90,
-                          height: 90,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: AppPalette.blueGradient,
+                        Text(
+                          user.name.isEmpty ? 'Hafis' : user.name,
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: AppPalette.darkBlue,
+                            height: 1.2,
                           ),
                         ),
+                        const SizedBox(height: 4),
+                        Text(
+                          user.email.isEmpty ? 'hafis@example.com' : user.email,
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF64748B),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
                         Container(
-                          width: 84,
-                          height: 84,
-                          decoration: const BoxDecoration(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
                             color: AppPalette.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: CircleAvatar(
-                            backgroundColor: AppPalette.softBlue,
-                            child: Text(
-                              user.name.isNotEmpty
-                                  ? user.name.substring(0, 1).toUpperCase()
-                                  : 'R',
-                              style: GoogleFonts.poppins(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w700,
-                                color: AppPalette.primary,
-                              ),
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: AppPalette.gray200,
+                              width: 1.5,
                             ),
                           ),
-                        ),
-                        Positioned(
-                          right: 0,
-                          bottom: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
+                          child: Text(
+                            'Edit Profil',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
                               color: AppPalette.primary,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: AppPalette.white,
-                                width: 2,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.camera_alt_rounded,
-                              size: 14,
-                              color: Colors.white,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 14),
+                  ),
+                ],
+              ),
 
-                    // User Name
-                    Text(
-                      user.name,
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppPalette.navy,
-                      ),
-                      textAlign: TextAlign.center,
+              const SizedBox(height: 36),
+
+              // Informasi Akun Section
+              Text(
+                'Informasi Akun',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppPalette.darkBlue,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppPalette.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
-                    const SizedBox(height: 4),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    _buildInfoItem(
+                      icon: Icons.person_outline_rounded,
+                      title: 'Nama Lengkap',
+                      value: user.name.isEmpty ? 'Hafis' : user.name,
+                    ),
+                    const Divider(height: 1, color: AppPalette.lightGray, indent: 56),
+                    _buildInfoItem(
+                      icon: Icons.mail_outline_rounded,
+                      title: 'Email',
+                      value: user.email.isEmpty ? 'hafis@example.com' : user.email,
+                    ),
+                    const Divider(height: 1, color: AppPalette.lightGray, indent: 56),
+                    _buildInfoItem(
+                      icon: Icons.calendar_today_outlined,
+                      title: 'Tanggal Bergabung',
+                      value: '12 Maret 2025',
+                    ),
+                  ],
+                ),
+              ),
 
-                    // User Email
-                    Text(
-                      user.email,
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
+              const SizedBox(height: 32),
+
+              // Pengaturan Section
+              Text(
+                'Pengaturan',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppPalette.darkBlue,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppPalette.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    _buildSettingItem(
+                      icon: Icons.notifications_none_rounded,
+                      title: 'Notifikasi',
+                      trailing: const Icon(
+                        Icons.chevron_right_rounded,
                         color: AppPalette.gray400,
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 10),
-
-                    // Role Badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppPalette.softBlue,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        user.role,
+                    const Divider(height: 1, color: AppPalette.lightGray, indent: 56),
+                    _buildSettingItem(
+                      icon: Icons.language_rounded,
+                      title: 'Bahasa Aplikasi',
+                      trailing: Text(
+                        'Indonesia',
                         style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppPalette.primary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppPalette.gray400,
                         ),
                       ),
                     ),
@@ -162,179 +209,14 @@ class ProfilePage extends ConsumerWidget {
                 ),
               ),
 
-              const SizedBox(height: 16),
-
-              // Quick Stats Section (sqflite integration stats & Riverpod count)
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppPalette.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFF1F5F9)),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppPalette.primary.withValues(alpha: 0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.history_rounded,
-                              color: AppPalette.primary,
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${historyState.items.length}',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppPalette.darkBlue,
-                                ),
-                              ),
-                              Text(
-                                'Riwayat',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  color: AppPalette.gray400,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppPalette.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFF1F5F9)),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppPalette.teal.withValues(alpha: 0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.storage_rounded,
-                              color: AppPalette.teal,
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'sqflite',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppPalette.darkBlue,
-                                ),
-                              ),
-                              Text(
-                                'Database Lokal',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  color: AppPalette.gray400,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // Section: Account Info
-              Text(
-                'INFORMASI AKUN',
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppPalette.gray400,
-                  letterSpacing: 0.8,
-                ),
-              ),
-              const SizedBox(height: 8),
-              ProfileInfoTile(
-                icon: Icons.badge_outlined,
-                title: 'NIM / ID Pengguna',
-                value: user.studentId,
-              ),
-              ProfileInfoTile(
-                icon: Icons.mail_outline_rounded,
-                title: 'Email',
-                value: user.email,
-              ),
-
-              const SizedBox(height: 16),
-
-              // Section: App Information & System
-              Text(
-                'SISTEM & DATABASE',
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppPalette.gray400,
-                  letterSpacing: 0.8,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const ProfileInfoTile(
-                icon: Icons.storage_rounded,
-                title: 'Status Database Lokal',
-                value: 'sqflite Online',
-                iconColor: AppPalette.teal,
-              ),
-              const ProfileInfoTile(
-                icon: Icons.tune_rounded,
-                title: 'State Management',
-                value: 'Riverpod 2.6',
-                iconColor: AppPalette.primary,
-              ),
-              const ProfileInfoTile(
-                icon: Icons.info_outline_rounded,
-                title: 'Versi Aplikasi',
-                value: 'v1.0.0+1',
-                iconColor: AppPalette.info,
-              ),
-
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
 
               // Logout Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppPalette.coral.withValues(alpha: 0.1),
+                    backgroundColor: AppPalette.coral.withValues(alpha: 0.08),
                     foregroundColor: AppPalette.coral,
                     elevation: 0,
                     minimumSize: const Size(double.infinity, 52),
@@ -359,10 +241,86 @@ class ProfilePage extends ConsumerWidget {
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 40),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoItem({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            color: const Color(0xFF64748B), // Slightly darker gray for icons
+            size: 24,
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: AppPalette.gray400,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF334155), // Softer dark blue for values
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingItem({
+    required IconData icon,
+    required String title,
+    required Widget trailing,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            color: const Color(0xFF64748B),
+            size: 24,
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              title,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF334155),
+              ),
+            ),
+          ),
+          trailing,
+        ],
       ),
     );
   }
