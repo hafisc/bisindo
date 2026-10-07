@@ -20,19 +20,56 @@ class ScanCameraView extends StatelessWidget {
     }
 
     final cameraController = controller;
-    if (cameraController == null || !cameraController.value.isInitialized) {
+    // Cek isInitialized; jika controller sudah disposed, value-nya juga
+    // tidak initialized sehingga aman menampilkan loading.
+    CameraValue? value;
+    try {
+      value = cameraController?.value;
+    } catch (_) {
+      value = null;
+    }
+    if (cameraController == null || value == null || !value.isInitialized) {
       return const Center(
         child: CircularProgressIndicator(color: Colors.white),
       );
     }
 
-    return FittedBox(
-      fit: BoxFit.cover,
-      child: SizedBox(
-        width: cameraController.value.previewSize!.height,
-        height: cameraController.value.previewSize!.width,
-        child: CameraPreview(cameraController),
-      ),
+    return _CameraPreviewBox(controller: cameraController);
+  }
+}
+
+class _CameraPreviewBox extends StatelessWidget {
+  final CameraController controller;
+
+  const _CameraPreviewBox({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final previewSize = controller.value.previewSize;
+    if (previewSize == null) {
+      return CameraPreview(controller);
+    }
+
+    // CameraPreview selalu melaporkan size dalam orientasi landscape
+    // (lebar = sisi panjang). Di layar portrait kita perlu menukarnya agar
+    // rasio aspek benar dan tidak terjadi crop berlebihan.
+    final deviceOrientation = MediaQuery.of(context).orientation;
+    final isPortrait = deviceOrientation == Orientation.portrait;
+
+    final width = isPortrait ? previewSize.height : previewSize.width;
+    final height = isPortrait ? previewSize.width : previewSize.height;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return FittedBox(
+          fit: BoxFit.cover,
+          child: SizedBox(
+            width: width,
+            height: height,
+            child: CameraPreview(controller),
+          ),
+        );
+      },
     );
   }
 }
