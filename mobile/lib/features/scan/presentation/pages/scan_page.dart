@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../controllers/scan_controller.dart';
+import '../widgets/camera_switch_button.dart';
 import '../widgets/connection_status_indicator.dart';
 import '../widgets/detection_info_overlay.dart';
 import '../widgets/scan_action_bar.dart';
@@ -45,6 +47,26 @@ class _ScanPageState extends State<ScanPage> {
                 errorMessage: _controller.cameraError,
                 onRetry: _controller.initializeCamera,
               ),
+              if (_controller.cameraError == null &&
+                  _controller.hasMultipleCameras)
+                Positioned(
+                  right: 20,
+                  top: 0,
+                  bottom: 0,
+                  child: SafeArea(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: CameraSwitchButton(
+                        isFrontCamera: _controller.isFrontCamera,
+                        isSwitching: _controller.isSwitchingCamera,
+                        isEnabled:
+                            _controller.cameraController?.value.isInitialized ==
+                                true,
+                        onPressed: _controller.switchCamera,
+                      ),
+                    ),
+                  ),
+                ),
               SafeArea(
                 child: Column(
                   children: [
@@ -61,6 +83,23 @@ class _ScanPageState extends State<ScanPage> {
                       onResetPressed: _controller.resetResult,
                     ),
                   ],
+                ),
+              ),
+              // Tombol kembali ke Beranda
+              Positioned(
+                left: 16,
+                top: 16,
+                child: SafeArea(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.black45,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () => context.go('/home'),
+                    ),
+                  ),
                 ),
               ),
             ],
