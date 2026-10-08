@@ -58,3 +58,8 @@ Thumbs.db
 *.env.local
 .env.*
 !.env.example
+
+# ── Custom Exclusions ─────────────────────────────────────────────────────────
+/bisindo/
+/design/
+/docs/
