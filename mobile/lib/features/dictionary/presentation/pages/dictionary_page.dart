@@ -24,7 +24,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
 
   @override
   Widget build(BuildContext context) {
-
+    // Filter and search
     List<DictionaryItem> filteredItems = DummyDictionaryRepository.getItemsByCategory(_selectedCategory);
     if (_searchQuery.isNotEmpty) {
       final lowerQuery = _searchQuery.toLowerCase();
@@ -34,7 +34,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC), 
+      backgroundColor: const Color(0xFFF8FAFC), // Light blue-ish grey background
       appBar: AppBar(
         title: const Text('Kamus BISINDO'),
         centerTitle: false,
@@ -105,6 +105,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
           ),
           
           if (_searchQuery.isEmpty && _selectedCategory == null) ...[
+            // Section for Huruf A-Z
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
@@ -138,6 +139,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
               items: DummyDictionaryRepository.getItemsByCategory(DictionaryCategory.huruf).take(12).toList(),
             ),
             
+            // Section for Kata Umum
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -275,11 +277,12 @@ class _DictionaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Generate a background color based on item category
     Color bgColor;
     if (item.category == DictionaryCategory.huruf) {
-      bgColor = const Color(0xFFFDEEE8); 
+      bgColor = const Color(0xFFFDEEE8); // Light peach/orange
     } else {
-      bgColor = const Color(0xFFE8F4FD); 
+      bgColor = const Color(0xFFE8F4FD); // Light blue
     }
 
     return GestureDetector(
