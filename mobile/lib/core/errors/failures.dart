@@ -52,6 +52,25 @@ class WeakPasswordFailure extends AuthFailure {
   const WeakPasswordFailure() : super('Password terlalu lemah.');
 }
 
+class EmailNotVerifiedFailure extends AuthFailure {
+  final String email;
+  const EmailNotVerifiedFailure({this.email = ''})
+      : super('Email belum diverifikasi. Silakan cek inbox kamu.');
+}
+
+class GoogleSignInCancelledFailure extends AuthFailure {
+  const GoogleSignInCancelledFailure() : super('Login dengan Google dibatalkan.');
+}
+
+class TooManyRequestsFailure extends AuthFailure {
+  const TooManyRequestsFailure()
+      : super('Terlalu banyak percobaan. Silakan coba lagi nanti.');
+}
+
+class NetworkAuthFailure extends AuthFailure {
+  const NetworkAuthFailure([super.message = 'Tidak ada koneksi internet.']);
+}
+
 // ── ML / Scanner Failures ─────────────────────────────────────────────────────
 
 class ModelLoadFailure extends Failure {
