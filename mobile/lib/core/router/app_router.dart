@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../features/auth/data/datasources/auth_remote_data_source_impl.dart';
+import '../../features/auth/data/repositories/auth_repository_impl.dart';
+import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/presentation/pages/email_verification_page.dart';
+import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
@@ -18,6 +23,8 @@ abstract class AppRoutes {
   static const String onboarding = '/onboarding';
   static const String login = '/login';
   static const String register = '/register';
+  static const String forgotPassword = '/forgot-password';
+  static const String emailVerification = '/email-verification';
   static const String home = '/home';
   static const String scan = '/scan';
   static const String notifications = '/notifications';
@@ -30,11 +37,53 @@ abstract class AppRoutes {
 
 @singleton
 class AppRouter {
+  final AuthRepository _authRepository;
+
+  AppRouter({AuthRepository? authRepository})
+      : _authRepository = authRepository ??
+            AuthRepositoryImpl(
+              remoteDataSource: AuthRemoteDataSourceImpl(),
+            );
+
   GoRouter get config => _router;
 
-  final GoRouter _router = GoRouter(
-    initialLocation: AppRoutes.home,
+  late final GoRouter _router = GoRouter(
+    initialLocation: AppRoutes.login,
     debugLogDiagnostics: true,
+
+    // ── Auth-based redirect ──────────────────────────────────────────────
+    redirect: (context, state) {
+      final user = _authRepository.currentUser;
+      final isLoggedIn = user != null && user.isNotEmpty;
+      final isVerified = user?.isEmailVerified ?? false;
+
+      final location = state.uri.path;
+
+      // Routes that don't require auth
+      const publicRoutes = [
+        AppRoutes.login,
+        AppRoutes.register,
+        AppRoutes.onboarding,
+        AppRoutes.forgotPassword,
+        AppRoutes.emailVerification,
+        AppRoutes.splash,
+      ];
+
+      final isPublicRoute = publicRoutes.contains(location);
+
+      // If NOT logged in and trying to access a protected route → go to login
+      if (!isLoggedIn && !isPublicRoute) {
+        return AppRoutes.login;
+      }
+
+      // If logged in and verified, and on a public route → go to home
+      if (isLoggedIn && isVerified && isPublicRoute) {
+        return AppRoutes.home;
+      }
+
+      // No redirect needed
+      return null;
+    },
     routes: [
       GoRoute(
         path: AppRoutes.splash,
@@ -55,6 +104,22 @@ class AppRouter {
         path: AppRoutes.register,
         name: 'register',
         builder: (context, state) => const RegisterPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.forgotPassword,
+        name: 'forgotPassword',
+        builder: (context, state) => const ForgotPasswordPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.emailVerification,
+        name: 'emailVerification',
+        builder: (context, state) {
+          final extra = (state.extra is Map) ? (state.extra as Map) : const {};
+          return EmailVerificationPage(
+            email: extra['email']?.toString() ?? '',
+            password: extra['password']?.toString() ?? '',
+          );
+        },
       ),
       // Scan dibuka layar penuh (tanpa bottom nav) karena kamera butuh
       // seluruh layar. Dibuka lewat context.push dari Beranda / tombol tengah.
