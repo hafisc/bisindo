@@ -178,38 +178,7 @@ class MainWrapperPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCenterScanItem({
-    required BuildContext context,
-    required bool isSelected,
-  }) {
-    return GestureDetector(
-      onTap: () => _onItemTapped(2, context),
-      child: Transform.translate(
-        offset: const Offset(0, -10), // Lift the button up so it aligns better with other icons
-        child: Container(
-          width: 56, // Slightly larger to emphasize it's the primary action
-          height: 56,
-          decoration: BoxDecoration(
-            color: AppPalette.primary,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppPalette.white, width: 4), // Add a white border to make it pop out of the nav bar
-            boxShadow: [
-              BoxShadow(
-                color: AppPalette.primary.withValues(alpha: 0.35),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.back_hand_rounded, // Hand icon to indicate sign language scanning
-            color: Colors.white,
-            size: 26,
-          ),
-        ),
-      ),
-    );
-  }
+
 }
 
 class _NotchBorderPainter extends CustomPainter {
