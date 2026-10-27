@@ -4,29 +4,27 @@ Aplikasi mobile untuk menerjemahkan Bahasa Isyarat Indonesia (BISINDO) secara re
 
 Aplikasi ini dikembangkan sebagai proyek mata kuliah (Project Based Learning) untuk memfasilitasi komunikasi bagi komunitas tunarungu.
 
-## 📊 Status & Progres Proyek
+## Status Pengembangan Proyek
 
-> **Total Keseluruhan Progres Menuju 100% Finish:** `55%`
->
-> `[███████████░░░░░░░░░] 55% / 100%`
+Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keseluruhan mencapai **55%**.
 
 ### Ringkasan per Komponen
 
-| Komponen | Status | Progres | Keterangan |
-| :--- | :---: | :---: | :--- |
-| **Mobile (Flutter)** | 🟡 *In Progress* | **85%** | UI, Navigasi, Auth, Kamus, Riwayat, dan Profil selesai. Menunggu integrasi model TFLite live. |
-| **Web Dashboard & API** | 🟡 *In Progress* | **35%** | Web Admin Dashboard selesai 100%. REST API endpoint (`/api/...`) pending. |
-| **Machine Learning (ML)** | 🟡 *In Progress* | **45%** | Dataset landmark CSV & training MLP selesai (`.h5`). Ekspor TFLite & modul evaluasi pending. |
+| Komponen | Status | Penyelesaian | Deskripsi |
+| :--- | :--- | :---: | :--- |
+| Mobile (Flutter) | Dalam Pengembangan | 85% | Alur UI, sistem navigasi, autentikasi Firebase, kamus BISINDO, dan riwayat selesai. Menunggu integrasi model TFLite secara on-device. |
+| Web Dashboard & API | Dalam Pengembangan | 35% | Halaman dashboard admin selesai. Endpoint REST API (`/api/*`) untuk sinkronisasi data sedang dipersiapkan. |
+| Machine Learning | Dalam Pengembangan | 45% | Dataset landmark dan pelatihan model classifier (MLP) selesai. Tahap ekspor TFLite dan pengujian metrik evaluasi sedang berjalan. |
 
-### Progres per Anggota & Scope GitHub
+### Pembagian Tugas dan Status Tim
 
-| Anggota Tim | Scope Issue GitHub | Status | Progres |
-| :--- | :--- | :---: | :---: |
-| **Aryaputra Ferdiananta** | [#1 Scope Kamus & Ekspor TFLite](https://github.com/hafisc/bisindo/issues/1) | In Progress | **38%** |
-| **Fadhil Taufiqurrachman** | [#2 Scope Auth & Ekstraksi MediaPipe](https://github.com/hafisc/bisindo/issues/2) | In Progress | **63%** |
-| **M. Aldyth Rafiansyah Fauzi** | [#3 Scope Scan Kamera & Model Training](https://github.com/hafisc/bisindo/issues/3) | In Progress | **70%** |
-| **Mohammad Al Hafis H.** | [#4 Scope Beranda, Admin & Evaluasi ML](https://github.com/hafisc/bisindo/issues/4) | In Progress | **64%** |
-| **Mokhamad Rizki Hadiono S.** | [#5 Scope Riwayat, Profil & Dataset ML](https://github.com/hafisc/bisindo/issues/5) | In Progress | **44%** |
+| Anggota Tim | Fokus Tugas | Referensi Task | Progres |
+| :--- | :--- | :--- | :---: |
+| Aryaputra Ferdiananta | Modul Kamus BISINDO & Konversi Model TFLite | [Issue #1](https://github.com/hafisc/bisindo/issues/1) | 38% |
+| Fadhil Taufiqurrachman | Modul Autentikasi & Pipeline Dataset MediaPipe | [Issue #2](https://github.com/hafisc/bisindo/issues/2) | 63% |
+| M. Aldyth Rafiansyah Fauzi | Antarmuka Scan Kamera & Training Model Klasifikasi | [Issue #3](https://github.com/hafisc/bisindo/issues/3) | 70% |
+| Mohammad Al Hafis H. | Halaman Beranda, Dashboard Admin, & Evaluasi Model | [Issue #4](https://github.com/hafisc/bisindo/issues/4) | 64% |
+| Mokhamad Rizki Hadiono S. | Riwayat Deteksi, Manajemen Profil, & Pengumpulan Data | [Issue #5](https://github.com/hafisc/bisindo/issues/5) | 44% |
 
 ## Daftar Fitur
 
