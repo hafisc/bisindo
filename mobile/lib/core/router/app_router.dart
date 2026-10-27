@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:injectable/injectable.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../di/injection.dart';
 import '../../features/auth/data/datasources/auth_remote_data_source_impl.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
@@ -50,8 +53,15 @@ class AppRouter {
 
   GoRouter get config => _router;
 
+  static String _getInitialLocation() {
+    final bool isOnboardingDone = getIt.isRegistered<SharedPreferences>()
+        ? (getIt<SharedPreferences>().getBool('onboarding_done') ?? false)
+        : false;
+    return isOnboardingDone ? AppRoutes.login : AppRoutes.onboarding;
+  }
+
   late final GoRouter _router = GoRouter(
-    initialLocation: AppRoutes.login,
+    initialLocation: _getInitialLocation(),
     debugLogDiagnostics: true,
 
     // ── Auth-based redirect ──────────────────────────────────────────────
@@ -61,6 +71,10 @@ class AppRouter {
       final isVerified = user?.isEmailVerified ?? false;
 
       final location = state.uri.path;
+
+      final bool isOnboardingDone = getIt.isRegistered<SharedPreferences>()
+          ? (getIt<SharedPreferences>().getBool('onboarding_done') ?? false)
+          : false;
 
       // Routes that don't require auth
       const publicRoutes = [
@@ -74,13 +88,22 @@ class AppRouter {
 
       final isPublicRoute = publicRoutes.contains(location);
 
-      // If NOT logged in and trying to access a protected route → go to login
+      // 1. Jika belum pernah onboarding dan belum di halaman onboarding → arahkan ke onboarding
+      if (!isOnboardingDone && location != AppRoutes.onboarding) {
+        return AppRoutes.onboarding;
+      }
+
+      // 2. Jika belum login dan mencoba akses rute terproteksi → arahkan ke login
       if (!isLoggedIn && !isPublicRoute) {
         return AppRoutes.login;
       }
 
-      // If logged in and verified, and on a public route → go to home
-      if (isLoggedIn && isVerified && isPublicRoute) {
+      // 3. Jika sudah login & terverifikasi, dan berada di rute login/register/onboarding → ke home
+      if (isLoggedIn &&
+          isVerified &&
+          (location == AppRoutes.login ||
+              location == AppRoutes.register ||
+              location == AppRoutes.onboarding)) {
         return AppRoutes.home;
       }
 
