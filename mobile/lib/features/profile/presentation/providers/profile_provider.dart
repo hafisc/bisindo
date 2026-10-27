@@ -3,6 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
+import '../../../../core/utils/use_case.dart';
+import '../../../auth/domain/entities/user_entity.dart';
+import '../../../auth/domain/usecases/get_current_user_usecase.dart';
+import '../../../auth/domain/usecases/logout_usecase.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/models/user_profile.dart';
 
 class ProfileState {
@@ -30,18 +35,44 @@ class ProfileState {
 }
 
 class ProfileNotifier extends StateNotifier<ProfileState> {
-  ProfileNotifier()
-      : super(
-          const ProfileState(
-            profile: UserProfile(
-              id: 'USR-2241720000',
-              name: 'Mokhamad Rizki Hadiono Singgih',
-              email: 'rizki.singgih@student.polinema.ac.id',
-              studentId: '2241720000',
-              role: 'Mahasiswa / Mobile Dev',
-            ),
+  ProfileNotifier({
+    required GetCurrentUserUseCase getCurrentUserUseCase,
+    required LogoutUseCase logoutUseCase,
+  })  : _getCurrentUserUseCase = getCurrentUserUseCase,
+        _logoutUseCase = logoutUseCase,
+        super(
+          ProfileState(
+            profile: _buildProfile(getCurrentUserUseCase()),
           ),
         );
+
+  final GetCurrentUserUseCase _getCurrentUserUseCase;
+  final LogoutUseCase _logoutUseCase;
+
+  static UserProfile _buildProfile(UserEntity? user) {
+    if (user == null || user.isEmpty) {
+      return const UserProfile(
+        id: '-',
+        name: 'Tamu',
+        email: '-',
+        studentId: '-',
+        role: '-',
+      );
+    }
+
+    return UserProfile(
+      id: user.id,
+      name: user.displayName.isNotEmpty ? user.displayName : 'Pengguna',
+      email: user.email.isNotEmpty ? user.email : '-',
+      studentId: '-',
+      role: 'Pengguna BISINDO',
+      avatarUrl: user.photoUrl,
+    );
+  }
+
+  void refreshProfile() {
+    state = state.copyWith(profile: _buildProfile(_getCurrentUserUseCase()));
+  }
 
   void updateProfileName(String newName) {
     state = state.copyWith(
@@ -51,7 +82,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
   Future<void> logout(BuildContext context) async {
     state = state.copyWith(isLoading: true);
-    await Future.delayed(const Duration(milliseconds: 500));
+    await _logoutUseCase(const NoParams());
     state = state.copyWith(isLoading: false);
     if (context.mounted) {
       context.go(AppRoutes.login);
@@ -61,5 +92,16 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
 final profileNotifierProvider =
     StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
-  return ProfileNotifier();
+  final notifier = ProfileNotifier(
+    getCurrentUserUseCase: ref.watch(getCurrentUserUseCaseProvider),
+    logoutUseCase: ref.watch(logoutUseCaseProvider),
+  );
+
+  ref.listen<AsyncValue<UserEntity?>>(authStateProvider, (prev, next) {
+    next.whenData((user) {
+      notifier.refreshProfile();
+    });
+  });
+
+  return notifier;
 });
