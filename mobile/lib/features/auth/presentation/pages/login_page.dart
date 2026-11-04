@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/router/app_router.dart';
+import '../providers/auth_provider.dart';
 import '../widgets/auth_primary_button.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/google_sign_in_button.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _rememberMe = false;
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -28,21 +29,61 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _onLogin() async {
+  void _onLogin() {
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
-    // TODO: integrasikan Firebase Auth
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _isLoading = false);
+    ref.read(loginNotifierProvider.notifier).loginWithEmail(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
   }
 
   void _onGoogleSignIn() {
-    // TODO: integrasikan Google Sign-In
+    ref.read(loginNotifierProvider.notifier).loginWithGoogle();
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
+    final authState = ref.watch(loginNotifierProvider);
+
+    // ── Listen for state changes
+    ref.listen<AuthState>(loginNotifierProvider, (prev, next) {
+      if (next.status == AuthStatus.success) {
+        context.go(AppRoutes.home);
+      }
+
+      if (next.status == AuthStatus.emailNotVerified) {
+        // Navigate to email verification page
+        context.push(
+          AppRoutes.emailVerification,
+          extra: {
+            'email': next.unverifiedEmail ?? '',
+            'password': next.unverifiedPassword ?? '',
+          },
+        );
+        // Reset state so user can try again after verifying
+        ref.read(loginNotifierProvider.notifier).resetState();
+      }
+
+      if (next.status == AuthStatus.error && next.errorMessage != null) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(
+                next.errorMessage!,
+                style: GoogleFonts.poppins(fontSize: 13),
+              ),
+              backgroundColor: const Color(0xFFEF4444),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          );
+      }
+    });
+
+    final isLoading = authState.status == AuthStatus.loading;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -200,9 +241,8 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               const Spacer(),
                               GestureDetector(
-                                onTap: () {
-                                  // TODO: forgot password
-                                },
+                                onTap: () =>
+                                    context.push(AppRoutes.forgotPassword),
                                 child: Text(
                                   'Lupa password?',
                                   style: GoogleFonts.poppins(
@@ -221,7 +261,7 @@ class _LoginPageState extends State<LoginPage> {
                           AuthPrimaryButton(
                             label: 'Masuk',
                             onPressed: _onLogin,
-                            isLoading: _isLoading,
+                            isLoading: isLoading,
                           ),
 
                           const SizedBox(height: 16),
@@ -255,7 +295,7 @@ class _LoginPageState extends State<LoginPage> {
                           // Google button
                           GoogleSignInButton(
                             label: 'Lanjut dengan Google',
-                            onPressed: _onGoogleSignIn,
+                            onPressed: isLoading ? () {} : _onGoogleSignIn,
                           ),
 
                           const SizedBox(height: 20),

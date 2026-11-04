@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "345785652894",
+    "project_id": "bisindo-translator-5b185",
+    "storage_bucket": "bisindo-translator-5b185.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:345785652894:android:fea24b1c01f97d9f8f8d8f",
+        "android_client_info": {
+          "package_name": "com.bisindo.bisindo_translator"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "345785652894-mvv41qi36e9nrmsbg4q7idrkpa0m8k0q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bisindo.bisindo_translator",
+            "certificate_hash": "00d93c53d931f3c97798b21984a2ad596b6af272"
+          }
+        },
+        {
+          "client_id": "345785652894-fci445o76jv5u4a41ql8kqnlr15i8ml9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4wJmyE72klBM0srPZQCzhDaTRxC5yoaM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "345785652894-fci445o76jv5u4a41ql8kqnlr15i8ml9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

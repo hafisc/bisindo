@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/router/app_router.dart';
+import '../providers/auth_provider.dart';
 import '../widgets/auth_primary_button.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/google_sign_in_button.dart';
 
-class RegisterPage extends StatefulWidget {
+class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  ConsumerState<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _agreeToTerms = false;
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -31,7 +33,7 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  void _onRegister() async {
+  void _onRegister() {
     if (!_formKey.currentState!.validate()) return;
     if (!_agreeToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -48,18 +50,62 @@ class _RegisterPageState extends State<RegisterPage> {
       );
       return;
     }
-    setState(() => _isLoading = true);
-    // TODO: integrasikan Firebase Auth
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _isLoading = false);
+
+    ref.read(registerNotifierProvider.notifier).registerWithEmail(
+          name: _nameController.text,
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
   }
 
   void _onGoogleSignUp() {
-    // TODO: integrasikan Google Sign-In
+    ref.read(registerNotifierProvider.notifier).registerWithGoogle();
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(registerNotifierProvider);
+    final isLoading = authState.status == AuthStatus.loading;
+
+    // ── Listen for state changes
+    ref.listen<AuthState>(registerNotifierProvider, (prev, next) {
+      if (next.status == AuthStatus.success) {
+        // Google sign-up → go straight to home
+        context.go(AppRoutes.home);
+      }
+
+      if (next.status == AuthStatus.emailNotVerified) {
+        // Email/password sign-up → go to email verification
+        context.push(
+          AppRoutes.emailVerification,
+          extra: {
+            'email': next.unverifiedEmail ?? '',
+            'password': next.unverifiedPassword ?? '',
+          },
+        );
+        // Reset so user can register again if needed
+        ref.read(registerNotifierProvider.notifier).resetState();
+      }
+
+      if (next.status == AuthStatus.error && next.errorMessage != null) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(
+                next.errorMessage!,
+                style: GoogleFonts.poppins(fontSize: 13),
+              ),
+              backgroundColor: const Color(0xFFEF4444),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          );
+      }
+    });
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -278,7 +324,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           AuthPrimaryButton(
                             label: 'Daftar',
                             onPressed: _onRegister,
-                            isLoading: _isLoading,
+                            isLoading: isLoading,
                           ),
 
                           const SizedBox(height: 16),
@@ -309,7 +355,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           // Google button
                           GoogleSignInButton(
                             label: 'Daftar dengan Google',
-                            onPressed: _onGoogleSignUp,
+                            onPressed: isLoading ? () {} : _onGoogleSignUp,
                           ),
 
                           const SizedBox(height: 20),

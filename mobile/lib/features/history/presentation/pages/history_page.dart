@@ -101,9 +101,7 @@ class HistoryPage extends ConsumerWidget {
         border: Border.all(color: const Color(0xFFE2E8F0), width: 1), // AppPalette.gray200
       ),
       child: Row(
-        children: filters.asMap().entries.map((entry) {
-          final index = entry.key;
-          final filter = entry.value;
+        children: filters.map((filter) {
           final isSelected = state.activeFilter == filter;
           
           return Expanded(
