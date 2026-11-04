@@ -5,6 +5,7 @@ import '../controllers/scan_controller.dart';
 import '../widgets/camera_switch_button.dart';
 import '../widgets/connection_status_indicator.dart';
 import '../widgets/detection_info_overlay.dart';
+import '../widgets/hand_landmarks_painter.dart';
 import '../widgets/scan_action_bar.dart';
 import '../widgets/scan_camera_view.dart';
 
@@ -32,8 +33,6 @@ class _ScanPageState extends State<ScanPage> {
 
   @override
   Widget build(BuildContext context) {
-    // ListenableBuilder otomatis akan me-refresh tampilan setiap kali
-    // _controller memanggil notifyListeners()
     return ListenableBuilder(
       listenable: _controller,
       builder: (context, child) {
@@ -47,6 +46,18 @@ class _ScanPageState extends State<ScanPage> {
                 errorMessage: _controller.cameraError,
                 onRetry: _controller.initializeCamera,
               ),
+              if (_controller.cameraError == null)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: CustomPaint(
+                      painter: HandLandmarksPainter(
+                        hands: _controller.detectedHands,
+                        isFrontCamera: _controller.isFrontCamera,
+                        imageSize: _controller.cameraController?.value.previewSize,
+                      ),
+                    ),
+                  ),
+                ),
               if (_controller.cameraError == null &&
                   _controller.hasMultipleCameras)
                 Positioned(
@@ -85,7 +96,6 @@ class _ScanPageState extends State<ScanPage> {
                   ],
                 ),
               ),
-              // Tombol kembali ke Beranda
               Positioned(
                 left: 16,
                 top: 16,
