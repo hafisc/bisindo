@@ -2,18 +2,26 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../data/services/prediction_socket.dart';
 import '../../data/services/camera_service.dart';
+import '../../data/services/native_hand_landmarker_service.dart';
+import '../../data/services/prediction_socket.dart';
 
 class ScanController extends ChangeNotifier with WidgetsBindingObserver {
   ScanController({
     PredictionSocket? predictionSocket,
     CameraService? cameraService,
-  }) : _predictionSocket = predictionSocket ?? PredictionSocket() {
+    NativeHandLandmarkerService? landmarkerService,
+  })  : _predictionSocket = predictionSocket ?? PredictionSocket(),
+        _landmarkerService = landmarkerService ?? NativeHandLandmarkerService() {
     WidgetsBinding.instance.addObserver(this);
 
     _statusSub = _predictionSocket.statusStream.listen((status) {
       socketStatus = status;
+      notifyListeners();
+    });
+
+    _landmarkSub = _landmarkerService.handsStream.listen((hands) {
+      detectedHands = hands;
       notifyListeners();
     });
 
@@ -29,76 +37,71 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   final PredictionSocket _predictionSocket;
+  final NativeHandLandmarkerService _landmarkerService;
   late final CameraService _cameraService;
-  StreamSubscription<SocketStatus>? _statusSub;
 
-  // -- State Variabel untuk UI --
+  StreamSubscription<SocketStatus>? _statusSub;
+  StreamSubscription<List<DetectedHand>>? _landmarkSub;
+
   String? cameraError;
   String detectedLetter = '-';
   double confidence = 0.0;
   String resultText = '';
   SocketStatus socketStatus = SocketStatus.idle;
+  List<DetectedHand> detectedHands = [];
 
-  // -- Proxy State Kamera --
   CameraController? get cameraController => _cameraService.controller;
   bool get isSwitchingCamera => _cameraService.isSwitchingCamera;
   bool get hasMultipleCameras => _cameraService.hasMultipleCameras;
   bool get isFrontCamera => _cameraService.isFrontCamera;
 
-  // -- State Internal --
-  bool _isProcessingFrame = false;
-  DateTime _lastProcessedAt = DateTime.fromMillisecondsSinceEpoch(0);
+  bool _isProcessingSocket = false;
+  DateTime _lastSocketAt = DateTime.fromMillisecondsSinceEpoch(0);
   bool _isDisposed = false;
 
   Future<void> initializeCamera() async {
     cameraError = null;
     notifyListeners();
-
     await _cameraService.initialize();
-
-    if (!_isDisposed) {
-      await _connectSocket();
-    }
+    if (!_isDisposed) await _connectSocket();
   }
 
-  Future<void> switchCamera() async {
-    await _cameraService.switchCamera();
-  }
+  Future<void> switchCamera() => _cameraService.switchCamera();
 
   Future<void> _connectSocket() async {
     try {
-      debugPrint('[CONTROLLER] Mencoba terhubung ke WebSocket...');
       await _predictionSocket.connect(onResult: _updatePrediction);
     } catch (e) {
-      debugPrint('[CONTROLLER ERROR CONNECT] $e');
+      debugPrint('[ScanController] Socket connect error: $e');
     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _connectSocket();
-    }
+    if (state == AppLifecycleState.resumed) _connectSocket();
   }
 
   Future<void> _processCameraImage(CameraImage image) async {
     if (_isDisposed) return;
 
-    final now = DateTime.now();
-    // Batasi pengiriman frame maks 4 fps (1 frame per 250ms)
-    if (_isProcessingFrame ||
-        now.difference(_lastProcessedAt).inMilliseconds < 250) {
-      return;
-    }
+    await _landmarkerService.processCameraImage(
+      image,
+      sensorOrientation: _cameraService.sensorOrientation,
+    );
 
-    _lastProcessedAt = now;
-    _isProcessingFrame = true;
-    try {
-      await _predictionSocket.sendFrame(image);
-    } catch (e) {
-      debugPrint('[CONTROLLER ERROR SEND] $e');
-    } finally {
-      _isProcessingFrame = false;
+    final now = DateTime.now();
+    if (_predictionSocket.isConnected &&
+        !_isProcessingSocket &&
+        now.difference(_lastSocketAt).inMilliseconds >= 250) {
+      _lastSocketAt = now;
+      _isProcessingSocket = true;
+      try {
+        await _predictionSocket.sendFrame(image);
+      } catch (e) {
+        debugPrint('[ScanController] Socket send error: $e');
+      } finally {
+        _isProcessingSocket = false;
+      }
     }
   }
 
@@ -114,9 +117,10 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void removeLastCharacter() {
-    if (resultText.isEmpty) return;
-    resultText = resultText.substring(0, resultText.length - 1);
-    notifyListeners();
+    if (resultText.isNotEmpty) {
+      resultText = resultText.substring(0, resultText.length - 1);
+      notifyListeners();
+    }
   }
 
   void resetResult() {
@@ -129,11 +133,11 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
     _isDisposed = true;
     WidgetsBinding.instance.removeObserver(this);
     _statusSub?.cancel();
-
+    _landmarkSub?.cancel();
     _cameraService.dispose();
+    _landmarkerService.dispose();
     _predictionSocket.close();
     _predictionSocket.dispose();
-
     super.dispose();
   }
 }

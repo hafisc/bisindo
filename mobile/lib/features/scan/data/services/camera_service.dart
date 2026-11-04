@@ -33,6 +33,12 @@ class CameraService {
     return _cameras[index].lensDirection == CameraLensDirection.front;
   }
 
+  int get sensorOrientation {
+    final index = _currentCameraIndex;
+    if (index == null || index >= _cameras.length) return 0;
+    return _cameras[index].sensorOrientation;
+  }
+
   Future<void> initialize() async {
     try {
       final available = await availableCameras();

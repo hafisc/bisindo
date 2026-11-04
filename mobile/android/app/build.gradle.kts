@@ -62,10 +62,18 @@ android {
             )
         }
     }
+
+    aaptOptions {
+        noCompress += listOf("task", "tflite")
+    }
 }
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    implementation("com.google.mediapipe:tasks-vision:0.10.14")
 }
 
 if (file("google-services.json").exists()) {
