@@ -18,5 +18,10 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # Path model machine learning BISINDO
+    MODEL_PATH = os.environ.get("MODEL_PATH") or (
+        (BASE_DIR.parent / "ml" / "models" / "bisindo_mlp_best.h5").as_posix()
+    )
+
     # Jumlah baris per halaman pada tabel admin.
     ADMIN_PER_PAGE = 10
