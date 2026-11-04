@@ -20,10 +20,19 @@ def create_app(config_overrides: dict | None = None) -> Flask:
     INSTANCE_DIR.mkdir(parents=True, exist_ok=True)
     db.init_app(app)
 
-    # Blueprint lain (auth, predict, history, dll) didaftarkan di sini.
+    try:
+        from flask_cors import CORS
+
+        CORS(app, resources={r"/api/*": {"origins": "*"}})
+    except ImportError:
+        pass
+
+    # Blueprint didaftarkan di sini:
     from .admin import bp as admin_bp
+    from .api import bp as api_bp
 
     app.register_blueprint(admin_bp)
+    app.register_blueprint(api_bp)
 
     @app.get("/")
     def root():
