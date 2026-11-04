@@ -4,6 +4,28 @@ Aplikasi mobile untuk menerjemahkan Bahasa Isyarat Indonesia (BISINDO) secara re
 
 Aplikasi ini dikembangkan sebagai proyek mata kuliah (Project Based Learning) untuk memfasilitasi komunikasi bagi komunitas tunarungu.
 
+## Status Pengembangan Proyek
+
+Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keseluruhan mencapai **55%**.
+
+### Ringkasan per Komponen
+
+| Komponen | Status | Penyelesaian | Deskripsi |
+| :--- | :--- | :---: | :--- |
+| Mobile (Flutter) | Dalam Pengembangan | 85% | Alur UI, sistem navigasi, autentikasi Firebase, kamus BISINDO, dan riwayat selesai. Menunggu integrasi model TFLite secara on-device. |
+| Web Dashboard & API | Dalam Pengembangan | 35% | Halaman dashboard admin selesai. Endpoint REST API (`/api/*`) untuk sinkronisasi data sedang dipersiapkan. |
+| Machine Learning | Dalam Pengembangan | 45% | Dataset landmark dan pelatihan model classifier (MLP) selesai. Tahap ekspor TFLite dan pengujian metrik evaluasi sedang berjalan. |
+
+### Pembagian Tugas dan Status Tim
+
+| Anggota Tim | Fokus Tugas | Referensi Task | Progres |
+| :--- | :--- | :--- | :---: |
+| Aryaputra Ferdiananta | Modul Kamus BISINDO & Konversi Model TFLite | [Issue #1](https://github.com/hafisc/bisindo/issues/1) | 38% |
+| Fadhil Taufiqurrachman | Modul Autentikasi & Pipeline Dataset MediaPipe | [Issue #2](https://github.com/hafisc/bisindo/issues/2) | 63% |
+| M. Aldyth Rafiansyah Fauzi | Antarmuka Scan Kamera & Training Model Klasifikasi | [Issue #3](https://github.com/hafisc/bisindo/issues/3) | 70% |
+| Mohammad Al Hafis H. | Halaman Beranda, Dashboard Admin, & Evaluasi Model | [Issue #4](https://github.com/hafisc/bisindo/issues/4) | 64% |
+| Mokhamad Rizki Hadiono S. | Riwayat Deteksi, Manajemen Profil, & Pengumpulan Data | [Issue #5](https://github.com/hafisc/bisindo/issues/5) | 44% |
+
 ## Daftar Fitur
 
 - Scanner Real-time: Mendeteksi gestur tangan dan menerjemahkannya secara langsung.
