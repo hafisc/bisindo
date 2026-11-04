@@ -6,6 +6,8 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/history/presentation/pages/history_page.dart';
+import '../../features/dictionary/presentation/pages/dictionary_page.dart';
+import '../../features/dictionary/presentation/pages/dictionary_detail_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/pages/main_wrapper_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
@@ -81,13 +83,13 @@ class AppRouter {
           GoRoute(
             path: AppRoutes.dictionary,
             name: 'dictionary',
-            builder: (context, state) => const _PlaceholderPage(title: 'Kamus'),
+            builder: (context, state) => const DictionaryPage(),
             routes: [
               GoRoute(
                 path: ':id',
                 name: 'dictionaryDetail',
-                builder: (context, state) => _PlaceholderPage(
-                  title: 'Detail Kamus ${state.pathParameters['id']}',
+                builder: (context, state) => DictionaryDetailPage(
+                  letter: state.pathParameters['id'] ?? 'A',
                 ),
               ),
             ],
