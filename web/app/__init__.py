@@ -22,8 +22,10 @@ def create_app(config_overrides: dict | None = None) -> Flask:
 
     # Blueprint lain (auth, predict, history, dll) didaftarkan di sini.
     from .admin import bp as admin_bp
+    from .dictionary import bp as dictionary_bp
 
     app.register_blueprint(admin_bp)
+    app.register_blueprint(dictionary_bp)
 
     @app.get("/")
     def root():
