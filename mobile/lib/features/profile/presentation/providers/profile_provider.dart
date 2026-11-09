@@ -5,14 +5,17 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/utils/use_case.dart';
 import '../../../auth/domain/entities/user_entity.dart';
+import '../../../auth/domain/usecases/delete_account_usecase.dart';
 import '../../../auth/domain/usecases/get_current_user_usecase.dart';
 import '../../../auth/domain/usecases/logout_usecase.dart';
+import '../../../auth/domain/usecases/reauthenticate_usecase.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/user_profile_remote_data_source.dart';
 import '../../data/repositories/user_profile_repository_impl.dart';
 import '../../domain/models/user_profile.dart';
 import '../../domain/repositories/user_profile_repository.dart';
 import '../../domain/usecases/delete_avatar_usecase.dart';
+import '../../domain/usecases/delete_user_profile_usecase.dart';
 import '../../domain/usecases/get_user_profile_usecase.dart';
 import '../../domain/usecases/update_user_profile_usecase.dart';
 import '../../domain/usecases/upload_avatar_usecase.dart';
@@ -45,6 +48,11 @@ final uploadAvatarUseCaseProvider = Provider<UploadAvatarUseCase>((ref) {
 
 final deleteAvatarUseCaseProvider = Provider<DeleteAvatarUseCase>((ref) {
   return DeleteAvatarUseCase(ref.watch(userProfileRepositoryProvider));
+});
+
+final deleteUserProfileUseCaseProvider =
+    Provider<DeleteUserProfileUseCase>((ref) {
+  return DeleteUserProfileUseCase(ref.watch(userProfileRepositoryProvider));
 });
 
 // ── State ────────────────────────────────────────────────────────────────────
@@ -91,12 +99,18 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     required UpdateUserProfileUseCase updateUserProfileUseCase,
     required UploadAvatarUseCase uploadAvatarUseCase,
     required DeleteAvatarUseCase deleteAvatarUseCase,
+    required DeleteUserProfileUseCase deleteUserProfileUseCase,
+    required DeleteAccountUseCase deleteAccountUseCase,
+    required ReauthenticateUseCase reauthenticateUseCase,
   })  : _getCurrentUserUseCase = getCurrentUserUseCase,
         _logoutUseCase = logoutUseCase,
         _getUserProfileUseCase = getUserProfileUseCase,
         _updateUserProfileUseCase = updateUserProfileUseCase,
         _uploadAvatarUseCase = uploadAvatarUseCase,
         _deleteAvatarUseCase = deleteAvatarUseCase,
+        _deleteUserProfileUseCase = deleteUserProfileUseCase,
+        _deleteAccountUseCase = deleteAccountUseCase,
+        _reauthenticateUseCase = reauthenticateUseCase,
         super(const ProfileState());
 
   final GetCurrentUserUseCase _getCurrentUserUseCase;
@@ -105,6 +119,9 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   final UpdateUserProfileUseCase _updateUserProfileUseCase;
   final UploadAvatarUseCase _uploadAvatarUseCase;
   final DeleteAvatarUseCase _deleteAvatarUseCase;
+  final DeleteUserProfileUseCase _deleteUserProfileUseCase;
+  final DeleteAccountUseCase _deleteAccountUseCase;
+  final ReauthenticateUseCase _reauthenticateUseCase;
 
   /// Profil sementara dari data Firebase Auth, dipakai saat dokumen Firestore
   /// belum ada atau gagal dimuat.
@@ -262,6 +279,68 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     );
   }
 
+  /// Menghapus akun pengguna beserta data profilnya.
+  ///
+  /// Dokumen Firestore dan foto profil dihapus lebih dulu karena setelah akun
+  /// Firebase Auth dihapus pengguna tidak lagi punya izin menulis ke database.
+  /// Mengembalikan `true` jika akun berhasil dihapus.
+  Future<bool> deleteAccount({String? password}) async {
+    final uid = state.profile.id;
+
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    // Verifikasi ulang lebih dulu agar data profil tidak terhapus ketika
+    // password yang dimasukkan salah.
+    if (password != null && password.isNotEmpty) {
+      final reauth = await _reauthenticateUseCase(
+        ReauthenticateParams(password: password),
+      );
+
+      if (reauth.isLeft()) {
+        final failure = reauth.fold((f) => f, (_) => null);
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: failure?.message ?? 'Password salah.',
+        );
+        return false;
+      }
+    }
+
+    if (uid.isNotEmpty) {
+      // Hapus foto profil lebih dulu agar tidak tertinggal di Cloud Storage.
+      final avatarCleanup = await _deleteAvatarUseCase(
+        DeleteAvatarParams(uid: uid),
+      );
+      if (avatarCleanup.isLeft()) {
+        debugPrint('[PROFILE] Gagal menghapus avatar $uid.');
+      }
+
+      final profileCleanup = await _deleteUserProfileUseCase(
+        DeleteUserProfileParams(uid: uid),
+      );
+      if (profileCleanup.isLeft()) {
+        // Kegagalan pembersihan data tidak boleh menghalangi pengguna
+        // menghapus akunnya.
+        debugPrint('[PROFILE] Gagal menghapus data profil $uid.');
+      }
+    }
+
+    final result = await _deleteAccountUseCase(
+      DeleteAccountParams(password: password),
+    );
+
+    return result.fold(
+      (failure) {
+        state = state.copyWith(isLoading: false, errorMessage: failure.message);
+        return false;
+      },
+      (_) {
+        state = const ProfileState(profile: UserProfile.empty);
+        return true;
+      },
+    );
+  }
+
   /// Muat ulang profil (mis. setelah login/logout).
   Future<void> refreshProfile() => load();
 
@@ -284,6 +363,9 @@ final profileNotifierProvider =
     updateUserProfileUseCase: ref.watch(updateUserProfileUseCaseProvider),
     uploadAvatarUseCase: ref.watch(uploadAvatarUseCaseProvider),
     deleteAvatarUseCase: ref.watch(deleteAvatarUseCaseProvider),
+    deleteUserProfileUseCase: ref.watch(deleteUserProfileUseCaseProvider),
+    deleteAccountUseCase: ref.watch(deleteAccountUseCaseProvider),
+    reauthenticateUseCase: ref.watch(reauthenticateUseCaseProvider),
   );
 
   // Muat profil pertama kali.
