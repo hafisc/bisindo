@@ -16,6 +16,7 @@ import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/history/presentation/pages/history_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/pages/main_wrapper_page.dart';
+import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/scan/presentation/pages/scan_page.dart';
 import '../../features/home/presentation/pages/notification_page.dart';
@@ -160,6 +161,13 @@ class AppRouter {
         path: AppRoutes.notifications,
         name: 'notifications',
         builder: (context, state) => const NotificationPage(),
+      ),
+      // Edit profil dibuka dari halaman Profil lewat context.push, layar penuh
+      // dengan AppBar sendiri agar bottom nav tidak ikut tampil.
+      GoRoute(
+        path: AppRoutes.editProfile,
+        name: 'editProfile',
+        builder: (context, state) => const EditProfilePage(),
       ),
       ShellRoute(
         builder: (context, state, child) => MainWrapperPage(child: child),
