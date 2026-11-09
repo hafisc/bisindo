@@ -13,6 +13,7 @@ class ProfileAvatar extends StatelessWidget {
   final double size;
   final VoidCallback? onTap;
   final Widget? badge;
+  final bool isLoading;
 
   const ProfileAvatar({
     super.key,
@@ -20,6 +21,7 @@ class ProfileAvatar extends StatelessWidget {
     this.size = 100,
     this.onTap,
     this.badge,
+    this.isLoading = false,
   });
 
   bool get _hasRemotePhoto => (avatarUrl ?? '').trim().isNotEmpty;
@@ -42,23 +44,40 @@ class ProfileAvatar extends StatelessWidget {
         ],
       ),
       child: ClipOval(
-        child: _hasRemotePhoto
-            ? Image.network(
-                avatarUrl!.trim(),
-                fit: BoxFit.cover,
-                width: size,
-                height: size,
-                errorBuilder: (context, error, stackTrace) =>
-                    _defaultImage(),
-              )
-            : _defaultImage(),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            _hasRemotePhoto
+                ? Image.network(
+                    avatarUrl!.trim(),
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _defaultImage(),
+                  )
+                : _defaultImage(),
+            if (isLoading)
+              Container(
+                color: Colors.black.withValues(alpha: 0.35),
+                child: const Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2.5,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
 
     if (onTap == null && badge == null) return avatar;
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: isLoading ? null : onTap,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -80,6 +99,31 @@ class ProfileAvatar extends StatelessWidget {
       fit: BoxFit.cover,
       width: size,
       height: size,
+    );
+  }
+}
+
+/// Badge kecil (ikon kamera) untuk menandakan avatar bisa diganti.
+class ProfileAvatarEditBadge extends StatelessWidget {
+  final double size;
+
+  const ProfileAvatarEditBadge({super.key, this.size = 32});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: AppPalette.primary,
+        shape: BoxShape.circle,
+        border: Border.all(color: AppPalette.white, width: 2),
+      ),
+      child: Icon(
+        Icons.photo_camera_rounded,
+        color: Colors.white,
+        size: size * 0.5,
+      ),
     );
   }
 }

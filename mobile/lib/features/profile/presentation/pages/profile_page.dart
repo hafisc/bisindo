@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_palette.dart';
 import '../../../../core/router/app_router.dart';
 import '../providers/profile_provider.dart';
+import '../widgets/avatar_actions.dart';
 import '../widgets/logout_dialog.dart';
 import '../widgets/profile_avatar.dart';
 import '../widgets/profile_info_tile.dart';
@@ -73,6 +74,9 @@ class ProfilePage extends ConsumerWidget {
                         ProfileAvatar(
                           avatarUrl: profile.avatarUrl,
                           size: 100,
+                          isLoading: state.isUploadingAvatar,
+                          onTap: () => showAvatarPicker(context, ref),
+                          badge: const ProfileAvatarEditBadge(),
                         ),
                         const SizedBox(width: 20),
                         Expanded(
