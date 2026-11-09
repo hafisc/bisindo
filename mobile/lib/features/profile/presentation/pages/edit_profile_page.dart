@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_palette.dart';
 import '../../domain/models/user_profile.dart';
 import '../providers/profile_provider.dart';
+import '../widgets/avatar_actions.dart';
 import '../widgets/profile_avatar.dart';
 
 /// Pilihan peran pengguna yang tersedia di form edit profil.
@@ -129,9 +130,24 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Center(
-                  child: ProfileAvatar(
-                    avatarUrl: profile.avatarUrl,
-                    size: 104,
+                  child: Column(
+                    children: [
+                      ProfileAvatar(
+                        avatarUrl: profile.avatarUrl,
+                        size: 104,
+                        isLoading: state.isUploadingAvatar,
+                        onTap: () => showAvatarPicker(context, ref),
+                        badge: const ProfileAvatarEditBadge(),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Ketuk foto untuk mengganti',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: AppPalette.gray400,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 24),
