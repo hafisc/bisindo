@@ -48,6 +48,20 @@ abstract class AuthRepository {
     required String email,
   });
 
+  /// Memverifikasi ulang pengguna dengan password saat ini.
+  Future<Either<Failure, void>> reauthenticate({required String password});
+
+  /// Mengganti password pengguna setelah verifikasi password lama.
+  Future<Either<Failure, void>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
+
+  /// Menghapus akun pengguna yang sedang login.
+  /// [password] wajib untuk akun email/password; akun Google akan
+  /// direautentikasi lewat Google Sign-In.
+  Future<Either<Failure, void>> deleteAccount({String? password});
+
   /// Signs the user out from both Firebase and Google.
   Future<Either<Failure, void>> logout();
 }
