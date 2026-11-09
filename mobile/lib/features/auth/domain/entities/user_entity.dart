@@ -11,6 +11,10 @@ class UserEntity extends Equatable {
   final bool isEmailVerified;
   final bool isGoogleUser;
 
+  /// True bila akun punya provider email/password, sehingga operasi sensitif
+  /// (ganti password / hapus akun) memerlukan password saat ini.
+  final bool hasPassword;
+
   const UserEntity({
     required this.id,
     required this.email,
@@ -18,6 +22,7 @@ class UserEntity extends Equatable {
     this.photoUrl,
     this.isEmailVerified = false,
     this.isGoogleUser = false,
+    this.hasPassword = false,
   });
 
   /// An unauthenticated / empty guest user representation
@@ -39,6 +44,7 @@ class UserEntity extends Equatable {
     String? photoUrl,
     bool? isEmailVerified,
     bool? isGoogleUser,
+    bool? hasPassword,
   }) {
     return UserEntity(
       id: id ?? this.id,
@@ -47,6 +53,7 @@ class UserEntity extends Equatable {
       photoUrl: photoUrl ?? this.photoUrl,
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
       isGoogleUser: isGoogleUser ?? this.isGoogleUser,
+      hasPassword: hasPassword ?? this.hasPassword,
     );
   }
 
@@ -58,5 +65,6 @@ class UserEntity extends Equatable {
         photoUrl,
         isEmailVerified,
         isGoogleUser,
+        hasPassword,
       ];
 }
