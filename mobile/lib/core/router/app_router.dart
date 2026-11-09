@@ -14,8 +14,6 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/history/presentation/pages/history_page.dart';
-import '../../features/dictionary/presentation/pages/dictionary_page.dart';
-import '../../features/dictionary/presentation/pages/dictionary_detail_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/pages/main_wrapper_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
@@ -180,8 +178,7 @@ class AppRouter {
                 path: ':id',
                 name: 'dictionaryDetail',
                 builder: (context, state) => DictionaryDetailPage(
-                  letter: state.pathParameters['id'] ?? 'A',
-                  id: state.pathParameters['id'] ?? ''
+                  id: state.pathParameters['id'] ?? '',
                 ),
               ),
             ],
