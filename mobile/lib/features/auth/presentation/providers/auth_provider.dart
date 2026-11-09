@@ -8,9 +8,12 @@ import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/check_email_verified_usecase.dart';
+import '../../domain/usecases/change_password_usecase.dart';
+import '../../domain/usecases/delete_account_usecase.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/login_with_email_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
+import '../../domain/usecases/reauthenticate_usecase.dart';
 import '../../domain/usecases/register_with_email_usecase.dart';
 import '../../domain/usecases/send_password_reset_usecase.dart';
 import '../../domain/usecases/send_verification_email_usecase.dart';
@@ -61,6 +64,18 @@ final logoutUseCaseProvider = Provider<LogoutUseCase>((ref) {
 
 final getCurrentUserUseCaseProvider = Provider<GetCurrentUserUseCase>((ref) {
   return GetCurrentUserUseCase(ref.watch(authRepositoryProvider));
+});
+
+final changePasswordUseCaseProvider = Provider<ChangePasswordUseCase>((ref) {
+  return ChangePasswordUseCase(ref.watch(authRepositoryProvider));
+});
+
+final reauthenticateUseCaseProvider = Provider<ReauthenticateUseCase>((ref) {
+  return ReauthenticateUseCase(ref.watch(authRepositoryProvider));
+});
+
+final deleteAccountUseCaseProvider = Provider<DeleteAccountUseCase>((ref) {
+  return DeleteAccountUseCase(ref.watch(authRepositoryProvider));
 });
 
 // ── Auth State Stream Provider ───────────────────────────────────────────────
@@ -437,5 +452,120 @@ final passwordResetProvider =
     StateNotifierProvider<PasswordResetNotifier, PasswordResetState>((ref) {
   return PasswordResetNotifier(
     sendPasswordResetUseCase: ref.watch(sendPasswordResetUseCaseProvider),
+  );
+});
+
+// ── Account Security Notifier ────────────────────────────────────────────────
+// Menangani operasi sensitif pada akun: ganti password, verifikasi ulang,
+// dan hapus akun.
+
+class AccountSecurityState {
+  final bool isProcessing;
+  final String? errorMessage;
+  final String? successMessage;
+
+  const AccountSecurityState({
+    this.isProcessing = false,
+    this.errorMessage,
+    this.successMessage,
+  });
+}
+
+class AccountSecurityNotifier extends StateNotifier<AccountSecurityState> {
+  final ChangePasswordUseCase _changePasswordUseCase;
+  final ReauthenticateUseCase _reauthenticateUseCase;
+  final DeleteAccountUseCase _deleteAccountUseCase;
+
+  AccountSecurityNotifier({
+    required ChangePasswordUseCase changePasswordUseCase,
+    required ReauthenticateUseCase reauthenticateUseCase,
+    required DeleteAccountUseCase deleteAccountUseCase,
+  })  : _changePasswordUseCase = changePasswordUseCase,
+        _reauthenticateUseCase = reauthenticateUseCase,
+        _deleteAccountUseCase = deleteAccountUseCase,
+        super(const AccountSecurityState());
+
+  /// Mengganti password. Mengembalikan `true` bila berhasil.
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    state = const AccountSecurityState(isProcessing: true);
+
+    final result = await _changePasswordUseCase(
+      ChangePasswordParams(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      ),
+    );
+
+    return result.fold(
+      (failure) {
+        state = AccountSecurityState(errorMessage: failure.message);
+        return false;
+      },
+      (_) {
+        state = const AccountSecurityState(
+          successMessage: 'Password berhasil diperbarui.',
+        );
+        return true;
+      },
+    );
+  }
+
+  /// Memverifikasi ulang pengguna dengan password saat ini.
+  Future<bool> reauthenticate(String password) async {
+    state = const AccountSecurityState(isProcessing: true);
+
+    final result = await _reauthenticateUseCase(
+      ReauthenticateParams(password: password),
+    );
+
+    return result.fold(
+      (failure) {
+        state = AccountSecurityState(errorMessage: failure.message);
+        return false;
+      },
+      (_) {
+        state = const AccountSecurityState();
+        return true;
+      },
+    );
+  }
+
+  /// Menghapus akun. Mengembalikan `true` bila berhasil.
+  ///
+  /// [password] hanya diperlukan untuk akun email/password; akun Google
+  /// akan diverifikasi ulang lewat Google Sign-In.
+  Future<bool> deleteAccount({String? password}) async {
+    state = const AccountSecurityState(isProcessing: true);
+
+    final result = await _deleteAccountUseCase(
+      DeleteAccountParams(password: password),
+    );
+
+    return result.fold(
+      (failure) {
+        state = AccountSecurityState(errorMessage: failure.message);
+        return false;
+      },
+      (_) {
+        state = const AccountSecurityState(
+          successMessage: 'Akun berhasil dihapus.',
+        );
+        return true;
+      },
+    );
+  }
+
+  void reset() => state = const AccountSecurityState();
+}
+
+final accountSecurityProvider =
+    StateNotifierProvider<AccountSecurityNotifier, AccountSecurityState>((ref) {
+  return AccountSecurityNotifier(
+    changePasswordUseCase: ref.watch(changePasswordUseCaseProvider),
+    reauthenticateUseCase: ref.watch(reauthenticateUseCaseProvider),
+    deleteAccountUseCase: ref.watch(deleteAccountUseCaseProvider),
   );
 });

@@ -5,8 +5,11 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_palette.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
 import '../widgets/avatar_actions.dart';
+import '../widgets/change_password_dialog.dart';
+import '../widgets/delete_account_dialog.dart';
 import '../widgets/logout_dialog.dart';
 import '../widgets/profile_avatar.dart';
 import '../widgets/profile_info_tile.dart';
@@ -38,6 +41,7 @@ class ProfilePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(profileNotifierProvider);
     final profile = state.profile;
+    final hasPassword = ref.watch(currentUserProvider)?.hasPassword ?? false;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
@@ -161,6 +165,34 @@ class ProfilePage extends ConsumerWidget {
                           ),
                         ],
                       ),
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    // ── Keamanan Akun
+                    _SectionTitle(title: 'Keamanan Akun'),
+                    const SizedBox(height: 12),
+                    if (hasPassword)
+                      ProfileInfoTile(
+                        icon: Icons.lock_outline_rounded,
+                        title: 'Ganti Password',
+                        trailing: const Icon(
+                          Icons.chevron_right_rounded,
+                          color: AppPalette.gray400,
+                          size: 20,
+                        ),
+                        onTap: () => ChangePasswordDialog.show(context),
+                      ),
+                    ProfileInfoTile(
+                      icon: Icons.delete_forever_outlined,
+                      title: 'Hapus Akun',
+                      iconColor: AppPalette.coral,
+                      trailing: const Icon(
+                        Icons.chevron_right_rounded,
+                        color: AppPalette.gray400,
+                        size: 20,
+                      ),
+                      onTap: () => DeleteAccountDialog.show(context),
                     ),
 
                     const SizedBox(height: 28),

@@ -141,6 +141,91 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     debugPrint('[AUTH DATA] Password reset email sent to $email');
   }
 
+  /// True bila akun memakai provider email/password (bukan hanya Google).
+  bool _hasPasswordProvider(User user) {
+    return user.providerData.any((info) => info.providerId == 'password');
+  }
+
+  User _requireCurrentUser() {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw const AppException('Sesi tidak ditemukan. Silakan masuk ulang.');
+    }
+    return user;
+  }
+
+  @override
+  Future<void> reauthenticate({required String password}) async {
+    final user = _requireCurrentUser();
+
+    if (!_hasPasswordProvider(user)) {
+      throw const PasswordNotSetException();
+    }
+
+    final email = user.email;
+    if (email == null || email.isEmpty) {
+      throw const AppException('Email akun tidak ditemukan.');
+    }
+
+    final credential = EmailAuthProvider.credential(
+      email: email,
+      password: password,
+    );
+
+    await user.reauthenticateWithCredential(credential);
+    debugPrint('[AUTH DATA] Reauthenticated: $email');
+  }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await reauthenticate(password: currentPassword);
+
+    final user = _requireCurrentUser();
+    await user.updatePassword(newPassword);
+
+    debugPrint('[AUTH DATA] Password diperbarui untuk ${user.email}');
+  }
+
+  /// Reautentikasi memakai akun Google (untuk pengguna yang tidak punya
+  /// password, atau akun yang terhubung ke Google).
+  Future<void> _reauthenticateWithGoogle() async {
+    final googleUser = await _googleSignIn.signIn();
+    if (googleUser == null) {
+      throw const GoogleSignInCancelledException();
+    }
+
+    final googleAuth = await googleUser.authentication;
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    await _requireCurrentUser().reauthenticateWithCredential(credential);
+    debugPrint('[AUTH DATA] Reauthenticated via Google.');
+  }
+
+  @override
+  Future<void> deleteAccount({String? password}) async {
+    final user = _requireCurrentUser();
+
+    if (_hasPasswordProvider(user)) {
+      if (password == null || password.isEmpty) {
+        throw const AppException('Password diperlukan untuk menghapus akun.');
+      }
+      await reauthenticate(password: password);
+    } else {
+      await _reauthenticateWithGoogle();
+    }
+
+    await user.delete();
+    await _googleSignIn.signOut();
+
+    debugPrint('[AUTH DATA] Akun ${user.email} dihapus.');
+  }
+
   @override
   Future<void> logout() async {
     await Future.wait([
