@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
 
 import '../../../../core/constants/app_palette.dart';
 import '../../data/dictionary_data.dart';
@@ -489,4 +488,4 @@ class _DictionaryDetailPageState extends State<DictionaryDetailPage> {
     );
   }
 }
->>>>>>> 95c878a36c3a21c5d928a7cfdcb3c0f629a63d7d
+

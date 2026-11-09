@@ -180,11 +180,8 @@ class AppRouter {
                 path: ':id',
                 name: 'dictionaryDetail',
                 builder: (context, state) => DictionaryDetailPage(
-<<<<<<< HEAD
                   letter: state.pathParameters['id'] ?? 'A',
-=======
-                  id: state.pathParameters['id'] ?? '',
->>>>>>> 95c878a36c3a21c5d928a7cfdcb3c0f629a63d7d
+                  id: state.pathParameters['id'] ?? ''
                 ),
               ),
             ],
