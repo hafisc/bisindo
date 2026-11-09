@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 class DictionaryItem {
   final String letter;
   final String title;
@@ -69,4 +68,3 @@ class DictionaryItem {
     }
   }
 }
->>>>>>> 95c878a36c3a21c5d928a7cfdcb3c0f629a63d7d

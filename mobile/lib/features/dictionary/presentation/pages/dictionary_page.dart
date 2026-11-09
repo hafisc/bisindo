@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-<<<<<<< HEAD
 import '../../../../core/constants/app_palette.dart';
 import '../../../../core/router/app_router.dart';
 import '../../data/dictionary_data.dart';
@@ -9,7 +8,6 @@ import '../../domain/models/dictionary_item.dart';
 =======
 import '../../domain/models/dictionary_item.dart';
 import '../../data/repositories/dummy_dictionary_repository.dart';
->>>>>>> 95c878a36c3a21c5d928a7cfdcb3c0f629a63d7d
 
 class DictionaryPage extends StatefulWidget {
   const DictionaryPage({super.key});
