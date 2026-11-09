@@ -13,4 +13,13 @@ abstract class UserProfileRepository {
 
   /// Menghapus data profil pengguna.
   Future<Either<Failure, void>> deleteProfile(String uid);
+
+  /// Mengunggah foto profil baru dan mengembalikan URL publiknya.
+  Future<Either<Failure, String>> uploadAvatar({
+    required String uid,
+    required String filePath,
+  });
+
+  /// Menghapus foto profil pengguna.
+  Future<Either<Failure, void>> deleteAvatar(String uid);
 }
