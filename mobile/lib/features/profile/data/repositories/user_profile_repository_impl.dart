@@ -53,4 +53,36 @@ class UserProfileRepositoryImpl implements UserProfileRepository {
       );
     }
   }
+
+  @override
+  Future<Either<Failure, String>> uploadAvatar({
+    required String uid,
+    required String filePath,
+  }) async {
+    try {
+      final url = await remoteDataSource.uploadAvatar(
+        uid: uid,
+        filePath: filePath,
+      );
+      return Right(url);
+    } catch (e) {
+      debugPrint('[PROFILE REPO] uploadAvatar gagal: $e');
+      return const Left(
+        ServerFailure('Gagal mengunggah foto profil. Silakan coba lagi.'),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteAvatar(String uid) async {
+    try {
+      await remoteDataSource.deleteAvatar(uid);
+      return const Right(null);
+    } catch (e) {
+      debugPrint('[PROFILE REPO] deleteAvatar gagal: $e');
+      return const Left(
+        ServerFailure('Gagal menghapus foto profil.'),
+      );
+    }
+  }
 }

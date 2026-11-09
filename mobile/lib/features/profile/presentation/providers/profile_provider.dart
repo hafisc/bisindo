@@ -12,8 +12,10 @@ import '../../data/datasources/user_profile_remote_data_source.dart';
 import '../../data/repositories/user_profile_repository_impl.dart';
 import '../../domain/models/user_profile.dart';
 import '../../domain/repositories/user_profile_repository.dart';
+import '../../domain/usecases/delete_avatar_usecase.dart';
 import '../../domain/usecases/get_user_profile_usecase.dart';
 import '../../domain/usecases/update_user_profile_usecase.dart';
+import '../../domain/usecases/upload_avatar_usecase.dart';
 
 // ── Dependency Injection Providers ───────────────────────────────────────────
 
@@ -37,18 +39,28 @@ final updateUserProfileUseCaseProvider =
   return UpdateUserProfileUseCase(ref.watch(userProfileRepositoryProvider));
 });
 
+final uploadAvatarUseCaseProvider = Provider<UploadAvatarUseCase>((ref) {
+  return UploadAvatarUseCase(ref.watch(userProfileRepositoryProvider));
+});
+
+final deleteAvatarUseCaseProvider = Provider<DeleteAvatarUseCase>((ref) {
+  return DeleteAvatarUseCase(ref.watch(userProfileRepositoryProvider));
+});
+
 // ── State ────────────────────────────────────────────────────────────────────
 
 class ProfileState {
   final UserProfile profile;
   final bool isLoading;
   final bool isSaving;
+  final bool isUploadingAvatar;
   final String? errorMessage;
 
   const ProfileState({
     this.profile = UserProfile.empty,
     this.isLoading = false,
     this.isSaving = false,
+    this.isUploadingAvatar = false,
     this.errorMessage,
   });
 
@@ -56,12 +68,14 @@ class ProfileState {
     UserProfile? profile,
     bool? isLoading,
     bool? isSaving,
+    bool? isUploadingAvatar,
     String? errorMessage,
   }) {
     return ProfileState(
       profile: profile ?? this.profile,
       isLoading: isLoading ?? this.isLoading,
       isSaving: isSaving ?? this.isSaving,
+      isUploadingAvatar: isUploadingAvatar ?? this.isUploadingAvatar,
       errorMessage: errorMessage,
     );
   }
@@ -75,16 +89,22 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     required LogoutUseCase logoutUseCase,
     required GetUserProfileUseCase getUserProfileUseCase,
     required UpdateUserProfileUseCase updateUserProfileUseCase,
+    required UploadAvatarUseCase uploadAvatarUseCase,
+    required DeleteAvatarUseCase deleteAvatarUseCase,
   })  : _getCurrentUserUseCase = getCurrentUserUseCase,
         _logoutUseCase = logoutUseCase,
         _getUserProfileUseCase = getUserProfileUseCase,
         _updateUserProfileUseCase = updateUserProfileUseCase,
+        _uploadAvatarUseCase = uploadAvatarUseCase,
+        _deleteAvatarUseCase = deleteAvatarUseCase,
         super(const ProfileState());
 
   final GetCurrentUserUseCase _getCurrentUserUseCase;
   final LogoutUseCase _logoutUseCase;
   final GetUserProfileUseCase _getUserProfileUseCase;
   final UpdateUserProfileUseCase _updateUserProfileUseCase;
+  final UploadAvatarUseCase _uploadAvatarUseCase;
+  final DeleteAvatarUseCase _deleteAvatarUseCase;
 
   /// Profil sementara dari data Firebase Auth, dipakai saat dokumen Firestore
   /// belum ada atau gagal dimuat.
@@ -185,6 +205,63 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     );
   }
 
+  /// Mengunggah foto profil baru dari [filePath] lokal.
+  /// Mengembalikan `true` jika berhasil.
+  Future<bool> uploadAvatar(String filePath) async {
+    final uid = state.profile.id;
+    if (uid.isEmpty) return false;
+
+    state = state.copyWith(isUploadingAvatar: true, errorMessage: null);
+
+    final result = await _uploadAvatarUseCase(
+      UploadAvatarParams(uid: uid, filePath: filePath),
+    );
+
+    return result.fold(
+      (failure) {
+        state = state.copyWith(
+          isUploadingAvatar: false,
+          errorMessage: failure.message,
+        );
+        return false;
+      },
+      (url) {
+        state = state.copyWith(
+          isUploadingAvatar: false,
+          profile: state.profile.copyWith(avatarUrl: url),
+        );
+        return true;
+      },
+    );
+  }
+
+  /// Menghapus foto profil dan kembali ke avatar default.
+  Future<bool> removeAvatar() async {
+    final uid = state.profile.id;
+    if (uid.isEmpty) return false;
+
+    state = state.copyWith(isUploadingAvatar: true, errorMessage: null);
+
+    final result = await _deleteAvatarUseCase(DeleteAvatarParams(uid: uid));
+
+    return result.fold(
+      (failure) {
+        state = state.copyWith(
+          isUploadingAvatar: false,
+          errorMessage: failure.message,
+        );
+        return false;
+      },
+      (_) {
+        state = state.copyWith(
+          isUploadingAvatar: false,
+          profile: state.profile.copyWith(avatarUrl: ''),
+        );
+        return true;
+      },
+    );
+  }
+
   /// Muat ulang profil (mis. setelah login/logout).
   Future<void> refreshProfile() => load();
 
@@ -205,6 +282,8 @@ final profileNotifierProvider =
     logoutUseCase: ref.watch(logoutUseCaseProvider),
     getUserProfileUseCase: ref.watch(getUserProfileUseCaseProvider),
     updateUserProfileUseCase: ref.watch(updateUserProfileUseCaseProvider),
+    uploadAvatarUseCase: ref.watch(uploadAvatarUseCaseProvider),
+    deleteAvatarUseCase: ref.watch(deleteAvatarUseCaseProvider),
   );
 
   // Muat profil pertama kali.
