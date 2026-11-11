@@ -32,7 +32,7 @@
           <th>#</th>
           <th>Waktu</th>
           <th>Pengguna</th>
-          <th>Huruf</th>
+          <th>Hasil</th>
           <th>Confidence</th>
         </tr>
       </thead>
@@ -54,7 +54,7 @@
               <span class="muted">Tanpa akun</span>
             {% endif %}
           </td>
-          <td><span class="letter-chip">{{ log.letter }}</span></td>
+          <td><span class="letter-chip">{{ log.display_label }}</span></td>
           <td>{{ confidence_badge(log.confidence) }}</td>
         </tr>
         {% endfor %}

@@ -41,8 +41,11 @@ def create_app(config_overrides: dict | None = None) -> Flask:
         return redirect(url_for("admin.dashboard"))
 
     from . import models  # noqa: F401  (supaya tabel terdaftar sebelum create_all)
+    from .schema import ensure_schema
 
     with app.app_context():
         db.create_all()
+        # Tambal kolom baru pada database lama (lihat app/schema.py).
+        ensure_schema()
 
     return app
