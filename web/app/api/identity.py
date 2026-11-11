@@ -62,3 +62,28 @@ def require_user() -> User:
         )
 
     return user
+
+
+def resolve_user_id(raw) -> int | None:
+    """Ubah nilai `user_id` dari payload menjadi primary key `users.id`.
+
+    Aplikasi mobile mengirim Firebase UID (string), sedangkan
+    `DetectionLog.user_id` adalah foreign key integer. Nilai integer
+    diperlakukan sebagai primary key apa adanya.
+    """
+    if raw is None or raw == "" or isinstance(raw, bool):
+        return None
+
+    if isinstance(raw, int):
+        return raw
+
+    uid = str(raw).strip()
+
+    if not uid:
+        return None
+
+    if uid.isdigit():
+        return int(uid)
+
+    user = find_user(uid)
+    return user.id if user is not None else None

@@ -3,6 +3,7 @@ from flask import jsonify, request
 from ..extensions import db
 from ..models import DetectionLog
 from . import bp
+from .identity import resolve_user_id
 from .services import get_model, predict_landmarks, preprocess_landmarks
 
 
@@ -45,9 +46,11 @@ def predict():
     # Simpan hasil deteksi ke riwayat database (DetectionLog)
     # Ini otomatis memberi makan dashboard admin tim
     try:
-        user_id = payload.get("user_id") if isinstance(payload, dict) else None
+        # Mobile mengirim Firebase UID, bukan primary key. Helper ini
+        # menerjemahkannya supaya log terhubung ke profil yang benar.
+        raw_user = payload.get("user_id") if isinstance(payload, dict) else None
         log = DetectionLog(
-            user_id=user_id,
+            user_id=resolve_user_id(raw_user),
             letter=result["prediction"],
             confidence=result["confidence"],
         )
