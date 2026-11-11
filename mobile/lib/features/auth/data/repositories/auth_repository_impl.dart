@@ -133,6 +133,65 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, void>> reauthenticate({
+    required String password,
+  }) async {
+    try {
+      await remoteDataSource.reauthenticate(password: password);
+      return const Right(null);
+    } on PasswordNotSetException {
+      return const Left(PasswordNotSetFailure());
+    } on FirebaseAuthException catch (e) {
+      return Left(mapFirebaseAuthError(e));
+    } catch (e) {
+      debugPrint('[AUTH REPO] reauthenticate unexpected: $e');
+      return const Left(
+        AuthFailure('Gagal memverifikasi password. Silakan coba lagi.'),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await remoteDataSource.changePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+      return const Right(null);
+    } on PasswordNotSetException {
+      return const Left(PasswordNotSetFailure());
+    } on FirebaseAuthException catch (e) {
+      return Left(mapFirebaseAuthError(e));
+    } catch (e) {
+      debugPrint('[AUTH REPO] changePassword unexpected: $e');
+      return const Left(
+        AuthFailure('Gagal mengganti password. Silakan coba lagi.'),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteAccount({String? password}) async {
+    try {
+      await remoteDataSource.deleteAccount(password: password);
+      return const Right(null);
+    } on GoogleSignInCancelledException {
+      return const Left(GoogleSignInCancelledFailure());
+    } on FirebaseAuthException catch (e) {
+      return Left(mapFirebaseAuthError(e));
+    } catch (e) {
+      debugPrint('[AUTH REPO] deleteAccount unexpected: $e');
+      return const Left(
+        AuthFailure('Gagal menghapus akun. Silakan coba lagi.'),
+      );
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> logout() async {
     try {
       await remoteDataSource.logout();

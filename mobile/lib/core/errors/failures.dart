@@ -71,6 +71,19 @@ class NetworkAuthFailure extends AuthFailure {
   const NetworkAuthFailure([super.message = 'Tidak ada koneksi internet.']);
 }
 
+class RequiresRecentLoginFailure extends AuthFailure {
+  const RequiresRecentLoginFailure()
+      : super('Sesi sudah terlalu lama. Silakan masuk ulang untuk melanjutkan.');
+}
+
+class PasswordNotSetFailure extends AuthFailure {
+  const PasswordNotSetFailure()
+      : super(
+          'Akun ini tidak memakai password (masuk lewat Google). '
+          'Kelola password dari pengaturan akun Google kamu.',
+        );
+}
+
 // ── ML / Scanner Failures ─────────────────────────────────────────────────────
 
 class ModelLoadFailure extends Failure {

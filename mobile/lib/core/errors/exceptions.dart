@@ -23,6 +23,14 @@ class GoogleSignInCancelledException implements Exception {
   String toString() => 'GoogleSignInCancelledException: User membatalkan login.';
 }
 
+/// Dilempar saat akun tidak punya provider password (mis. hanya Google).
+class PasswordNotSetException implements Exception {
+  const PasswordNotSetException();
+  @override
+  String toString() =>
+      'PasswordNotSetException - akun ini tidak memakai password.';
+}
+
 /// Converts a [FirebaseAuthException] to the appropriate [AuthFailure].
 AuthFailure mapFirebaseAuthError(FirebaseAuthException e) {
   switch (e.code) {
@@ -43,6 +51,8 @@ AuthFailure mapFirebaseAuthError(FirebaseAuthException e) {
       return const NetworkAuthFailure();
     case 'user-disabled':
       return const AuthFailure('Akun ini telah dinonaktifkan.');
+    case 'requires-recent-login':
+      return const RequiresRecentLoginFailure();
     case 'operation-not-allowed':
       return const AuthFailure('Metode autentikasi ini belum diaktifkan.');
     default:

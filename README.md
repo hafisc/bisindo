@@ -13,7 +13,7 @@ Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keselur
 | Komponen | Status | Penyelesaian | Deskripsi |
 | :--- | :--- | :---: | :--- |
 | Mobile (Flutter) | Dalam Pengembangan | 85% | Alur UI, sistem navigasi, autentikasi Firebase, kamus BISINDO, dan riwayat selesai. Menunggu integrasi model TFLite secara on-device. |
-| Web Dashboard & API | Dalam Pengembangan | 35% | Halaman dashboard admin selesai. Endpoint REST API (`/api/*`) untuk sinkronisasi data sedang dipersiapkan. |
+| Web Dashboard & API | Dalam Pengembangan | 45% | Dashboard admin, endpoint riwayat, dan endpoint profil selesai. Menunggu integrasi pemanggilan API dari aplikasi mobile. |
 | Machine Learning | Dalam Pengembangan | 45% | Dataset landmark dan pelatihan model classifier (MLP) selesai. Tahap ekspor TFLite dan pengujian metrik evaluasi sedang berjalan. |
 
 ### Pembagian Tugas dan Status Tim
@@ -24,7 +24,7 @@ Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keselur
 | Fadhil Taufiqurrachman | Modul Autentikasi & Pipeline Dataset MediaPipe | [Issue #2](https://github.com/hafisc/bisindo/issues/2) | 63% |
 | M. Aldyth Rafiansyah Fauzi | Antarmuka Scan Kamera & Training Model Klasifikasi | [Issue #3](https://github.com/hafisc/bisindo/issues/3) | 70% |
 | Mohammad Al Hafis H. | Halaman Beranda, Dashboard Admin, & Evaluasi Model | [Issue #4](https://github.com/hafisc/bisindo/issues/4) | 64% |
-| Mokhamad Rizki Hadiono S. | Riwayat Deteksi, Manajemen Profil, & Pengumpulan Data | [Issue #5](https://github.com/hafisc/bisindo/issues/5) | 44% |
+| Mokhamad Rizki Hadiono S. | Riwayat Deteksi, Manajemen Profil, & Pengumpulan Data | [Issue #5](https://github.com/hafisc/bisindo/issues/5) | 75% |
 
 ## Daftar Fitur
 
@@ -70,6 +70,81 @@ Machine Learning:
 
 Web Dashboard:
 - Framework: Flask (Python)
+
+## REST API (Web)
+
+Server Flask menyediakan endpoint JSON untuk aplikasi mobile. Semua endpoint
+riwayat memakai header `X-User-Id` berisi Firebase UID pengguna yang sudah
+login. Sebagai alternatif, UID boleh dikirim lewat query string `user_id` atau
+field `user_id` di body JSON.
+
+| Method | Endpoint | Keterangan |
+| :--- | :--- | :--- |
+| GET | `/api/status` | Status layanan dan kesiapan model prediksi |
+| POST | `/api/predict` | Prediksi huruf BISINDO dari 21 titik landmark tangan |
+| GET | `/api/dictionary` | Daftar seluruh huruf kamus BISINDO |
+| GET | `/api/dictionary/<huruf>` | Detail satu huruf kamus |
+| GET | `/api/history` | Riwayat deteksi milik pengguna, terbaru lebih dulu |
+| POST | `/api/history` | Simpan satu entri riwayat baru |
+| DELETE | `/api/history/<id>` | Hapus satu entri riwayat |
+| DELETE | `/api/history` | Hapus seluruh riwayat pengguna |
+| GET | `/api/profile` | Ambil profil pengguna |
+| PUT | `/api/profile` | Buat atau perbarui profil pengguna |
+
+Contoh menyimpan riwayat:
+
+```bash
+curl -X POST http://127.0.0.1:5000/api/history \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: <firebase-uid>" \
+  -d '{
+    "title": "Halo",
+    "type": "Kata",
+    "category": "Teks",
+    "mode": "BISINDO -> Teks",
+    "confidence": 0.95,
+    "timestamp": "2026-11-11T10:20:00"
+  }'
+```
+
+Nilai `type` yang diterima adalah `Kata` atau `Huruf`, sedangkan `category`
+adalah `Teks` atau `Suara`. Field `confidence` harus di antara 0.0 dan 1.0.
+Field `timestamp` bersifat opsional; bila kosong, server memakai waktu saat
+request diterima.
+
+Contoh sinkronisasi profil setelah login:
+
+```bash
+curl -X PUT http://127.0.0.1:5000/api/profile \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: <firebase-uid>" \
+  -d '{
+    "name": "Budi Santoso",
+    "email": "budi@mail.com",
+    "student_id": "2210512001",
+    "role": "Mahasiswa"
+  }'
+```
+
+`PUT /api/profile` bersifat upsert: panggilan pertama membuat baris pengguna
+dan membalas 201, panggilan berikutnya memperbarui field yang dikirim saja dan
+membalas 200. Field `name` dan `email` wajib pada panggilan pertama. Mengirim
+string kosong pada `student_id`, `role`, atau `avatar_url` akan mengosongkan
+nilai tersebut.
+
+Endpoint riwayat dan profil memakai header `X-User-Id` yang belum diverifikasi
+tanda tangannya. Peningkatan ke verifikasi Firebase ID token dapat ditambahkan
+kemudian memakai `firebase-admin`.
+
+### Menjalankan test web
+
+```bash
+cd web/
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements-dev.txt
+pytest
+```
 
 ## Panduan Instalasi dan Penggunaan
 

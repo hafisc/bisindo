@@ -20,11 +20,20 @@ def create_app(config_overrides: dict | None = None) -> Flask:
     INSTANCE_DIR.mkdir(parents=True, exist_ok=True)
     db.init_app(app)
 
-    # Blueprint lain (auth, predict, history, dll) didaftarkan di sini.
+    try:
+        from flask_cors import CORS
+
+        CORS(app, resources={r"/api/*": {"origins": "*"}})
+    except ImportError:
+        pass
+
+    # Blueprint didaftarkan di sini:
     from .admin import bp as admin_bp
+    from .api import bp as api_bp
     from .dictionary import bp as dictionary_bp
 
     app.register_blueprint(admin_bp)
+    app.register_blueprint(api_bp)
     app.register_blueprint(dictionary_bp)
 
     @app.get("/")
@@ -32,8 +41,11 @@ def create_app(config_overrides: dict | None = None) -> Flask:
         return redirect(url_for("admin.dashboard"))
 
     from . import models  # noqa: F401  (supaya tabel terdaftar sebelum create_all)
+    from .schema import ensure_schema
 
     with app.app_context():
         db.create_all()
+        # Tambal kolom baru pada database lama (lihat app/schema.py).
+        ensure_schema()
 
     return app
