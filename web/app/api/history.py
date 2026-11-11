@@ -12,7 +12,8 @@ from sqlalchemy import delete, func, select
 
 from ..extensions import db
 from ..models import DetectionLog
-from .identity import IdentityError, require_user
+from .identity import require_user
+from .validation import ValidationError, clean_text, json_body
 
 # Blueprint ini di-register sebagai nested blueprint di dalam `api.bp`
 # (url_prefix "/api"), jadi prefix di sini cukup "/history".
@@ -30,14 +31,6 @@ MAX_IMAGE_PATH = 512
 
 DEFAULT_LIMIT = 50
 MAX_LIMIT = 200
-
-
-class ValidationError(Exception):
-    """Payload riwayat tidak valid."""
-
-    def __init__(self, message: str):
-        super().__init__(message)
-        self.message = message
 
 
 def _parse_timestamp(raw) -> datetime:
@@ -66,33 +59,6 @@ def _parse_timestamp(raw) -> datetime:
     return parsed
 
 
-def _clean_text(payload: dict, key: str, max_length: int, required: bool = False):
-    """Ambil dan validasi field teks opsional/wajib."""
-    value = payload.get(key)
-
-    if value is None:
-        if required:
-            raise ValidationError(f"Field '{key}' wajib diisi.")
-        return None
-
-    if not isinstance(value, str):
-        raise ValidationError(f"Field '{key}' harus berupa string.")
-
-    value = value.strip()
-
-    if not value:
-        if required:
-            raise ValidationError(f"Field '{key}' tidak boleh kosong.")
-        return None
-
-    if len(value) > max_length:
-        raise ValidationError(
-            f"Field '{key}' maksimal {max_length} karakter."
-        )
-
-    return value
-
-
 def _parse_confidence(payload: dict) -> float:
     raw = payload.get("confidence")
 
@@ -112,11 +78,11 @@ def _parse_confidence(payload: dict) -> float:
 
 def _build_log(user_id: int, payload: dict) -> DetectionLog:
     """Validasi payload lalu bentuk objek DetectionLog baru."""
-    title = _clean_text(payload, "title", MAX_TITLE, required=True)
-    entry_type = _clean_text(payload, "type", MAX_TYPE, required=True)
-    category = _clean_text(payload, "category", MAX_CATEGORY, required=True)
-    mode = _clean_text(payload, "mode", MAX_MODE)
-    image_path = _clean_text(payload, "image_path", MAX_IMAGE_PATH)
+    title = clean_text(payload, "title", MAX_TITLE, required=True)
+    entry_type = clean_text(payload, "type", MAX_TYPE, required=True)
+    category = clean_text(payload, "category", MAX_CATEGORY, required=True)
+    mode = clean_text(payload, "mode", MAX_MODE)
+    image_path = clean_text(payload, "image_path", MAX_IMAGE_PATH)
 
     if entry_type not in VALID_TYPES:
         raise ValidationError(
@@ -141,13 +107,6 @@ def _build_log(user_id: int, payload: dict) -> DetectionLog:
     )
 
 
-def _json_body() -> dict:
-    payload = request.get_json(silent=True)
-    if not isinstance(payload, dict):
-        raise ValidationError("Body request harus berupa JSON object.")
-    return payload
-
-
 @bp.get("")
 @bp.get("/")
 def list_history():
@@ -162,10 +121,7 @@ def list_history():
     base = select(DetectionLog).where(DetectionLog.user_id == user.id)
 
     total = (
-        db.session.scalar(
-            select(func.count()).select_from(base.subquery())
-        )
-        or 0
+        db.session.scalar(select(func.count()).select_from(base.subquery())) or 0
     )
 
     rows = db.session.scalars(
@@ -189,7 +145,7 @@ def list_history():
 def create_history():
     """Simpan satu entri riwayat baru."""
     user = require_user()
-    payload = _json_body()
+    payload = json_body()
 
     log = _build_log(user.id, payload)
 
@@ -232,16 +188,3 @@ def clear_history():
     db.session.commit()
 
     return jsonify({"deleted": result.rowcount or 0})
-
-
-# ── Error handler khusus blueprint ───────────────────────────────────────────
-
-
-@bp.errorhandler(ValidationError)
-def handle_validation_error(error: ValidationError):
-    return jsonify({"error": error.message}), 400
-
-
-@bp.errorhandler(IdentityError)
-def handle_identity_error(error: IdentityError):
-    return jsonify({"error": error.message}), error.status

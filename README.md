@@ -13,7 +13,7 @@ Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keselur
 | Komponen | Status | Penyelesaian | Deskripsi |
 | :--- | :--- | :---: | :--- |
 | Mobile (Flutter) | Dalam Pengembangan | 85% | Alur UI, sistem navigasi, autentikasi Firebase, kamus BISINDO, dan riwayat selesai. Menunggu integrasi model TFLite secara on-device. |
-| Web Dashboard & API | Dalam Pengembangan | 35% | Halaman dashboard admin selesai. Endpoint REST API (`/api/*`) untuk sinkronisasi data sedang dipersiapkan. |
+| Web Dashboard & API | Dalam Pengembangan | 45% | Halaman dashboard admin dan endpoint riwayat serta profil selesai. Integrasi penuh dari aplikasi mobile sedang dikerjakan. |
 | Machine Learning | Dalam Pengembangan | 45% | Dataset landmark dan pelatihan model classifier (MLP) selesai. Tahap ekspor TFLite dan pengujian metrik evaluasi sedang berjalan. |
 
 ### Pembagian Tugas dan Status Tim
@@ -88,6 +88,8 @@ field `user_id` di body JSON.
 | POST | `/api/history` | Simpan satu entri riwayat baru |
 | DELETE | `/api/history/<id>` | Hapus satu entri riwayat |
 | DELETE | `/api/history` | Hapus seluruh riwayat pengguna |
+| GET | `/api/profile` | Ambil profil pengguna |
+| PUT | `/api/profile` | Buat atau perbarui profil pengguna |
 
 Contoh menyimpan riwayat:
 
@@ -109,6 +111,30 @@ Nilai `type` yang diterima adalah `Kata` atau `Huruf`, sedangkan `category`
 adalah `Teks` atau `Suara`. Field `confidence` harus di antara 0.0 dan 1.0.
 Field `timestamp` bersifat opsional; bila kosong, server memakai waktu saat
 request diterima.
+
+Contoh sinkronisasi profil setelah login:
+
+```bash
+curl -X PUT http://127.0.0.1:5000/api/profile \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: <firebase-uid>" \
+  -d '{
+    "name": "Budi Santoso",
+    "email": "budi@mail.com",
+    "student_id": "2210512001",
+    "role": "Mahasiswa"
+  }'
+```
+
+`PUT /api/profile` bersifat upsert: panggilan pertama membuat baris pengguna
+dan membalas 201, panggilan berikutnya memperbarui field yang dikirim saja dan
+membalas 200. Field `name` dan `email` wajib pada panggilan pertama. Mengirim
+string kosong pada `student_id`, `role`, atau `avatar_url` akan mengosongkan
+nilai tersebut.
+
+Endpoint riwayat dan profil memakai header `X-User-Id` yang belum diverifikasi
+tanda tangannya. Peningkatan ke verifikasi Firebase ID token dapat ditambahkan
+kemudian memakai `firebase-admin`.
 
 ### Menjalankan test web
 
