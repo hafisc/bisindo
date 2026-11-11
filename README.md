@@ -71,6 +71,55 @@ Machine Learning:
 Web Dashboard:
 - Framework: Flask (Python)
 
+## REST API (Web)
+
+Server Flask menyediakan endpoint JSON untuk aplikasi mobile. Semua endpoint
+riwayat memakai header `X-User-Id` berisi Firebase UID pengguna yang sudah
+login. Sebagai alternatif, UID boleh dikirim lewat query string `user_id` atau
+field `user_id` di body JSON.
+
+| Method | Endpoint | Keterangan |
+| :--- | :--- | :--- |
+| GET | `/api/status` | Status layanan dan kesiapan model prediksi |
+| POST | `/api/predict` | Prediksi huruf BISINDO dari 21 titik landmark tangan |
+| GET | `/api/dictionary` | Daftar seluruh huruf kamus BISINDO |
+| GET | `/api/dictionary/<huruf>` | Detail satu huruf kamus |
+| GET | `/api/history` | Riwayat deteksi milik pengguna, terbaru lebih dulu |
+| POST | `/api/history` | Simpan satu entri riwayat baru |
+| DELETE | `/api/history/<id>` | Hapus satu entri riwayat |
+| DELETE | `/api/history` | Hapus seluruh riwayat pengguna |
+
+Contoh menyimpan riwayat:
+
+```bash
+curl -X POST http://127.0.0.1:5000/api/history \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: <firebase-uid>" \
+  -d '{
+    "title": "Halo",
+    "type": "Kata",
+    "category": "Teks",
+    "mode": "BISINDO -> Teks",
+    "confidence": 0.95,
+    "timestamp": "2026-11-11T10:20:00"
+  }'
+```
+
+Nilai `type` yang diterima adalah `Kata` atau `Huruf`, sedangkan `category`
+adalah `Teks` atau `Suara`. Field `confidence` harus di antara 0.0 dan 1.0.
+Field `timestamp` bersifat opsional; bila kosong, server memakai waktu saat
+request diterima.
+
+### Menjalankan test web
+
+```bash
+cd web/
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements-dev.txt
+pytest
+```
+
 ## Panduan Instalasi dan Penggunaan
 
 ### Persyaratan Sistem
