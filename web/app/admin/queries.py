@@ -55,6 +55,8 @@ def get_top_letters(limit: int = 5) -> list[dict]:
     total = func.count(DetectionLog.id)
     rows = db.session.execute(
         select(DetectionLog.letter, total.label("total"))
+        # Entri "Kata" tidak punya huruf, jadi tidak ikut peringkat.
+        .where(DetectionLog.letter.is_not(None))
         .group_by(DetectionLog.letter)
         .order_by(desc("total"), DetectionLog.letter)
         .limit(limit)
@@ -147,6 +149,8 @@ def paginate_logs(letter: str, search: str, page: int, per_page: int):
             or_(
                 User.name.icontains(search, autoescape=True),
                 User.email.icontains(search, autoescape=True),
+                # Kata hasil terjemahan juga bisa dicari.
+                DetectionLog.title.icontains(search, autoescape=True),
             )
         )
     return db.paginate(stmt, page=page, per_page=per_page, error_out=False)
