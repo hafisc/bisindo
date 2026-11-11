@@ -95,14 +95,14 @@
     <div class="table-wrap">
       <table id="table-latest">
         <thead>
-          <tr><th>Waktu</th><th>Pengguna</th><th>Huruf</th><th>Confidence</th></tr>
+          <tr><th>Waktu</th><th>Pengguna</th><th>Hasil</th><th>Confidence</th></tr>
         </thead>
         <tbody>
           {% for log in latest_logs %}
           <tr>
             <td class="muted">{{ log.created_at | wib }}</td>
             <td>{{ log.user.name if log.user else "Tanpa akun" }}</td>
-            <td><span class="letter-chip">{{ log.letter }}</span></td>
+            <td><span class="letter-chip">{{ log.display_label }}</span></td>
             <td>{{ confidence_badge(log.confidence) }}</td>
           </tr>
           {% endfor %}

@@ -11,12 +11,16 @@ class UserModel extends UserEntity {
     super.photoUrl,
     super.isEmailVerified = false,
     super.isGoogleUser = false,
+    super.hasPassword = false,
   });
 
   /// Creates a [UserModel] from a Firebase [User].
   factory UserModel.fromFirebaseUser(User user) {
     final isGoogle = user.providerData.any(
       (info) => info.providerId == 'google.com',
+    );
+    final hasPassword = user.providerData.any(
+      (info) => info.providerId == 'password',
     );
 
     return UserModel(
@@ -26,6 +30,7 @@ class UserModel extends UserEntity {
       photoUrl: user.photoURL,
       isEmailVerified: user.emailVerified || isGoogle,
       isGoogleUser: isGoogle,
+      hasPassword: hasPassword,
     );
   }
 
@@ -37,6 +42,7 @@ class UserModel extends UserEntity {
       photoUrl: json['photoUrl'] as String?,
       isEmailVerified: json['isEmailVerified'] as bool? ?? false,
       isGoogleUser: json['isGoogleUser'] as bool? ?? false,
+      hasPassword: json['hasPassword'] as bool? ?? false,
     );
   }
 
@@ -48,6 +54,7 @@ class UserModel extends UserEntity {
       'photoUrl': photoUrl,
       'isEmailVerified': isEmailVerified,
       'isGoogleUser': isGoogleUser,
+      'hasPassword': hasPassword,
     };
   }
 }
