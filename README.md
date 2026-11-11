@@ -13,7 +13,7 @@ Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keselur
 | Komponen | Status | Penyelesaian | Deskripsi |
 | :--- | :--- | :---: | :--- |
 | Mobile (Flutter) | Dalam Pengembangan | 85% | Alur UI, sistem navigasi, autentikasi Firebase, kamus BISINDO, dan riwayat selesai. Menunggu integrasi model TFLite secara on-device. |
-| Web Dashboard & API | Dalam Pengembangan | 45% | Halaman dashboard admin dan endpoint riwayat serta profil selesai. Integrasi penuh dari aplikasi mobile sedang dikerjakan. |
+| Web Dashboard & API | Dalam Pengembangan | 45% | Dashboard admin, endpoint riwayat, dan endpoint profil selesai. Menunggu integrasi pemanggilan API dari aplikasi mobile. |
 | Machine Learning | Dalam Pengembangan | 45% | Dataset landmark dan pelatihan model classifier (MLP) selesai. Tahap ekspor TFLite dan pengujian metrik evaluasi sedang berjalan. |
 
 ### Pembagian Tugas dan Status Tim
@@ -24,7 +24,7 @@ Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keselur
 | Fadhil Taufiqurrachman | Modul Autentikasi & Pipeline Dataset MediaPipe | [Issue #2](https://github.com/hafisc/bisindo/issues/2) | 63% |
 | M. Aldyth Rafiansyah Fauzi | Antarmuka Scan Kamera & Training Model Klasifikasi | [Issue #3](https://github.com/hafisc/bisindo/issues/3) | 70% |
 | Mohammad Al Hafis H. | Halaman Beranda, Dashboard Admin, & Evaluasi Model | [Issue #4](https://github.com/hafisc/bisindo/issues/4) | 64% |
-| Mokhamad Rizki Hadiono S. | Riwayat Deteksi, Manajemen Profil, & Pengumpulan Data | [Issue #5](https://github.com/hafisc/bisindo/issues/5) | 44% |
+| Mokhamad Rizki Hadiono S. | Riwayat Deteksi, Manajemen Profil, & Pengumpulan Data | [Issue #5](https://github.com/hafisc/bisindo/issues/5) | 75% |
 
 ## Daftar Fitur
 
