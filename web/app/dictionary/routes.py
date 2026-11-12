@@ -31,9 +31,13 @@ DICTIONARY_DATA = {
     "Z": {"description": "Telunjuk bergerak membentuk pola Z di udara."},
 }
 
-@bp.route("/", methods=["GET"])
+@bp.route("/", methods=["GET"], strict_slashes=False)
 def get_all_letters():
-    """Mengambil seluruh daftar huruf."""
+    """Mengambil seluruh daftar huruf.
+
+    ``strict_slashes=False`` supaya ``/api/dictionary`` dan
+    ``/api/dictionary/`` sama-sama mengembalikan 200, bukan redirect 308.
+    """
     letters = [{"letter": k} for k in sorted(DICTIONARY_DATA.keys())]
     return jsonify(letters)
 

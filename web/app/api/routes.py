@@ -4,7 +4,14 @@ from ..extensions import db
 from ..models import DetectionLog
 from . import bp
 from .identity import resolve_user_id
-from .services import get_model, predict_landmarks, preprocess_landmarks
+from .services import (
+    FEATURE_COUNT,
+    get_classes,
+    get_model,
+    get_model_info,
+    predict_landmarks,
+    preprocess_landmarks,
+)
 
 
 @bp.get("/status")
@@ -15,14 +22,30 @@ def status():
         "status": "online",
         "service": "BISINDO Sign Language Prediction API",
         "model_loaded": model is not None,
+        "feature_count": FEATURE_COUNT,
+        "class_count": len(get_classes()),
     })
+
+
+@bp.get("/model")
+def model_info():
+    """Informasi model aktif, dipakai mobile untuk cek kompatibilitas.
+
+    Berisi jumlah fitur, daftar kelas, dan akurasi model. Aplikasi bisa
+    membandingkan ``feature_count`` dengan yang dikirimnya sebelum memanggil
+    ``/api/predict``, sehingga kesalahan format terdeteksi lebih awal.
+    """
+    info = get_model_info()
+    return jsonify(info), 200 if info.get("loaded") else 503
 
 
 @bp.post("/predict")
 def predict():
     """
-    Endpoint utama prediksi huruf BISINDO dari 21 titik landmark tangan.
-    Menerima format array landmark (21 titik).
+    Endpoint utama prediksi huruf BISINDO dari landmark tangan.
+
+    Menerima 21 titik (satu tangan) atau 42 titik (dua tangan), dalam bentuk
+    list koordinat, dict ``{x, y, z}``, maupun flat array 63/126 nilai.
     Mengembalikan prediksi huruf dan confidence score.
     """
     if not request.is_json:

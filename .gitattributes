@@ -1,0 +1,37 @@
+# Aturan akhir baris untuk seluruh repositori.
+#
+# Repositori menyimpan semua berkas teks dengan LF, dan checkout juga memakai
+# LF di semua sistem operasi. Ini membuat isi berkas tidak bergantung pada
+# setelan core.autocrlf masing-masing komputer.
+#
+# Penting untuk berkas deploy: Procfile, Dockerfile, dan .dockerignore yang
+# berakhir CRLF bisa membuat perintah gagal dibaca di server Linux.
+
+* text=auto eol=lf
+
+# Berkas biner tidak boleh diubah Git.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.joblib binary
+*.pkl binary
+*.h5 binary
+*.npz binary
+*.zip binary
+
+# Notebook disimpan sebagai teks, tetapi output di dalamnya bisa berisi biner.
+*.ipynb text eol=lf
+
+# Skrip shell harus LF agar bisa dieksekusi di kontainer.
+*.sh text eol=lf
+Dockerfile text eol=lf
+Procfile text eol=lf
+.dockerignore text eol=lf
+
+# Berkas Windows boleh CRLF karena dibaca aplikasi Windows.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
