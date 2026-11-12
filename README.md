@@ -101,10 +101,31 @@ curl -X POST http://127.0.0.1:5000/api/predict \
   -d '{"landmarks": [{"x": 0.1, "y": 0.2, "z": 0.0}, "... 21 titik"]}'
 ```
 
-Respons berisi `prediction`, `confidence`, dan `class_index`. Model memakai 127
-fitur, tetapi server yang menyusunnya: kirim 21 titik untuk satu tangan atau 42
-titik untuk dua tangan. Bila hanya 21 titik yang dikirim, 63 nilai tangan kedua
-diisi nol dan `is_two_handed` bernilai 0.
+Respons berisi `prediction`, `confidence`, `class_index`, `hand_order`, dan
+`mirrored`. Model memakai 127 fitur, tetapi server yang menyusunnya: kirim 21
+titik untuk satu tangan atau 42 titik untuk dua tangan. Bila hanya 21 titik yang
+dikirim, 63 nilai tangan kedua diisi nol dan `is_two_handed` bernilai 0.
+
+Server melakukan dua normalisasi yang wajib, sama seperti saat dataset latih
+dibuat: mengurangi posisi pergelangan tangan pertama, lalu membagi dengan jarak
+pergelangan ke titik 9 (pangkal jari tengah). Landmark mentah MediaPipe boleh
+dikirim apa adanya dalam koordinat gambar 0-1.
+
+Ada dua ketidakpastian yang tidak bisa diketahui server, jadi keduanya diuji
+sebagai kandidat lalu dipilih hasil dengan confidence tertinggi:
+
+1. **Urutan tangan.** MediaPipe mengembalikan tangan sesuai urutan deteksi,
+   sedangkan dataset latih selalu menaruh tangan pertama di kolom awal. Tanpa
+   penanganan ini, akurasi dua tangan jatuh dari 99,58% menjadi 9,92%. Nilai
+   `hand_order` berisi `as_is` atau `swapped`.
+2. **Pencerminan.** Kamera depan dan konvensi koordinat berbeda antar perangkat.
+   Tanpa kandidat cermin, data yang tercermin hanya dikenali 51,34%. Dengan
+   kandidat cermin, akurasi kembali di atas 96%. Nilai `mirrored` berisi `true`
+   bila kandidat cermin yang menang.
+
+Total ada empat kandidat untuk dua tangan (dua urutan dikali dua cermin) dan dua
+kandidat untuk satu tangan. Biaya tambahannya kecil: satu permintaan prediksi
+selesai sekitar 2 sampai 3 ms di laptop pengembangan.
 
 Contoh menyimpan riwayat:
 
@@ -218,7 +239,9 @@ docker run -p 8000:8000 bisindo-api
 ```
 
 `Procfile` dipakai platform yang menjalankan perintah `web:` seperti Heroku atau
-Render. Keduanya menjalankan `gunicorn` dengan aplikasi `web/run.py`.
+Render. Keduanya menjalankan `gunicorn` dengan aplikasi `web/run.py` memakai
+satu worker, supaya model yang diaktifkan lewat panel admin konsisten di semua
+request.
 
 Model tidak dilatih di dalam image. Alur yang benar: latih lewat CLI
 (`python ml/src/training/train_svm.py`), lalu deploy artefaknya. Training di
@@ -227,6 +250,46 @@ dalam request Flask akan memblokir server.
 Catatan ukuran: karena tidak lagi memakai TensorFlow, image hanya berisi Flask,
 NumPy, scikit-learn, dan joblib. Tanpa TensorFlow, image jauh lebih kecil dan
 server mulai di bawah satu detik.
+
+#### Data yang harus bertahan
+
+Filesystem container cloud dibuang setiap redeploy. Ada dua hal yang harus
+disiapkan agar riwayat dan unggahan tidak hilang:
+
+1. **Database.** Isi `DATABASE_URL` dengan connection string Postgres, misalnya
+   dari add-on database penyedia. `postgres://` otomatis dinormalkan menjadi
+   `postgresql://`. Tanpa itu server memakai SQLite di dalam container, dan
+   seluruh riwayat hilang saat redeploy.
+2. **Folder unggahan.** Dataset dan model dari panel admin disimpan di
+   `web/instance`. Arahkan env `INSTANCE_DIR` ke folder volume persisten, atau
+   pasang volume ke `/app/web/instance`.
+
+Isi juga `SECRET_KEY` dan `ADMIN_PASSWORD` dengan nilai acak. Nilai bawaan di
+`web/app/config.py` hanya untuk pengembangan lokal.
+
+#### Alamat server di aplikasi mobile
+
+Aplikasi mobile tidak menyimpan alamat server di dalam kode. Ada dua cara
+mengaturnya:
+
+- **Saat build**, lewat `--dart-define`:
+
+  ```bash
+  flutter build apk --release --dart-define=API_BASE_URL=https://api.contoh.com
+  ```
+
+- **Saat aplikasi berjalan**, lewat ikon gerigi di kanan atas layar Scan. Cara
+  ini tidak butuh build ulang, jadi teman yang memakai laptop berbeda cukup
+  mengganti alamat di sana.
+
+Untuk demo di WiFi yang sama, jalankan `python web/run.py`. Server mencetak
+alamat `http://<ip-laptop>:5000` yang bisa langsung diisi di layar Scan.
+
+Catatan HTTP polos: build debug dan profile mengizinkan HTTP polos lewat
+`android/app/src/debug/AndroidManifest.xml` dan `profile/AndroidManifest.xml`.
+Build release tidak mengizinkannya, sehingga untuk demo lokal bagikan APK debug
+(`flutter build apk --debug`). Bila server sudah memakai HTTPS, build release
+bisa langsung dipakai.
 
 ## Panduan Instalasi dan Penggunaan
 

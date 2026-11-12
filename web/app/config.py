@@ -2,7 +2,29 @@ import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-INSTANCE_DIR = BASE_DIR / "instance"
+
+# Folder data yang ditulis saat runtime: database SQLite, dataset unggahan, dan
+# model unggahan. Di cloud, arahkan ke volume persisten lewat env INSTANCE_DIR,
+# karena filesystem container dibuang setiap redeploy.
+INSTANCE_DIR = Path(os.environ.get("INSTANCE_DIR") or (BASE_DIR / "instance"))
+
+
+def _database_uri() -> str:
+    """URI database, dengan dukungan Postgres untuk deployment cloud.
+
+    Sebagian penyedia cloud memberi ``postgres://``, sedangkan SQLAlchemy 2
+    hanya menerima ``postgresql://``. Nilai itu dinormalkan di sini supaya
+    pengguna tidak perlu mengubahnya sendiri.
+    """
+    url = (os.environ.get("DATABASE_URL") or "").strip()
+
+    if not url:
+        return f"sqlite:///{(INSTANCE_DIR / 'bisindo.db').as_posix()}"
+
+    if url.startswith("postgres://"):
+        url = "postgresql://" + url[len("postgres://") :]
+
+    return url
 
 
 class Config:
@@ -13,9 +35,7 @@ class Config:
     ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
     ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
 
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL") or (
-        f"sqlite:///{(INSTANCE_DIR / 'bisindo.db').as_posix()}"
-    )
+    SQLALCHEMY_DATABASE_URI = _database_uri()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Path model machine learning BISINDO (artefak joblib hasil ml/src/training/train_svm.py)
