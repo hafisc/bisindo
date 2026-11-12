@@ -9,8 +9,15 @@ Kontrak fitur: 127 nilai, dengan urutan
 - 63 sampai 125 : 21 titik tangan 2 (x, y, z per titik)
 - 126           : ``is_two_handed`` (1 atau 0)
 
-Seluruh koordinat sudah dinormalkan terhadap pergelangan tangan 1. Bila hanya
-satu tangan terdeteksi, 63 nilai tangan 2 diisi nol.
+Seluruh koordinat sudah dinormalkan terhadap pergelangan tangan 1 dan dibagi
+dengan jarak pergelangan ke titik 9 tangan 1 (pangkal jari tengah), sehingga
+jarak tersebut selalu 1. Bila hanya satu tangan terdeteksi, 63 nilai tangan 2
+diisi nol.
+
+Dua normalisasi itu wajib. Landmark mentah MediaPipe memakai koordinat gambar
+0-1, sedangkan dataset latih memakai satuan panjang tangan. Tanpa pembagian
+skala, akurasi pada data yang diperkecil 0,1 kali jatuh ke 3,69% (lihat
+``web/tests/test_predict.py``).
 """
 
 import json
@@ -218,14 +225,11 @@ def _parse_points(data) -> list[list[float]]:
     return points
 
 
-def preprocess_landmarks(data):
-    """Ubah payload landmark menjadi matriks fitur 127 kolom.
+def _landmark_input(data):
+    """Baca payload menjadi ``(points_array, features_lengkap)``.
 
-    Format yang diterima:
-    1. 21 titik (satu tangan), dict ``{x, y, z}`` atau list ``[x, y, z]``
-    2. 42 titik (dua tangan)
-    3. Flat list 63 nilai (satu tangan), 126 nilai (dua tangan),
-       atau 127 nilai (vektor fitur lengkap)
+    Salah satu hasil selalu ``None``. ``features_lengkap`` terisi bila payload
+    sudah berupa vektor fitur 127 kolom yang siap dipakai model.
     """
     if data is None:
         raise ValueError("Payload tidak boleh kosong.")
@@ -258,7 +262,7 @@ def preprocess_landmarks(data):
                     f"Jumlah fitur tidak sesuai: {features.shape[1]}, "
                     f"model membutuhkan {expected}."
                 )
-            return features
+            return None, features
 
         if len(values) == HAND_FEATURES:
             points = [values[i : i + 3] for i in range(0, HAND_FEATURES, 3)]
@@ -278,41 +282,144 @@ def preprocess_landmarks(data):
             "Diharapkan 21 titik (satu tangan) atau 42 titik (dua tangan)."
         )
 
-    points_array = np.asarray(points, dtype=np.float32)
-    two_handed = points_array.shape[0] == POINT_COUNT * 2
+    return np.asarray(points, dtype=np.float32), None
 
-    # Dataset mengurangi posisi pergelangan tangan 1 dari seluruh 42 titik.
-    wrist = points_array[0]
-    hand1 = points_array[:POINT_COUNT] - wrist
 
-    if two_handed:
-        hand2 = points_array[POINT_COUNT:] - wrist
+def _normalized_features(points_array, reference_index):
+    """Bentuk 127 fitur dengan tangan ke-``reference_index`` sebagai acuan.
+
+    ``reference_index`` 0 berarti tangan pertama, 21 berarti tangan kedua.
+    Dataset latih mengurangi posisi pergelangan tangan acuan dari semua titik,
+    lalu membagi dengan jarak pergelangan ke titik 9 tangan acuan (pangkal jari
+    tengah). Kedua langkah itu wajib agar landmark mentah MediaPipe, yang masih
+    memakai satuan gambar 0-1, cocok dengan data latih.
+    """
+    reference = points_array[reference_index]
+    shifted = points_array - reference
+    two_handed = len(points_array) > POINT_COUNT
+
+    if reference_index == 0:
+        hand1 = shifted[:POINT_COUNT]
+        if two_handed:
+            hand2 = shifted[POINT_COUNT:]
+        else:
+            # Satu tangan: tangan 2 diisi nol, sama seperti di dataset latih.
+            hand2 = np.zeros((POINT_COUNT, AXES), dtype=np.float32)
     else:
-        # Satu tangan: tangan 2 diisi nol, sama seperti di dataset latih.
-        hand2 = np.zeros((POINT_COUNT, AXES), dtype=np.float32)
+        hand1 = shifted[POINT_COUNT:]
+        hand2 = shifted[:POINT_COUNT]
 
-    features = np.concatenate(
+    scale = float(np.linalg.norm(hand1[9]))
+    if not np.isfinite(scale) or scale < 1e-6:
+        raise ValueError(
+            "Landmark tangan terlalu kecil untuk diproses. Pastikan tangan "
+            "terlihat jelas oleh kamera."
+        )
+
+    hand1 = hand1 / scale
+    hand2 = hand2 / scale
+
+    return np.concatenate(
         [
             hand1.ravel(),
             hand2.ravel(),
             np.array([1.0 if two_handed else 0.0], dtype=np.float32),
         ]
-    ).astype(np.float32)
-
-    features = features.reshape(1, -1)
-
-    expected = _expected_feature_count()
-    if features.shape[1] != expected:
-        raise ValueError(
-            f"Jumlah fitur tidak sesuai: {features.shape[1]}, "
-            f"model membutuhkan {expected}."
-        )
-
-    return features
+    ).astype(np.float32).reshape(1, -1)
 
 
-def predict_landmarks(features):
-    """Jalankan inferensi model terhadap matriks fitur.
+def _mirror_x(matrix):
+    """Cerminkan sumbu x pada matriks fitur 127 kolom.
+
+    Kolom x berada di indeks 0, 3, 6, dan seterusnya. Kolom ``is_two_handed``
+    di indeks 126 tidak ikut diubah.
+    """
+    mirrored = np.array(matrix, dtype=np.float32, copy=True)
+    mirrored[:, : HAND_FEATURES * 2 : 3] *= -1
+    return mirrored
+
+
+def preprocess_landmarks_variants(data):
+    """Ubah payload menjadi daftar kandidat fitur beserta keterangannya.
+
+    Setiap kandidat berupa ``(matriks_fitur, urutan_tangan, dicerminkan)``.
+
+    Ada dua sumbu ketidakpastian yang tidak bisa diketahui server:
+
+    1. **Urutan tangan.** MediaPipe mengembalikan tangan sesuai urutan deteksi,
+       sedangkan dataset latih selalu menaruh tangan pertama di kolom awal.
+       Kandidat ``as_is`` dan ``swapped`` menutup kemungkinan ini.
+    2. **Pencerminan.** Kamera depan dan konvensi koordinat berbeda-beda antar
+       perangkat. Dataset yang dicerminkan hanya dikenali 51,34% bila kandidat
+       cermin tidak disediakan, dan 98,10% bila disediakan.
+
+    Keduanya harus dinormalkan sendiri-sendiri, karena pergelangan dan skala
+    acuannya berbeda. Menukar blok fitur setelah normalisasi tidak cukup:
+    hasilnya bukan kebalikan yang benar.
+    """
+    points_array, full_features = _landmark_input(data)
+
+    if full_features is not None:
+        variants = [(full_features, "as_is", False)]
+        if full_features.shape[1] == FEATURE_COUNT and float(full_features[0, -1]) == 1.0:
+            variants.append((swap_hands(full_features), "swapped", False))
+        return variants + [
+            (_mirror_x(candidate), order, True) for candidate, order, _ in variants
+        ]
+
+    two_handed = points_array.shape[0] == POINT_COUNT * 2
+
+    def build(points):
+        candidates = [(_normalized_features(points, 0), "as_is", False)]
+        if two_handed:
+            candidates.append((_normalized_features(points, POINT_COUNT), "swapped", False))
+        return candidates
+
+    variants = build(points_array)
+
+    # Cermin dihitung dari landmark mentah: membalik tanda x sebelum atau
+    # sesudah normalisasi memberi hasil yang sama, karena normalisasi hanya
+    # menggeser dan membagi dengan bilangan positif.
+    mirrored_points = points_array.copy()
+    mirrored_points[:, 0] *= -1
+    variants += [(features, order, True) for features, order, _ in build(mirrored_points)]
+
+    return variants
+
+
+def preprocess_landmarks(data):
+    """Ubah payload landmark menjadi matriks fitur 127 kolom.
+
+    Format yang diterima:
+    1. 21 titik (satu tangan), dict ``{x, y, z}`` atau list ``[x, y, z]``
+    2. 42 titik (dua tangan)
+    3. Flat list 63 nilai (satu tangan), 126 nilai (dua tangan),
+       atau 127 nilai (vektor fitur lengkap)
+    """
+    return preprocess_landmarks_variants(data)[0][0]
+
+
+def swap_hands(matrix):
+    """Tukar blok fitur tangan 1 dan tangan 2 pada matriks fitur.
+
+    Dataset latih selalu menyimpan tangan pertama di kolom 0-62 dan tangan
+    kedua di kolom 63-125. MediaPipe di aplikasi mobile mengembalikan tangan
+    sesuai urutan deteksi, yang bisa terbalik. Fungsi ini membuat versi
+    alternatif dari vektor fitur untuk diuji ulang oleh model.
+    """
+    swapped = np.array(matrix, dtype=np.float32, copy=True)
+    swapped[:, :HAND_FEATURES] = matrix[:, HAND_FEATURES : HAND_FEATURES * 2]
+    swapped[:, HAND_FEATURES : HAND_FEATURES * 2] = matrix[:, :HAND_FEATURES]
+    return swapped
+
+
+def predict_variants(variants):
+    """Jalankan model pada beberapa kandidat fitur, pilih yang paling yakin.
+
+    ``variants`` berisi ``(matriks_fitur, urutan_tangan, dicerminkan)``. Setiap
+    kandidat dihitung probabilitasnya, lalu hasil dengan confidence tertinggi
+    yang dipakai. Bila nilainya sama, kandidat yang lebih dulu menang, sehingga
+    orientasi asli selalu dipilih saat semuanya setara.
 
     Mengembalikan ``(dict_result, None)`` saat berhasil, atau
     ``(None, error_message)`` saat gagal.
@@ -326,13 +433,32 @@ def predict_landmarks(features):
         )
 
     try:
-        matrix = np.asarray(features, dtype=np.float32)
-        if matrix.ndim == 1:
-            matrix = matrix.reshape(1, -1)
+        best_probabilities = None
+        best_order = "as_is"
+        best_mirrored = False
 
-        probabilities = model.predict_proba(matrix)[0]
-        predicted_idx = int(np.argmax(probabilities))
-        confidence = float(probabilities[predicted_idx])
+        for candidate, hand_order, mirrored in variants:
+            matrix = np.asarray(candidate, dtype=np.float32)
+            if matrix.ndim == 1:
+                matrix = matrix.reshape(1, -1)
+
+            expected = _expected_feature_count()
+            if matrix.shape[1] != expected:
+                raise ValueError(
+                    f"Jumlah fitur tidak sesuai: {matrix.shape[1]}, "
+                    f"model membutuhkan {expected}."
+                )
+
+            probabilities = model.predict_proba(matrix)[0]
+            if best_probabilities is None or float(probabilities.max()) > float(
+                best_probabilities.max()
+            ):
+                best_probabilities = probabilities
+                best_order = hand_order
+                best_mirrored = bool(mirrored)
+
+        predicted_idx = int(np.argmax(best_probabilities))
+        confidence = float(best_probabilities[predicted_idx])
 
         classes = get_classes()
         predicted_letter = (
@@ -345,6 +471,39 @@ def predict_landmarks(features):
             "prediction": predicted_letter,
             "confidence": round(confidence, 4),
             "class_index": predicted_idx,
+            "hand_order": best_order,
+            "mirrored": best_mirrored,
         }, None
     except Exception as error:
         return None, f"Gagal menjalankan inferensi model: {str(error)}"
+
+
+def predict_landmarks(features):
+    """Jalankan inferensi model terhadap matriks fitur yang sudah jadi.
+
+    Untuk sampel dua tangan, model diuji pada dua kemungkinan urutan tangan,
+    masing-masing dengan versi cermin, lalu dipilih hasil dengan confidence
+    tertinggi. Bila yang dikirim adalah landmark mentah, gunakan
+    :func:`predict_variants` dengan hasil :func:`preprocess_landmarks_variants`,
+    karena normalisasi harus diulang untuk masing-masing urutan.
+    """
+    matrix = np.asarray(features, dtype=np.float32)
+    if matrix.ndim == 1:
+        matrix = matrix.reshape(1, -1)
+
+    variants = [(matrix, "as_is", False)]
+
+    # Hanya sampel dua tangan yang punya masalah urutan. Sampel satu tangan
+    # tidak perlu diuji ulang karena tangan kedua berisi nol.
+    is_two_handed = (
+        matrix.shape[1] == FEATURE_COUNT and float(matrix[0, -1]) == 1.0
+    )
+    if is_two_handed:
+        variants.append((swap_hands(matrix), "swapped", False))
+
+    variants += [
+        (_mirror_x(candidate), order, True) for candidate, order, _ in list(variants)
+    ]
+
+    return predict_variants(variants)
+

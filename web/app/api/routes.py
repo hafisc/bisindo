@@ -9,8 +9,8 @@ from .services import (
     get_classes,
     get_model,
     get_model_info,
-    predict_landmarks,
-    preprocess_landmarks,
+    predict_variants,
+    preprocess_landmarks_variants,
 )
 
 
@@ -56,29 +56,33 @@ def predict():
         return jsonify({"error": "JSON body tidak valid atau kosong."}), 400
 
     try:
-        features = preprocess_landmarks(payload)
+        variants = preprocess_landmarks_variants(payload)
     except ValueError as val_err:
         return jsonify({"error": f"Validasi data landmark gagal: {str(val_err)}"}), 400
     except Exception as e:
         return jsonify({"error": f"Terjadi kesalahan saat memproses data: {str(e)}"}), 400
 
-    result, err = predict_landmarks(features)
+    result, err = predict_variants(variants)
     if err:
         return jsonify({"error": err}), 503
 
-    # Simpan hasil deteksi ke riwayat database (DetectionLog)
-    # Ini otomatis memberi makan dashboard admin tim
+    # Simpan hasil deteksi ke riwayat database hanya bila diminta lewat
+    # "log": true. Aplikasi mobile memanggil endpoint ini sekitar lima kali per
+    # detik, jadi menyimpan setiap frame akan membanjiri tabel. Riwayat yang
+    # benar-benar dipakai dikirim sekali per huruf ke POST /api/history.
     try:
-        # Mobile mengirim Firebase UID, bukan primary key. Helper ini
-        # menerjemahkannya supaya log terhubung ke profil yang benar.
-        raw_user = payload.get("user_id") if isinstance(payload, dict) else None
-        log = DetectionLog(
-            user_id=resolve_user_id(raw_user),
-            letter=result["prediction"],
-            confidence=result["confidence"],
-        )
-        db.session.add(log)
-        db.session.commit()
+        simpan_log = isinstance(payload, dict) and payload.get("log") is True
+        if simpan_log:
+            # Mobile mengirim Firebase UID, bukan primary key. Helper ini
+            # menerjemahkannya supaya log terhubung ke profil yang benar.
+            raw_user = payload.get("user_id")
+            log = DetectionLog(
+                user_id=resolve_user_id(raw_user),
+                letter=result["prediction"],
+                confidence=result["confidence"],
+            )
+            db.session.add(log)
+            db.session.commit()
     except Exception:
         db.session.rollback()
 
