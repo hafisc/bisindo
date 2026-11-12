@@ -1,15 +1,20 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/errors/exceptions.dart';
 import '../models/user_model.dart';
 import 'auth_remote_data_source.dart';
 
 /// Implementation of [AuthRemoteDataSource] using Firebase Auth and Google Sign-In SDK.
+@Injectable(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
+
+  @factoryMethod
+  factory AuthRemoteDataSourceImpl.create() => AuthRemoteDataSourceImpl();
 
   AuthRemoteDataSourceImpl({
     FirebaseAuth? auth,
