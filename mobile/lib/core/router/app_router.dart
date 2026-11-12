@@ -46,6 +46,7 @@ abstract class AppRoutes {
 class AppRouter {
   final AuthRepository _authRepository;
 
+  @factoryMethod
   AppRouter({AuthRepository? authRepository})
       : _authRepository = authRepository ??
             AuthRepositoryImpl(
