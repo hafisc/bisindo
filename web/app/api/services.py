@@ -60,9 +60,22 @@ def _load_classes(model_path: Path, model) -> list[str]:
     # Pipeline menyimpan kelas pada langkah terakhir.
     try:
         estimator = model.steps[-1][1]
-        return [str(item) for item in estimator.classes_]
+        classes = list(estimator.classes_)
     except Exception:  # pragma: no cover - jalur jarang
         return list(CLASSES)
+
+    if not classes:
+        return list(CLASSES)
+
+    # LabelEncoder menghasilkan 0..25, bukan huruf. Tanpa pemetaan ini server
+    # akan membalas angka padahal aplikasi mobile mengharapkan huruf.
+    if all(isinstance(item, (int, np.integer)) for item in classes):
+        return [
+            CLASSES[int(item)] if 0 <= int(item) < len(CLASSES) else str(item)
+            for item in classes
+        ]
+
+    return [str(item) for item in classes]
 
 
 def _load_metrics(model_path: Path) -> dict:
@@ -155,6 +168,21 @@ def get_classes() -> list[str]:
     """Daftar kelas sesuai urutan keluaran model."""
     get_model()
     return list(_classes or CLASSES)
+
+
+def reload_model() -> bool:
+    """Buang model dari cache lalu muat ulang.
+
+    Dipanggil setelah admin mengaktifkan versi model lain. Tanpa ini, server
+    tetap memakai model lama sampai proses dijalankan ulang.
+    """
+    global _model, _classes, _model_info
+
+    _model = None
+    _classes = None
+    _model_info = {}
+
+    return get_model() is not None
 
 
 def _expected_feature_count() -> int:

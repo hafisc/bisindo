@@ -13,8 +13,8 @@ Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keselur
 | Komponen | Status | Penyelesaian | Deskripsi |
 | :--- | :--- | :---: | :--- |
 | Mobile (Flutter) | Dalam Pengembangan | 85% | Alur UI, sistem navigasi, autentikasi Firebase, kamus BISINDO, dan riwayat selesai. Menunggu integrasi model TFLite secara on-device. |
-| Web Dashboard & API | Dalam Pengembangan | 45% | Dashboard admin, endpoint riwayat, dan endpoint profil selesai. Menunggu integrasi pemanggilan API dari aplikasi mobile. |
-| Machine Learning | Dalam Pengembangan | 65% | Model SVM RBF selesai dilatih dengan akurasi 97,91% pada 127 fitur landmark dan tersimpan sebagai artefak `joblib`. Sisa pekerjaan: penyajian model lewat web API dan konversi TFLite untuk mobile. |
+| Web Dashboard & API | Dalam Pengembangan | 45% | Dashboard admin, halaman dataset dan model, endpoint riwayat, dan endpoint profil selesai. Menunggu integrasi pemanggilan API dari aplikasi mobile. |
+| Machine Learning | Dalam Pengembangan | 65% | Model SVM RBF selesai dilatih dengan akurasi 97,91% pada 127 fitur landmark, tersimpan sebagai artefak `joblib`, dan sudah disajikan lewat web API. Sisa pekerjaan: konversi TFLite untuk mobile. |
 
 ### Pembagian Tugas dan Status Tim
 
@@ -172,6 +172,38 @@ python run.py
 Server berjalan di `http://127.0.0.1:5000`. Model SVM dimuat dari
 `ml/models/svm_rbf_bisindo.joblib`. Bila path berbeda, atur lewat variabel
 lingkungan `MODEL_PATH`.
+
+### Panel admin
+
+Halaman admin tersedia di `/admin` setelah login memakai `ADMIN_USERNAME` dan
+`ADMIN_PASSWORD`. Selain dashboard, pengguna, dan log deteksi, ada dua halaman
+untuk mengelola berkas:
+
+| Halaman | Endpoint | Keterangan |
+| :--- | :--- | :--- |
+| Dataset | `GET /admin/dataset` | Daftar snapshot CSV, statistik baris dan kelas, peringatan nama berkas lintas kelas |
+| Unggah dataset | `POST /admin/dataset/upload` | Simpan CSV landmark 127 kolom, tolak kolom kurang atau berkas ganda |
+| Model | `GET /admin/model` | Daftar versi model dan ringkasan model yang sedang dilayani server |
+| Unggah model | `POST /admin/model/upload` | Simpan `.joblib` beserta `label_map.json` dan `metrics.json` opsional |
+
+Berkas unggahan disimpan di `web/instance/datasets/` dan `web/instance/models/`
+sehingga tidak masuk git. Server menolak model yang jumlah fiturnya bukan 127
+atau tidak memiliki `predict_proba`.
+
+Mengaktifkan versi model langsung memuat ulang model pada proses yang berjalan
+(`services.reload_model()`), dan pilihan itu dipulihkan otomatis saat server
+dijalankan ulang. Model aktif tidak bisa dihapus sebelum ada versi lain yang
+diaktifkan.
+
+Pelatihan tetap dijalankan dari terminal, bukan dari panel admin, karena
+melatih SVM memblokir request Flask:
+
+```bash
+python ml/src/training/train_svm.py --csv data/landmarks.csv
+```
+
+Setelah artefak jadi, unggah `svm_rbf_bisindo.joblib` di halaman Model lalu
+tekan Aktifkan.
 
 ### Deploy ke cloud
 

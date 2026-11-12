@@ -1,0 +1,211 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import icon %}
+
+{% block title %}Model{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>Model</h1>
+    <p>Kelola versi model SVM. Hanya satu versi yang aktif dan dipakai server untuk prediksi.</p>
+  </div>
+</header>
+
+<div class="grid-2">
+  <section class="card card-pad">
+    <h2>Unggah versi model</h2>
+    <form method="post" action="{{ url_for('admin.model_upload') }}" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="field">
+        <label for="model_file">Berkas model (.joblib)</label>
+        <input id="model_file" type="file" name="model_file" accept=".joblib,.pkl" required>
+        <small class="hint">
+          Hasil <code>ml/src/training/train_svm.py</code>. Server menolak model yang
+          jumlah fiturnya bukan {{ feature_count }} atau tidak punya <code>predict_proba</code>.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="model_label">Nama versi</label>
+        <input id="model_label" type="text" name="label" maxlength="120"
+               placeholder="Contoh: SVM RBF C=10 (7.893 baris)">
+      </div>
+
+      <div class="field">
+        <label for="label_map">label_map.json (opsional)</label>
+        <input id="label_map" type="file" name="label_map" accept=".json">
+        <small class="hint">
+          Bila kosong, pemetaan kelas disusun otomatis dari model. Model hasil
+          <code>LabelEncoder</code> memakai angka 0 sampai 25, server mengubahnya ke A sampai Z.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="metrics">metrics.json (opsional)</label>
+        <input id="metrics" type="file" name="metrics" accept=".json">
+        <small class="hint">Dipakai untuk menampilkan akurasi dan F1 pada tabel versi.</small>
+      </div>
+
+      <div class="field">
+        <label for="model_note">Catatan (opsional)</label>
+        <input id="model_note" type="text" name="note" maxlength="255"
+               placeholder="Contoh: percobaan C=10, gamma=scale">
+      </div>
+
+      <button type="submit" class="btn">{{ icon("upload") }} Unggah model</button>
+    </form>
+  </section>
+
+  <section class="card card-pad">
+    <h2>Model yang sedang dilayani</h2>
+    {% if live_info and live_info.loaded %}
+      <div class="stat-grid single">
+        <div class="stat">
+          <div class="icon green">{{ icon("target") }}</div>
+          <div>
+            <div class="label">Akurasi uji</div>
+            <div class="value">{{ live_info.accuracy | percent }}</div>
+          </div>
+        </div>
+        <div class="stat">
+          <div class="icon blue">{{ icon("model") }}</div>
+          <div>
+            <div class="label">Fitur</div>
+            <div class="value">{{ live_info.feature_count }}</div>
+          </div>
+        </div>
+        <div class="stat">
+          <div class="icon purple">{{ icon("dataset") }}</div>
+          <div>
+            <div class="label">Kelas</div>
+            <div class="value">{{ live_info.class_count }}</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="meta">
+        <span class="strong">{{ live_info.algorithm }}{% if live_info.variant %} &middot; {{ live_info.variant }}{% endif %}</span><br>
+        {% if live_info.kernel %}Kernel <code>{{ live_info.kernel }}</code> &middot; {% endif %}
+        F1 makro {{ live_info.f1_score | percent }}
+        {% if live_info.trained_at %}<br>Berkas diperbarui {{ live_info.trained_at }}{% endif %}
+      </p>
+
+      <p class="meta"><span class="strong">Berkas aktif:</span> <code class="wrap">{{ live_info.model_file }}</code></p>
+
+      {% if live_info.dataset_warning %}
+      <div class="notice warn">
+        <strong>Catatan dataset</strong>
+        {{ live_info.dataset_warning }}
+      </div>
+      {% endif %}
+
+      <details class="fold">
+        <summary>{{ live_info.classes | length }} kelas terdaftar</summary>
+        <div class="chips">
+          {% for letter in live_info.classes %}
+          <span class="letter-chip">{{ letter }}</span>
+          {% endfor %}
+        </div>
+      </details>
+    {% else %}
+      <div class="empty compact">
+        <div class="ring">{{ icon("model") }}</div>
+        <strong>Model belum termuat</strong>
+        Periksa berkas model di server lalu jalankan ulang aplikasi.
+      </div>
+    {% endif %}
+
+    <p class="meta"><span class="strong">Sumber saat ini:</span> <code class="wrap">{{ model_path }}</code></p>
+  </section>
+</div>
+
+<section class="card">
+  <div class="table-wrap">
+    {% if versions %}
+    <table id="table-models">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Versi</th>
+          <th>Akurasi</th>
+          <th>F1</th>
+          <th>Fitur</th>
+          <th>Ukuran</th>
+          <th>Diunggah</th>
+          <th>Status</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in versions %}
+        <tr>
+          <td class="muted">{{ item.id }}</td>
+          <td>
+            <span class="strong">{{ item.label }}</span>
+            <small class="muted block">
+              {{ item.filename }}
+              {% if item.kernel %}&middot; kernel {{ item.kernel }}{% endif %}
+            </small>
+            {% if item.note %}<small class="muted block">{{ item.note }}</small>{% endif %}
+          </td>
+          <td class="num">{{ item.accuracy | percent }}</td>
+          <td class="num">{{ item.f1_score | percent }}</td>
+          <td class="num">{{ item.feature_count }}</td>
+          <td class="muted">{{ item.size_label }}</td>
+          <td class="muted">{{ item.uploaded_at | wib }}</td>
+          <td>
+            {% if item.is_active %}
+              <span class="badge high">Aktif</span>
+            {% else %}
+              <span class="badge">Arsip</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="row-actions">
+              {% if not item.is_active %}
+              <form method="post" action="{{ url_for('admin.model_activate', version_id=item.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn ghost small inline">Aktifkan</button>
+              </form>
+              <form method="post" action="{{ url_for('admin.model_delete', version_id=item.id) }}"
+                    onsubmit="return confirm('Hapus versi model #{{ item.id }}? Berkasnya ikut terhapus.');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn ghost small inline danger">Hapus</button>
+              </form>
+              {% else %}
+              <span class="muted">-</span>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+      <div class="ring">{{ icon("model") }}</div>
+      <strong>Belum ada versi model yang diunggah</strong>
+      Server masih memakai model bawaan dari folder <code>ml/models</code>.
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="card card-pad">
+  <h2>Cara kerja</h2>
+  <p class="meta">
+    Melatih model tetap dilakukan dari terminal, bukan dari halaman ini, supaya
+    request web tidak tertahan selama proses latih. Setelah artefak jadi, unggah
+    berkasnya di atas lalu tekan Aktifkan. Server langsung memuat model baru tanpa
+    perlu dijalankan ulang.
+  </p>
+  <pre class="code">python ml/src/training/train_svm.py --csv data/landmarks.csv
+python ml/src/evaluation/evaluate_svm.py --compare</pre>
+  <p class="meta">
+    Versi aktif juga dipulihkan otomatis saat server mulai, jadi pilihan Anda tidak
+    hilang setelah restart. Model aktif tidak bisa dihapus sebelum ada versi lain
+    yang diaktifkan.
+  </p>
+</section>
+{% endblock %}
