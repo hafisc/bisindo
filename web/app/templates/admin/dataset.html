@@ -1,0 +1,186 @@
+{% extends "admin/base.html" %}
+{% from "admin/_macros.html" import icon %}
+
+{% block title %}Dataset{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>Dataset</h1>
+    <p>Unggah CSV landmark sebagai acuan pelatihan. Berkas disimpan di server dan tidak masuk git.</p>
+  </div>
+</header>
+
+<div class="grid-2">
+  <section class="card card-pad">
+    <h2>Unggah dataset CSV</h2>
+    <form method="post" action="{{ url_for('admin.dataset_upload') }}" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="field">
+        <label for="dataset_file">Berkas CSV</label>
+        <input id="dataset_file" type="file" name="dataset_file" accept=".csv" required>
+        <small class="hint">
+          Wajib memuat kolom <code>label</code> dan {{ feature_count }} kolom fitur
+          (h1, h2, is_two_handed).
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="dataset_note">Catatan (opsional)</label>
+        <input id="dataset_note" type="text" name="note" maxlength="255"
+               placeholder="Contoh: hasil ekstraksi MediaPipe 7.893 baris">
+      </div>
+
+      <button type="submit" class="btn">{{ icon("upload") }} Unggah dataset</button>
+    </form>
+  </section>
+
+  <section class="card card-pad">
+    <h2>Dataset aktif</h2>
+    {% if active %}
+      <div class="stat-grid single">
+        <div class="stat">
+          <div class="icon blue">{{ icon("dataset") }}</div>
+          <div>
+            <div class="label">Baris data</div>
+            <div class="value">{{ "{:,}".format(active.row_count).replace(",", ".") }}</div>
+          </div>
+        </div>
+        <div class="stat">
+          <div class="icon green">{{ icon("target") }}</div>
+          <div>
+            <div class="label">Kelas</div>
+            <div class="value">{{ active.class_count }}</div>
+          </div>
+        </div>
+        <div class="stat">
+          <div class="icon purple">{{ icon("model") }}</div>
+          <div>
+            <div class="label">Fitur</div>
+            <div class="value">{{ active.feature_count }}</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="meta">
+        <span class="strong">{{ active.filename }}</span><br>
+        {{ active.size_label }} &middot; diunggah {{ active.uploaded_at | wib }}
+        {% if active.uploaded_by %}oleh {{ active.uploaded_by }}{% endif %}
+      </p>
+
+      {% if active.shared_filename_count %}
+      <div class="notice warn">
+        <strong>{{ active.shared_filename_count }} nama berkas dipakai di lebih dari satu kelas.</strong>
+        Augmentasi kemungkinan dilakukan sebelum pembagian data, sehingga akurasi
+        berpotensi lebih tinggi daripada performa pada gambar baru. Catat hal ini
+        saat melaporkan hasil.
+      </div>
+      {% else %}
+      <div class="notice ok">
+        Tidak ada nama berkas yang muncul di lebih dari satu kelas.
+      </div>
+      {% endif %}
+
+      {% set dist = active.distribution() %}
+      {% if dist %}
+      <div class="dist">
+        {% for letter, total in dist.items() %}
+        <div class="dist-row">
+          <span class="letter-chip">{{ letter }}</span>
+          <span class="dist-bar"><span style="width: {{ (total / (dist.values() | max) * 100) | round }}%"></span></span>
+          <span class="dist-count">{{ total }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% else %}
+      <div class="empty compact">
+        <div class="ring">{{ icon("dataset") }}</div>
+        <strong>Belum ada dataset aktif</strong>
+        Unggah berkas CSV lalu tekan Aktifkan.
+      </div>
+    {% endif %}
+  </section>
+</div>
+
+<section class="card">
+  <div class="table-wrap">
+    {% if snapshots %}
+    <table id="table-datasets">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Berkas</th>
+          <th>Baris</th>
+          <th>Kelas</th>
+          <th>Ukuran</th>
+          <th>Diunggah</th>
+          <th>Status</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in snapshots %}
+        <tr>
+          <td class="muted">{{ item.id }}</td>
+          <td>
+            <span class="strong">{{ item.filename }}</span>
+            {% if item.note %}<small class="muted block">{{ item.note }}</small>{% endif %}
+          </td>
+          <td class="num">{{ "{:,}".format(item.row_count).replace(",", ".") }}</td>
+          <td class="num">{{ item.class_count }}</td>
+          <td class="muted">{{ item.size_label }}</td>
+          <td class="muted">{{ item.uploaded_at | wib }}</td>
+          <td>
+            {% if item.is_active %}
+              <span class="badge high">Aktif</span>
+            {% else %}
+              <span class="badge">Arsip</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="row-actions">
+              {% if not item.is_active %}
+              <form method="post" action="{{ url_for('admin.dataset_activate', snapshot_id=item.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn ghost small inline">Aktifkan</button>
+              </form>
+              <form method="post" action="{{ url_for('admin.dataset_delete', snapshot_id=item.id) }}"
+                    onsubmit="return confirm('Hapus snapshot dataset #{{ item.id }}? Berkasnya ikut terhapus.');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn ghost small inline danger">Hapus</button>
+              </form>
+              {% else %}
+              <span class="muted">-</span>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+      <div class="ring">{{ icon("dataset") }}</div>
+      <strong>Belum ada dataset yang diunggah</strong>
+      Mulai dari formulir di atas.
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="card card-pad">
+  <h2>Cara kerja</h2>
+  <p class="meta">
+    Dataset diunggah lewat halaman ini hanya sebagai acuan dan arsip. Pelatihan
+    model tetap dijalankan dari terminal supaya tidak memblokir server:
+  </p>
+  <pre class="code">python ml/src/training/train_svm.py --csv &lt;berkas.csv&gt;
+python ml/src/evaluation/evaluate_svm.py --compare</pre>
+  <p class="meta">
+    Setelah artefak <code>svm_rbf_bisindo.joblib</code> jadi, unggah berkas itu di
+    halaman <a href="{{ url_for('admin.model_versions') }}">Model</a> lalu aktifkan.
+  </p>
+</section>
+{% endblock %}

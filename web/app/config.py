@@ -23,5 +23,12 @@ class Config:
         (BASE_DIR.parent / "ml" / "models" / "svm_rbf_bisindo.joblib").as_posix()
     )
 
+    # Folder unggahan lewat panel admin. Isinya tidak masuk git.
+    DATASET_DIR = (INSTANCE_DIR / "datasets").as_posix()
+    MODEL_UPLOAD_DIR = (INSTANCE_DIR / "models").as_posix()
+
+    # Batas ukuran unggahan: dataset landmark sekitar 9 MB, model sekitar 2 MB.
+    MAX_CONTENT_LENGTH = 64 * 1024 * 1024  # 64 MB
+
     # Jumlah baris per halaman pada tabel admin.
     ADMIN_PER_PAGE = 10

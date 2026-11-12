@@ -29,3 +29,4 @@ def inject_helpers():
 
 
 from . import routes  # noqa: E402,F401  (mendaftarkan route ke blueprint)
+from . import assets  # noqa: E402,F401  (halaman dataset dan model)
