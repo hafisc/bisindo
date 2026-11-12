@@ -48,4 +48,13 @@ void main() {
       expect(ApiConfig.display('http://192.168.1.5:5000'), '192.168.1.5:5000');
     });
   });
+
+  group('alamat bawaan', () {
+    test('memakai alamat adb reverse, bukan alias emulator', () {
+      // 10.0.2.2 hanya ada di emulator, sedangkan kamera MediaPipe hanya bisa
+      // diuji di HP fisik. Alamat bawaan harus bisa dipakai lewat kabel USB.
+      expect(ApiConfig.buildTimeBaseUrl, 'http://127.0.0.1:5000');
+      expect(ApiConfig.buildTimeBaseUrl.contains('10.0.2.2'), isFalse);
+    });
+  });
 }

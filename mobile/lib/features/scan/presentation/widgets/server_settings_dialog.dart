@@ -83,8 +83,9 @@ class _ServerSettingsDialogState extends State<ServerSettingsDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Masukkan alamat IP laptop yang menjalankan server BISINDO. '
-            'Alamat ini tercetak di terminal saat server dijalankan.',
+            'Masukkan alamat server BISINDO. Lewat kabel USB, isi 127.0.0.1:5000 '
+            'setelah menjalankan adb reverse. Lewat WiFi, isi alamat IP laptop '
+            'yang tercetak di terminal saat server dijalankan.',
             style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
           ),
           const SizedBox(height: 16),

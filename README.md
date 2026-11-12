@@ -275,12 +275,25 @@ mengaturnya:
 - **Saat build**, lewat `--dart-define`:
 
   ```bash
-  flutter build apk --release --dart-define=API_BASE_URL=https://api.contoh.com
+  flutter run -d <id-hp> --dart-define=API_BASE_URL=http://127.0.0.1:5000
   ```
 
 - **Saat aplikasi berjalan**, lewat ikon gerigi di kanan atas layar Scan. Cara
   ini tidak butuh build ulang, jadi teman yang memakai laptop berbeda cukup
   mengganti alamat di sana.
+
+Alamat bawaan adalah `http://127.0.0.1:5000`, yaitu jalur kabel USB:
+
+```bash
+adb reverse tcp:5000 tcp:5000
+flutter run -d <id-hp>
+```
+
+`adb reverse` meneruskan port 5000 di HP ke port 5000 di laptop, sehingga
+Windows Firewall tidak ikut campur. Perintah itu perlu diulang setiap kabel
+dicabut atau HP di-reboot. Alamat ini tidak memakai alias emulator `10.0.2.2`,
+karena emulator x86_64 tidak punya MediaPipe native sehingga kamera tidak bisa
+diuji di sana.
 
 Untuk demo di WiFi yang sama, jalankan `python web/run.py`. Server mencetak
 alamat `http://<ip-laptop>:5000` yang bisa langsung diisi di layar Scan.
