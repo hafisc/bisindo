@@ -48,4 +48,9 @@ def create_app(config_overrides: dict | None = None) -> Flask:
         # Tambal kolom baru pada database lama (lihat app/schema.py).
         ensure_schema()
 
+        # Pakai model yang terakhir diaktifkan lewat panel admin, bila ada.
+        from .admin.assets import apply_active_assets
+
+        apply_active_assets(app)
+
     return app
