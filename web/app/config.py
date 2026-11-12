@@ -18,9 +18,9 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Path model machine learning BISINDO
+    # Path model machine learning BISINDO (artefak joblib hasil ml/src/training/train_svm.py)
     MODEL_PATH = os.environ.get("MODEL_PATH") or (
-        (BASE_DIR.parent / "ml" / "models" / "bisindo_mlp_best.h5").as_posix()
+        (BASE_DIR.parent / "ml" / "models" / "svm_rbf_bisindo.joblib").as_posix()
     )
 
     # Jumlah baris per halaman pada tabel admin.

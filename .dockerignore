@@ -1,0 +1,14 @@
+# Jangan ikutkan ke image Docker.
+.git
+.gitignore
+.venv
+web/.venv
+web/instance
+**/__pycache__
+**/*.pyc
+mobile
+ml/data
+ml/notebooks
+ml/tests
+ml/src
+ml/models/evaluation

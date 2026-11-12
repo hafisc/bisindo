@@ -82,7 +82,8 @@ field `user_id` di body JSON.
 | Method | Endpoint | Keterangan |
 | :--- | :--- | :--- |
 | GET | `/api/status` | Status layanan dan kesiapan model prediksi |
-| POST | `/api/predict` | Prediksi huruf BISINDO dari 21 titik landmark tangan |
+| GET | `/api/model` | Informasi model aktif: jumlah fitur, daftar kelas, akurasi |
+| POST | `/api/predict` | Prediksi huruf BISINDO dari 21 atau 42 titik landmark tangan |
 | GET | `/api/dictionary` | Daftar seluruh huruf kamus BISINDO |
 | GET | `/api/dictionary/<huruf>` | Detail satu huruf kamus |
 | GET | `/api/history` | Riwayat deteksi milik pengguna, terbaru lebih dulu |
@@ -91,6 +92,19 @@ field `user_id` di body JSON.
 | DELETE | `/api/history` | Hapus seluruh riwayat pengguna |
 | GET | `/api/profile` | Ambil profil pengguna |
 | PUT | `/api/profile` | Buat atau perbarui profil pengguna |
+
+Contoh prediksi satu tangan:
+
+```bash
+curl -X POST http://127.0.0.1:5000/api/predict \
+  -H "Content-Type: application/json" \
+  -d '{"landmarks": [{"x": 0.1, "y": 0.2, "z": 0.0}, "... 21 titik"]}'
+```
+
+Respons berisi `prediction`, `confidence`, dan `class_index`. Model memakai 127
+fitur, tetapi server yang menyusunnya: kirim 21 titik untuk satu tangan atau 42
+titik untuk dua tangan. Bila hanya 21 titik yang dikirim, 63 nilai tangan kedua
+diisi nol dan `is_two_handed` bernilai 0.
 
 Contoh menyimpan riwayat:
 
@@ -146,6 +160,41 @@ python -m venv .venv
 pip install -r requirements-dev.txt
 pytest
 ```
+
+### Menjalankan server secara lokal
+
+```bash
+cd web/
+.venv\Scripts\activate
+python run.py
+```
+
+Server berjalan di `http://127.0.0.1:5000`. Model SVM dimuat dari
+`ml/models/svm_rbf_bisindo.joblib`. Bila path berbeda, atur lewat variabel
+lingkungan `MODEL_PATH`.
+
+### Deploy ke cloud
+
+Repositori sudah menyiapkan dua jalur deploy yang portabel, tidak terikat satu
+penyedia.
+
+Docker:
+
+```bash
+docker build -t bisindo-api .
+docker run -p 8000:8000 bisindo-api
+```
+
+`Procfile` dipakai platform yang menjalankan perintah `web:` seperti Heroku atau
+Render. Keduanya menjalankan `gunicorn` dengan aplikasi `web/run.py`.
+
+Model tidak dilatih di dalam image. Alur yang benar: latih lewat CLI
+(`python ml/src/training/train_svm.py`), lalu deploy artefaknya. Training di
+dalam request Flask akan memblokir server.
+
+Catatan ukuran: karena tidak lagi memakai TensorFlow, image hanya berisi Flask,
+NumPy, scikit-learn, dan joblib. Tanpa TensorFlow, image jauh lebih kecil dan
+server mulai di bawah satu detik.
 
 ## Panduan Instalasi dan Penggunaan
 
