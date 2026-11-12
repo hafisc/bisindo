@@ -14,7 +14,7 @@ Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keselur
 | :--- | :--- | :---: | :--- |
 | Mobile (Flutter) | Dalam Pengembangan | 85% | Alur UI, sistem navigasi, autentikasi Firebase, kamus BISINDO, dan riwayat selesai. Menunggu integrasi model TFLite secara on-device. |
 | Web Dashboard & API | Dalam Pengembangan | 45% | Dashboard admin, endpoint riwayat, dan endpoint profil selesai. Menunggu integrasi pemanggilan API dari aplikasi mobile. |
-| Machine Learning | Dalam Pengembangan | 45% | Dataset landmark dan pelatihan model classifier (MLP) selesai. Tahap ekspor TFLite dan pengujian metrik evaluasi sedang berjalan. |
+| Machine Learning | Dalam Pengembangan | 65% | Model SVM RBF selesai dilatih dengan akurasi 97,91% pada 127 fitur landmark dan tersimpan sebagai artefak `joblib`. Sisa pekerjaan: penyajian model lewat web API dan konversi TFLite untuk mobile. |
 
 ### Pembagian Tugas dan Status Tim
 
@@ -63,8 +63,9 @@ Aplikasi Mobile:
 - Text-to-Speech: flutter_tts
 
 Machine Learning:
-- Bahasa: Python 3.10
-- Framework: TensorFlow
+- Bahasa: Python 3.12
+- Model: SVM kernel RBF (scikit-learn), 127 fitur landmark
+- Akurasi data uji: 97,91%
 - Ekstraksi Fitur: MediaPipe
 - Inferensi Mobile: TFLite Flutter
 
@@ -198,11 +199,12 @@ pip install -r requirements.txt
 ## Pipeline Machine Learning
 
 Alur kerja pelatihan model hingga siap digunakan di aplikasi:
-1. `collect_data.py`: Pengumpulan gambar tangan per kelas.
-2. `augment.py`: Proses augmentasi dataset (rotasi, flip, potong).
-3. `train.py`: Pelatihan model CNN memanfaatkan landmark dari MediaPipe.
-4. `evaluate.py`: Pengujian akurasi model.
-5. `export_tflite.py`: Konversi model menjadi format `.tflite` untuk digunakan pada aplikasi mobile.
+1. `ml/src/dataset/data_loader.py`: Membaca CSV landmark, menyusun 127 fitur, lalu membagi data latih dan uji.
+2. `ml/src/training/train_svm.py`: Melatih SVM RBF dan menyimpan `svm_rbf_bisindo.joblib`, `label_map.json`, serta `metrics.json`.
+3. `ml/src/evaluation/evaluate_svm.py`: Menghitung akurasi, confusion matrix, F1 per kelas, dan membandingkan kernel linear, polynomial, dan RBF.
+4. `ml/tests/test_svm.py`: Memastikan susunan fitur, pemuatan dataset, dan artefak model tetap konsisten.
+
+Detail lengkap ada di [`ml/README.md`](ml/README.md).
 
 ## Daftar Perintah Penting
 
@@ -217,8 +219,8 @@ flutter build apk --release
 
 Perintah Python (ML):
 ```bash
-pip install -r requirements.txt
-python src/dataset/collect_data.py
-python src/training/train.py
-python src/export/export_tflite.py
+pip install -r ml/requirements.txt
+python ml/src/training/train_svm.py
+python ml/src/evaluation/evaluate_svm.py --compare
+python -m pytest ml/tests -q
 ```
