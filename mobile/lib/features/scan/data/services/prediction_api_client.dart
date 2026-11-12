@@ -166,9 +166,12 @@ class PredictionApiClient {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return 'Server tidak menjawab dalam 3 detik. Periksa alamat server dan WiFi.';
+        return 'Server di $baseUrl tidak menjawab dalam 3 detik. Periksa alamat '
+            'server dan pastikan HP tersambung ke laptop.';
       case DioExceptionType.connectionError:
-        return 'Server tidak bisa dihubungi. Pastikan alamat benar dan HP satu WiFi dengan laptop.';
+        return 'Server tidak bisa dihubungi di $baseUrl. Lewat kabel USB, '
+            'jalankan "adb reverse tcp:5000 tcp:5000" lalu coba lagi. Lewat '
+            'WiFi, pastikan HP dan laptop satu jaringan dan alamatnya benar.';
       case DioExceptionType.badResponse:
         final status = error.response?.statusCode;
         final body = error.response?.data;
