@@ -269,6 +269,86 @@ input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px 
 .field input { width: 100%; }
 .login-card .btn { width: 100%; padding: 12px; margin-top: 4px; }
 
+/* Unggahan berkas (dataset & model) */
+input[type="file"] {
+  font: inherit; color: var(--text); width: 100%;
+  padding: 9px 12px; border: 1px dashed var(--line); border-radius: 12px;
+  background: var(--bg); cursor: pointer;
+}
+input[type="file"]:hover { border-color: var(--primary); background: var(--white); }
+input[type="file"]::file-selector-button {
+  font: inherit; font-weight: 600; cursor: pointer;
+  margin-right: 12px; padding: 6px 14px; border-radius: 9px;
+  border: 1px solid var(--line); background: var(--white); color: var(--primary);
+}
+input[type="file"]::file-selector-button:hover { background: var(--soft-blue); }
+
+.hint { display: block; margin-top: 6px; color: var(--muted); font-size: 12.5px; }
+.block { display: block; margin-top: 2px; }
+
+code {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 12.5px; padding: 1px 6px; border-radius: 6px;
+  background: var(--bg); border: 1px solid var(--line); color: var(--text);
+}
+code.wrap { overflow-wrap: anywhere; }
+
+pre.code {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 12.5px; line-height: 1.7; color: var(--text);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 16px; margin: 0 0 12px; overflow-x: auto;
+}
+
+/* Satu kolom statistik di dalam panel samping */
+.stat-grid.single { grid-template-columns: 1fr; gap: 0; margin-bottom: 10px; }
+.stat-grid.single .stat { padding: 10px 0; }
+.stat-grid.single .stat .icon { width: 40px; height: 40px; border-radius: 12px; }
+.stat-grid.single .stat .icon svg { width: 21px; height: 21px; }
+.stat-grid.single .stat .value { font-size: 20px; }
+
+.meta { margin: 10px 0 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
+
+/* Kotak pemberitahuan */
+.notice {
+  margin-top: 12px; padding: 12px 14px; border-radius: 12px;
+  font-size: 12.5px; line-height: 1.65;
+  border-left: 3px solid transparent;
+}
+.notice strong { display: block; margin-bottom: 2px; font-size: 13px; }
+.notice.warn { background: var(--amber-soft); color: #92400e; border-left-color: var(--amber); }
+.notice.ok { background: var(--green-soft); color: #166534; border-left-color: var(--green); }
+
+/* Sebaran kelas */
+.dist {
+  margin-top: 14px; max-height: 260px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 6px; padding-right: 4px;
+}
+.dist-row { display: grid; grid-template-columns: 30px 1fr 42px; gap: 10px; align-items: center; }
+.dist-row .letter-chip { width: 30px; height: 30px; border-radius: 9px; font-size: 12.5px; }
+.dist-bar { height: 7px; border-radius: 99px; background: var(--bg); overflow: hidden; }
+.dist-bar span { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #93c5fd, var(--primary)); }
+.dist-count { text-align: right; font-size: 12.5px; font-weight: 600; color: var(--ink); }
+
+/* Tombol aksi di dalam tabel */
+.row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.row-actions form { margin: 0; }
+.btn.inline { width: auto; }
+.btn.danger { color: var(--red); }
+.btn.danger:hover { background: var(--red-soft); border-color: #fecaca; }
+
+/* Daftar huruf yang bisa dilipat */
+.fold { margin-top: 12px; }
+.fold summary {
+  cursor: pointer; font-weight: 600; font-size: 13px; color: var(--primary);
+  padding: 6px 0; list-style: none;
+}
+.fold summary::-webkit-details-marker { display: none; }
+.fold summary::before { content: "+ "; font-weight: 700; }
+.fold[open] summary::before { content: "- "; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chips .letter-chip { width: 28px; height: 28px; border-radius: 8px; font-size: 12px; }
+
 /* Responsif */
 @media (max-width: 1100px) {
   .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
