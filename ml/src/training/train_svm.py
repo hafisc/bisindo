@@ -63,7 +63,7 @@ MODEL_FILENAME = "svm_rbf_bisindo.joblib"
 LABEL_MAP_FILENAME = "label_map.json"
 METRICS_FILENAME = "metrics.json"
 
-# Konfigurasi terbaik dari eksperimen SVM (akurasi 97,91%).
+# Konfigurasi terbaik dari eksperimen SVM (akurasi 96,36% pada data bersih).
 DEFAULT_KERNEL = "rbf"
 DEFAULT_C = 10.0
 DEFAULT_GAMMA = "scale"

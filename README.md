@@ -14,7 +14,7 @@ Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keselur
 | :--- | :--- | :---: | :--- |
 | Mobile (Flutter) | Dalam Pengembangan | 92% | Autentikasi (email, Google, lupa password, verifikasi email), Beranda, scan realtime dengan MediaPipe native dan TTS, Mode Belajar (latihan huruf acak dengan kamera dan skor), riwayat lokal yang tersinkron ke server, serta edit profil, foto profil, ganti password, dan hapus akun sudah berjalan. Sisa: menu Favorit (masih "segera hadir"), foto peragaan dan penjelasan cara memperagakan di kamus yang masih dummy, dan rilis APK release. |
 | Web Dashboard & API | Selesai | 100% | Panel admin (dashboard, pengguna, log, dataset, model) dan seluruh endpoint `/api/predict`, `/api/history`, `/api/profile`, `/api/dictionary` selesai dengan 151 test lolos. Docker dan Procfile untuk deploy sudah disiapkan. Verifikasi Firebase ID token dan deploy ke cloud dicatat sebagai pengembangan lanjutan (lihat bagian Keamanan API). |
-| Machine Learning | Dalam Pengembangan | 88% | Model SVM RBF dilatih pada 127 fitur landmark untuk huruf A-Z dengan akurasi 97,91%. Evaluasi (metrik per kelas, confusion matrix 26x26, analisis huruf yang sering tertukar, perbandingan kernel) selesai dan model sudah disajikan lewat web API. Sisa: script ekstraksi landmark MediaPipe belum masuk repo (baru hasil CSV-nya), pembersihan data tidak valid, dan dokumentasi jumlah sampel per kelas. |
+| Machine Learning | Dalam Pengembangan | 88% | Model SVM RBF dilatih pada 127 fitur landmark untuk huruf A-Z dengan akurasi 96,36% pada dataset yang sudah dibersihkan dari 1.160 baris duplikat. Evaluasi (metrik per kelas, confusion matrix 26x26, analisis huruf yang sering tertukar, perbandingan kernel) selesai dan model sudah disajikan lewat web API. Sisa: script ekstraksi landmark MediaPipe belum masuk repo (baru hasil CSV-nya), pembersihan data tidak valid, dan dokumentasi jumlah sampel per kelas. |
 
 ### Perubahan Lingkup karena Arsitektur
 
@@ -84,7 +84,7 @@ Aplikasi Mobile:
 Machine Learning:
 - Bahasa: Python 3.12
 - Model: SVM kernel RBF (scikit-learn), 127 fitur landmark
-- Akurasi data uji: 97,91%
+- Akurasi data uji: 96,36% (6.733 baris setelah pembersihan)
 - Ekstraksi Fitur: MediaPipe
 - Inferensi: di server Flask lewat `POST /api/predict` (mobile mengirim landmark MediaPipe)
 
