@@ -9,16 +9,12 @@ class DummyDictionaryRepository {
         id: 'letter_$letter',
         title: letter,
         category: DictionaryCategory.huruf,
-        imageUrl: '', // Blank for now, we will show a placeholder UI in the view
-        instructions: [
-          'Bentuk tangan sesuai dengan isyarat $letter.',
-          'Posisikan tangan sejajar dengan dada.',
-          'Pastikan tangan terlihat jelas.',
-        ],
-        tips: 'Lakukan dengan gerakan yang jelas dan tidak terlalu cepat.',
+        imageUrl: '',
+        // Ilustrasi, cara melakukan, dan tips huruf diambil dari
+        // assets/data/bisindo_poses.json lewat LetterPoseRepository.
       );
     }),
-    
+
     // Some Kata Umum
     const DictionaryItem(
       id: 'word_terima_kasih',
@@ -74,6 +70,8 @@ class DummyDictionaryRepository {
   static List<DictionaryItem> searchItems(String query) {
     if (query.isEmpty) return allItems;
     final lowerQuery = query.toLowerCase();
-    return allItems.where((item) => item.title.toLowerCase().contains(lowerQuery)).toList();
+    return allItems
+        .where((item) => item.title.toLowerCase().contains(lowerQuery))
+        .toList();
   }
 }
