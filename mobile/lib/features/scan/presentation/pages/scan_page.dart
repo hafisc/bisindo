@@ -77,35 +77,62 @@ class _ScanPageState extends ConsumerState<ScanPage> {
                 errorMessage: _controller.cameraError,
                 onRetry: _controller.initializeCamera,
               ),
-              if (_controller.cameraError == null)
+              if (_controller.cameraError == null && _controller.showSkeleton)
                 Positioned.fill(
                   child: IgnorePointer(
                     child: CustomPaint(
                       painter: HandLandmarksPainter(
                         hands: _controller.detectedHands,
                         isFrontCamera: _controller.isFrontCamera,
-                        imageSize: _controller.cameraController?.value.previewSize,
+                        imageSize:
+                            _controller.cameraController?.value.previewSize,
                       ),
                     ),
                   ),
                 ),
-              if (_controller.cameraError == null &&
-                  _controller.hasMultipleCameras)
+              if (_controller.cameraError == null)
                 Positioned(
-                  right: 20,
-                  top: 0,
-                  bottom: 0,
+                  right: 16,
+                  top: 80,
                   child: SafeArea(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: CameraSwitchButton(
-                        isFrontCamera: _controller.isFrontCamera,
-                        isSwitching: _controller.isSwitchingCamera,
-                        isEnabled:
-                            _controller.cameraController?.value.isInitialized ==
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        _RoundIconButton(
+                          icon: _controller.showSkeleton
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          tooltip: _controller.showSkeleton
+                              ? 'Sembunyikan skeleton'
+                              : 'Tampilkan skeleton',
+                          onPressed: _controller.toggleSkeleton,
+                        ),
+                        const SizedBox(height: 16),
+                        _RoundIconButton(
+                          icon: _controller.ttsEnabled
+                              ? Icons.volume_up
+                              : Icons.volume_off,
+                          tooltip: _controller.ttsEnabled
+                              ? 'Matikan suara'
+                              : 'Nyalakan suara',
+                          onPressed: _controller.toggleTts,
+                        ),
+                        if (_controller.hasMultipleCameras) ...[
+                          const SizedBox(height: 16),
+                          CameraSwitchButton(
+                            isFrontCamera: _controller.isFrontCamera,
+                            isSwitching: _controller.isSwitchingCamera,
+                            isEnabled:
+                                _controller
+                                    .cameraController
+                                    ?.value
+                                    .isInitialized ==
                                 true,
-                        onPressed: _controller.switchCamera,
-                      ),
+                            onPressed: _controller.switchCamera,
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),
@@ -158,25 +185,10 @@ class _ScanPageState extends ConsumerState<ScanPage> {
                 right: 16,
                 top: 16,
                 child: SafeArea(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _RoundIconButton(
-                        icon: _controller.ttsEnabled
-                            ? Icons.volume_up
-                            : Icons.volume_off,
-                        tooltip: _controller.ttsEnabled
-                            ? 'Matikan suara'
-                            : 'Nyalakan suara',
-                        onPressed: _controller.toggleTts,
-                      ),
-                      const SizedBox(width: 8),
-                      _RoundIconButton(
-                        icon: Icons.settings,
-                        tooltip: 'Alamat server',
-                        onPressed: _openServerSettings,
-                      ),
-                    ],
+                  child: _RoundIconButton(
+                    icon: Icons.settings,
+                    tooltip: 'Alamat server',
+                    onPressed: _openServerSettings,
                   ),
                 ),
               ),
