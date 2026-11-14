@@ -4,4 +4,10 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Hanya untuk build debug: server BISINDO saat pengembangan berjalan di
+         laptop lewat HTTP polos (http://192.168.x.x:5000). Android 9 ke atas
+         memblokir HTTP polos secara bawaan. Build release tidak memakai file
+         ini, sehingga tetap menolak HTTP polos. -->
+    <application android:usesCleartextTraffic="true"/>
 </manifest>

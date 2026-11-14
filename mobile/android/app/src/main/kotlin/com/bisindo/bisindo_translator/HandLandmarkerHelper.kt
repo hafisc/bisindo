@@ -30,33 +30,40 @@ class HandLandmarkerHelper(
 
     @Synchronized
     fun setupHandLandmarker() {
-        val baseOptions = BaseOptions.builder()
-            .setModelAssetPath(MODEL_NAME)
-            .build()
-
-        val options = HandLandmarker.HandLandmarkerOptions.builder()
-            .setBaseOptions(baseOptions)
-            .setMinHandDetectionConfidence(0.5f)
-            .setMinTrackingConfidence(0.5f)
-            .setMinHandPresenceConfidence(0.5f)
-            .setNumHands(2)
-            .setRunningMode(RunningMode.LIVE_STREAM)
-            .setResultListener { result: HandLandmarkerResult, _: MPImage ->
-                listener.onResults(result)
-            }
-            .setErrorListener { error: RuntimeException ->
-                Log.e(TAG, "MediaPipe error: ${error.message}", error)
-                listener.onError(error.message ?: "Unknown MediaPipe error")
-            }
-            .build()
-
         try {
+            val baseOptions = BaseOptions.builder()
+                .setModelAssetPath(MODEL_NAME)
+                .build()
+
+            val options = HandLandmarker.HandLandmarkerOptions.builder()
+                .setBaseOptions(baseOptions)
+                .setMinHandDetectionConfidence(0.5f)
+                .setMinTrackingConfidence(0.5f)
+                .setMinHandPresenceConfidence(0.5f)
+                .setNumHands(2)
+                .setRunningMode(RunningMode.LIVE_STREAM)
+                .setResultListener { result: HandLandmarkerResult, _: MPImage ->
+                    listener.onResults(result)
+                }
+                .setErrorListener { error: RuntimeException ->
+                    Log.e(TAG, "MediaPipe error: ${error.message}", error)
+                    listener.onError(error.message ?: "Unknown MediaPipe error")
+                }
+                .build()
+
             handLandmarker = HandLandmarker.createFromOptions(context, options)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
+            // UnsatisfiedLinkError (native lib tidak tersedia untuk ABI ini, mis. emulator
+            // x86_64) adalah Error, bukan Exception, sehingga harus ditangkap sebagai Throwable
+            // agar aplikasi tidak crash saat start.
+            handLandmarker = null
             Log.e(TAG, "Gagal inisialisasi MediaPipe: ${e.message}", e)
             listener.onError("Gagal inisialisasi MediaPipe: ${e.message}")
         }
     }
+
+    @Synchronized
+    fun isAvailable(): Boolean = handLandmarker != null
 
     @Synchronized
     fun detectLiveStream(bitmap: Bitmap, rotationDegrees: Int = 0) {
