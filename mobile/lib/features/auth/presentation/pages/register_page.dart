@@ -44,14 +44,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           ),
           backgroundColor: const Color(0xFFEF4444),
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       );
       return;
     }
 
-    ref.read(registerNotifierProvider.notifier).registerWithEmail(
+    ref
+        .read(registerNotifierProvider.notifier)
+        .registerWithEmail(
           name: _nameController.text,
           email: _emailController.text,
           password: _passwordController.text,
@@ -108,296 +111,401 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // ── Dekorasi blob biru muda pojok kanan bawah
-          Positioned(
-            right: -50,
-            bottom: -50,
-            child: Container(
-              width: 160,
-              height: 160,
-              decoration: const BoxDecoration(
-                color: Color(0xFFDBEAFE),
-                shape: BoxShape.circle,
+      body: SizedBox.expand(
+        child: Stack(
+          children: [
+            // ── Dekorasi blob biru muda pojok kanan bawah
+            Positioned(
+              right: -50,
+              bottom: -50,
+              child: Container(
+                width: 160,
+                height: 160,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFDBEAFE),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
-          ),
 
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── Back button
-                Padding(
-                  padding: const EdgeInsets.only(left: 8, top: 8),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 20,
-                      color: Color(0xFF0F172A),
-                    ),
-                    onPressed: () => context.pop(),
-                  ),
+            // ── Dekorasi blob biru muda pojok kiri atas
+            Positioned(
+              left: -50,
+              top: -50,
+              child: Container(
+                width: 140,
+                height: 140,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFEFF6FF),
+                  shape: BoxShape.circle,
                 ),
+              ),
+            ),
 
-                // ── Form
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 8),
+            SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Back button
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 4),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 20,
+                        color: Color(0xFF0F172A),
+                      ),
+                      onPressed: () => context.pop(),
+                    ),
+                  ),
 
-                          // Judul
-                          Text(
-                            'Daftar Akun',
-                            style: GoogleFonts.poppins(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF0F172A),
+                  // ── Form (diposisikan tepat di tengah layar)
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight - 24,
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Buat akun untuk mulai menggunakan\nBISINDO Translator.',
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              color: const Color(0xFF64748B),
-                              height: 1.4,
-                            ),
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          // Nama lengkap
-                          AuthTextField(
-                            hintText: 'Nama lengkap',
-                            prefixIcon: Icons.person_outline_rounded,
-                            controller: _nameController,
-                            keyboardType: TextInputType.name,
-                            validator: (v) {
-                              if (v == null || v.isEmpty) {
-                                return 'Nama tidak boleh kosong';
-                              }
-                              return null;
-                            },
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          // Email
-                          AuthTextField(
-                            hintText: 'Email',
-                            prefixIcon: Icons.mail_outline_rounded,
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            validator: (v) {
-                              if (v == null || v.isEmpty) {
-                                return 'Email tidak boleh kosong';
-                              }
-                              if (!v.contains('@')) {
-                                return 'Format email tidak valid';
-                              }
-                              return null;
-                            },
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          // Password
-                          AuthTextField(
-                            hintText: 'Password',
-                            prefixIcon: Icons.lock_outline_rounded,
-                            isPassword: true,
-                            controller: _passwordController,
-                            validator: (v) {
-                              if (v == null || v.isEmpty) {
-                                return 'Password tidak boleh kosong';
-                              }
-                              if (v.length < 8) {
-                                return 'Password minimal 8 karakter';
-                              }
-                              return null;
-                            },
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          // Konfirmasi password
-                          AuthTextField(
-                            hintText: 'Konfirmasi password',
-                            prefixIcon: Icons.lock_outline_rounded,
-                            isPassword: true,
-                            controller: _confirmPasswordController,
-                            textInputAction: TextInputAction.done,
-                            validator: (v) {
-                              if (v == null || v.isEmpty) {
-                                return 'Konfirmasi password tidak boleh kosong';
-                              }
-                              if (v != _passwordController.text) {
-                                return 'Password tidak sama';
-                              }
-                              return null;
-                            },
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          // Terms & Conditions checkbox
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: Checkbox(
-                                  value: _agreeToTerms,
-                                  onChanged: (v) => setState(
-                                      () => _agreeToTerms = v ?? false),
-                                  activeColor: const Color(0xFF2563EB),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  side: const BorderSide(
-                                      color: Color(0xFFCBD5E1)),
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 420,
                                 ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: RichText(
-                                  text: TextSpan(
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 12.5,
-                                      color: const Color(0xFF64748B),
-                                      height: 1.5,
-                                    ),
+                                child: Form(
+                                  key: _formKey,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      const TextSpan(
-                                          text: 'Saya setuju dengan '),
-                                      WidgetSpan(
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            // TODO: buka halaman syarat & ketentuan
-                                          },
-                                          child: Text(
-                                            'Syarat dan Ketentuan',
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 12.5,
-                                              fontWeight: FontWeight.w600,
-                                              color: const Color(0xFF2563EB),
+                                      // Judul & Subjudul di tengah
+                                      Center(
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              'Daftar Akun',
+                                              textAlign: TextAlign.center,
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 26,
+                                                fontWeight: FontWeight.w700,
+                                                color: const Color(0xFF0F172A),
+                                              ),
                                             ),
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              'Buat akun untuk mulai menggunakan\nBISINDO Translator.',
+                                              textAlign: TextAlign.center,
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 14,
+                                                color: const Color(0xFF64748B),
+                                                height: 1.5,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 24),
+
+                                      // Nama lengkap
+                                      AuthTextField(
+                                        label: 'Nama Lengkap',
+                                        hintText: 'Masukkan nama lengkap',
+                                        prefixIcon:
+                                            Icons.person_outline_rounded,
+                                        controller: _nameController,
+                                        keyboardType: TextInputType.name,
+                                        validator: (v) {
+                                          if (v == null || v.trim().isEmpty) {
+                                            return 'Nama tidak boleh kosong';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+
+                                      const SizedBox(height: 14),
+
+                                      // Email
+                                      AuthTextField(
+                                        label: 'Email',
+                                        hintText: 'Masukkan alamat email',
+                                        prefixIcon: Icons.mail_outline_rounded,
+                                        controller: _emailController,
+                                        keyboardType:
+                                            TextInputType.emailAddress,
+                                        validator: (v) {
+                                          if (v == null || v.trim().isEmpty) {
+                                            return 'Email tidak boleh kosong';
+                                          }
+                                          if (!v.contains('@')) {
+                                            return 'Format email tidak valid';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+
+                                      const SizedBox(height: 14),
+
+                                      // Password
+                                      AuthTextField(
+                                        label: 'Password',
+                                        hintText: 'Minimal 8 karakter',
+                                        prefixIcon: Icons.lock_outline_rounded,
+                                        isPassword: true,
+                                        controller: _passwordController,
+                                        validator: (v) {
+                                          if (v == null || v.isEmpty) {
+                                            return 'Password tidak boleh kosong';
+                                          }
+                                          if (v.length < 8) {
+                                            return 'Password minimal 8 karakter';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+
+                                      const SizedBox(height: 14),
+
+                                      // Konfirmasi password
+                                      AuthTextField(
+                                        label: 'Konfirmasi Password',
+                                        hintText: 'Ulangi password',
+                                        prefixIcon: Icons.lock_outline_rounded,
+                                        isPassword: true,
+                                        controller: _confirmPasswordController,
+                                        textInputAction: TextInputAction.done,
+                                        validator: (v) {
+                                          if (v == null || v.isEmpty) {
+                                            return 'Konfirmasi password tidak boleh kosong';
+                                          }
+                                          if (v != _passwordController.text) {
+                                            return 'Password tidak sama';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+
+                                      const SizedBox(height: 16),
+
+                                      // Terms & Conditions checkbox
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 2,
+                                            ),
+                                            child: SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: Checkbox(
+                                                value: _agreeToTerms,
+                                                onChanged: (v) => setState(
+                                                  () => _agreeToTerms =
+                                                      v ?? false,
+                                                ),
+                                                activeColor: const Color(
+                                                  0xFF2563EB,
+                                                ),
+                                                materialTapTargetSize:
+                                                    MaterialTapTargetSize
+                                                        .shrinkWrap,
+                                                visualDensity:
+                                                    VisualDensity.compact,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
+                                                side: const BorderSide(
+                                                  color: Color(0xFF94A3B8),
+                                                  width: 1.3,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: GestureDetector(
+                                              onTap: () => setState(
+                                                () => _agreeToTerms =
+                                                    !_agreeToTerms,
+                                              ),
+                                              child: RichText(
+                                                text: TextSpan(
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: 12.5,
+                                                    color: const Color(
+                                                      0xFF475569,
+                                                    ),
+                                                    height: 1.5,
+                                                  ),
+                                                  children: [
+                                                    const TextSpan(
+                                                      text:
+                                                          'Saya setuju dengan ',
+                                                    ),
+                                                    WidgetSpan(
+                                                      child: GestureDetector(
+                                                        onTap: () {
+                                                          // TODO: buka halaman syarat & ketentuan
+                                                        },
+                                                        child: Text(
+                                                          'Syarat dan Ketentuan',
+                                                          style:
+                                                              GoogleFonts.poppins(
+                                                                fontSize: 12.5,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                color:
+                                                                    const Color(
+                                                                      0xFF2563EB,
+                                                                    ),
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const TextSpan(
+                                                      text: ' serta ',
+                                                    ),
+                                                    WidgetSpan(
+                                                      child: GestureDetector(
+                                                        onTap: () {
+                                                          // TODO: buka halaman kebijakan privasi
+                                                        },
+                                                        child: Text(
+                                                          'Kebijakan Privasi',
+                                                          style:
+                                                              GoogleFonts.poppins(
+                                                                fontSize: 12.5,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                color:
+                                                                    const Color(
+                                                                      0xFF2563EB,
+                                                                    ),
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const TextSpan(text: '.'),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+
+                                      const SizedBox(height: 22),
+
+                                      // Tombol Daftar
+                                      AuthPrimaryButton(
+                                        label: 'Daftar',
+                                        onPressed: _onRegister,
+                                        isLoading: isLoading,
+                                      ),
+
+                                      const SizedBox(height: 18),
+
+                                      // Divider
+                                      Row(
+                                        children: [
+                                          const Expanded(
+                                            child: Divider(
+                                              color: Color(0xFFE2E8F0),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                            ),
+                                            child: Text(
+                                              'atau',
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 13,
+                                                color: const Color(0xFF94A3B8),
+                                              ),
+                                            ),
+                                          ),
+                                          const Expanded(
+                                            child: Divider(
+                                              color: Color(0xFFE2E8F0),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+
+                                      const SizedBox(height: 18),
+
+                                      // Google button
+                                      GoogleSignInButton(
+                                        label: 'Daftar dengan Google',
+                                        onPressed: isLoading
+                                            ? () {}
+                                            : _onGoogleSignUp,
+                                      ),
+
+                                      const SizedBox(height: 20),
+
+                                      // Footer: Sudah punya akun
+                                      Center(
+                                        child: RichText(
+                                          text: TextSpan(
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 13.5,
+                                              color: const Color(0xFF64748B),
+                                            ),
+                                            children: [
+                                              const TextSpan(
+                                                text: 'Sudah punya akun? ',
+                                              ),
+                                              WidgetSpan(
+                                                child: GestureDetector(
+                                                  onTap: () => context.pop(),
+                                                  child: Text(
+                                                    'Masuk di sini',
+                                                    style: GoogleFonts.poppins(
+                                                      fontSize: 13.5,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: const Color(
+                                                        0xFF2563EB,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
-                                      const TextSpan(text: ' serta '),
-                                      WidgetSpan(
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            // TODO: buka halaman kebijakan privasi
-                                          },
-                                          child: Text(
-                                            'Kebijakan Privasi',
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 12.5,
-                                              fontWeight: FontWeight.w600,
-                                              color: const Color(0xFF2563EB),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const TextSpan(text: '.'),
+
+                                      const SizedBox(height: 12),
                                     ],
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          // Tombol Daftar
-                          AuthPrimaryButton(
-                            label: 'Daftar',
-                            onPressed: _onRegister,
-                            isLoading: isLoading,
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          // Divider
-                          Row(
-                            children: [
-                              const Expanded(
-                                  child: Divider(color: Color(0xFFE2E8F0))),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12),
-                                child: Text(
-                                  'atau',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 13,
-                                    color: const Color(0xFF94A3B8),
-                                  ),
-                                ),
-                              ),
-                              const Expanded(
-                                  child: Divider(color: Color(0xFFE2E8F0))),
-                            ],
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          // Google button
-                          GoogleSignInButton(
-                            label: 'Daftar dengan Google',
-                            onPressed: isLoading ? () {} : _onGoogleSignUp,
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          // Footer: Sudah punya akun
-                          Center(
-                            child: RichText(
-                              text: TextSpan(
-                                style: GoogleFonts.poppins(
-                                  fontSize: 13,
-                                  color: const Color(0xFF64748B),
-                                ),
-                                children: [
-                                  const TextSpan(text: 'Sudah punya akun? '),
-                                  WidgetSpan(
-                                    child: GestureDetector(
-                                      onTap: () => context.pop(),
-                                      child: Text(
-                                        'Masuk di sini',
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: const Color(0xFF2563EB),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ),
                           ),
-
-                          const SizedBox(height: 20),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
