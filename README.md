@@ -6,25 +6,29 @@ Aplikasi ini dikembangkan sebagai proyek mata kuliah (Project Based Learning) un
 
 ## Status Pengembangan Proyek
 
-Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keseluruhan mencapai **55%**.
+Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keseluruhan mencapai **87%** (per 15 November 2026). Angka keseluruhan adalah rata-rata berbobot: Mobile 40%, Web 30%, Machine Learning 30%.
 
 ### Ringkasan per Komponen
 
 | Komponen | Status | Penyelesaian | Deskripsi |
 | :--- | :--- | :---: | :--- |
-| Mobile (Flutter) | Dalam Pengembangan | 85% | Alur UI, sistem navigasi, autentikasi Firebase, kamus BISINDO, dan riwayat selesai. Menunggu integrasi model TFLite secara on-device. |
-| Web Dashboard & API | Dalam Pengembangan | 45% | Dashboard admin, halaman dataset dan model, endpoint riwayat, dan endpoint profil selesai. Menunggu integrasi pemanggilan API dari aplikasi mobile. |
-| Machine Learning | Dalam Pengembangan | 65% | Model SVM RBF selesai dilatih dengan akurasi 97,91% pada 127 fitur landmark, tersimpan sebagai artefak `joblib`, dan sudah disajikan lewat web API. Sisa pekerjaan: konversi TFLite untuk mobile. |
+| Mobile (Flutter) | Dalam Pengembangan | 78% | Autentikasi (email, Google, lupa password, verifikasi email), Beranda, scan realtime dengan MediaPipe native dan TTS, riwayat lokal yang tersinkron ke server, serta edit profil, foto profil, ganti password, dan hapus akun sudah berjalan. Sisa: Mode Belajar dan Favorit (masih "segera hadir"), konten kamus yang masih dummy tanpa gambar peragaan dan belum mengambil data dari `/api/dictionary`. |
+| Web Dashboard & API | Selesai | 100% | Panel admin (dashboard, pengguna, log, dataset, model) dan seluruh endpoint `/api/predict`, `/api/history`, `/api/profile`, `/api/dictionary` selesai dengan 151 test lolos. Docker dan Procfile untuk deploy sudah disiapkan. Verifikasi Firebase ID token dan deploy ke cloud dicatat sebagai pengembangan lanjutan (lihat bagian Keamanan API). |
+| Machine Learning | Dalam Pengembangan | 85% | Model SVM RBF dilatih pada 127 fitur landmark untuk huruf A-Z dengan akurasi 97,91%. Evaluasi (confusion matrix, F1 per kelas, perbandingan kernel) selesai dan model sudah disajikan lewat web API. Sisa: model baru mengenali huruf, belum kosa kata umum. |
+
+Catatan arsitektur: inferensi saat ini dilakukan di server Flask, bukan on-device. Model SVM tidak bisa dikonversi langsung ke TFLite, sehingga rencana TFLite perlu diputuskan ulang oleh tim (tetap di server, atau melatih model jaringan saraf terpisah untuk mode offline).
 
 ### Pembagian Tugas dan Status Tim
 
 | Anggota Tim | Fokus Tugas | Referensi Task | Progres |
 | :--- | :--- | :--- | :---: |
-| Aryaputra Ferdiananta | Modul Kamus BISINDO & Konversi Model TFLite | [Issue #1](https://github.com/hafisc/bisindo/issues/1) | 38% |
-| Fadhil Taufiqurrachman | Modul Autentikasi & Pipeline Dataset MediaPipe | [Issue #2](https://github.com/hafisc/bisindo/issues/2) | 63% |
-| M. Aldyth Rafiansyah Fauzi | Antarmuka Scan Kamera & Training Model Klasifikasi | [Issue #3](https://github.com/hafisc/bisindo/issues/3) | 70% |
-| Mohammad Al Hafis H. | Halaman Beranda, Dashboard Admin, & Evaluasi Model | [Issue #4](https://github.com/hafisc/bisindo/issues/4) | 64% |
-| Mokhamad Rizki Hadiono S. | Riwayat Deteksi, Manajemen Profil, & Pengumpulan Data | [Issue #5](https://github.com/hafisc/bisindo/issues/5) | 75% |
+| Aryaputra Ferdiananta | Modul Kamus BISINDO & Konversi Model TFLite | [Issue #1](https://github.com/hafisc/bisindo/issues/1) | 45% |
+| Fadhil Taufiqurrachman | Modul Autentikasi & Pipeline Dataset MediaPipe | [Issue #2](https://github.com/hafisc/bisindo/issues/2) | 90% |
+| M. Aldyth Rafiansyah Fauzi | Antarmuka Scan Kamera & Training Model Klasifikasi | [Issue #3](https://github.com/hafisc/bisindo/issues/3) | 90% |
+| Mohammad Al Hafis H. | Halaman Beranda, Dashboard Admin, & Evaluasi Model | [Issue #4](https://github.com/hafisc/bisindo/issues/4) | 90% |
+| Mokhamad Rizki Hadiono S. | Riwayat Deteksi, Manajemen Profil, & Pengumpulan Data | [Issue #5](https://github.com/hafisc/bisindo/issues/5) | 90% |
+
+Progres per anggota dihitung dari kondisi modul yang menjadi tanggung jawabnya di kode, bukan dari jumlah commit.
 
 ## Daftar Fitur
 
@@ -55,7 +59,7 @@ Proyek ini menggunakan struktur monorepo yang memisahkan bagian mobile, machine 
 
 Aplikasi Mobile:
 - Framework: Flutter 3.32 (Dart 3.8)
-- State Management: BLoC + Equatable
+- State Management: Riverpod + Equatable
 - Routing: GoRouter
 - Dependency Injection: GetIt + Injectable
 - Layanan Cloud: Firebase (Auth, Firestore, Storage)
@@ -67,7 +71,7 @@ Machine Learning:
 - Model: SVM kernel RBF (scikit-learn), 127 fitur landmark
 - Akurasi data uji: 97,91%
 - Ekstraksi Fitur: MediaPipe
-- Inferensi Mobile: TFLite Flutter
+- Inferensi: di server Flask lewat `POST /api/predict` (mobile mengirim landmark MediaPipe)
 
 Web Dashboard:
 - Framework: Flask (Python)
@@ -168,9 +172,15 @@ membalas 200. Field `name` dan `email` wajib pada panggilan pertama. Mengirim
 string kosong pada `student_id`, `role`, atau `avatar_url` akan mengosongkan
 nilai tersebut.
 
+### Keamanan API
+
 Endpoint riwayat dan profil memakai header `X-User-Id` yang belum diverifikasi
-tanda tangannya. Peningkatan ke verifikasi Firebase ID token dapat ditambahkan
-kemudian memakai `firebase-admin`.
+tanda tangannya, begitu juga `user_id` pada body `/api/predict`. Artinya siapa
+pun yang mengetahui UID seseorang bisa membaca riwayatnya. Untuk demo lokal hal
+ini masih bisa diterima, tetapi sebelum server dipasang di internet sebaiknya
+diganti dengan verifikasi Firebase ID token memakai `firebase-admin`: mobile
+mengirim `Authorization: Bearer <id-token>`, server memverifikasinya lalu
+mengambil UID dari token tersebut.
 
 ### Menjalankan test web
 

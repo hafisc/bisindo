@@ -67,7 +67,7 @@ dependencies:
   # ── Utils ─────────────────────────────────────────────────────
   intl: ^0.20.2
   connectivity_plus: ^7.3.1
-  image_picker: ^1.2.4
+  image_picker: ^1.2.1
 
 dev_dependencies:
   flutter_test:
