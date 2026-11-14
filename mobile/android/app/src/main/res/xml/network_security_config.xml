@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Server prediksi BISINDO dijalankan di laptop lewat HTTP polos, baik melalui
+    adb reverse (http://127.0.0.1:5000) maupun WiFi yang sama
+    (http://192.168.x.x:5000). Alamat IP lokal tidak bisa didaftarkan per rentang
+    di domain-config, jadi HTTP polos diizinkan di base-config agar scan dan
+    Mode Belajar tetap jalan di APK release.
+
+    Firebase dan layanan Google lain tetap memakai HTTPS. Setelah server
+    di-deploy dengan HTTPS, ubah cleartextTrafficPermitted menjadi false.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

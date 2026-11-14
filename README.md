@@ -323,11 +323,11 @@ diuji di sana.
 Untuk demo di WiFi yang sama, jalankan `python web/run.py`. Server mencetak
 alamat `http://<ip-laptop>:5000` yang bisa langsung diisi di layar Scan.
 
-Catatan HTTP polos: build debug dan profile mengizinkan HTTP polos lewat
-`android/app/src/debug/AndroidManifest.xml` dan `profile/AndroidManifest.xml`.
-Build release tidak mengizinkannya, sehingga untuk demo lokal bagikan APK debug
-(`flutter build apk --debug`). Bila server sudah memakai HTTPS, build release
-bisa langsung dipakai.
+Catatan HTTP polos: semua build type, termasuk release, mengizinkan HTTP polos
+lewat `android/app/src/main/res/xml/network_security_config.xml`, karena server
+demo berjalan di laptop tanpa HTTPS. Firebase tetap memakai HTTPS. Setelah
+server di-deploy dengan HTTPS, ubah `cleartextTrafficPermitted` di file itu
+menjadi `false`.
 
 ## Panduan Instalasi dan Penggunaan
 
@@ -358,6 +358,47 @@ flutter pub get
 dart run build_runner build --delete-conflicting-outputs
 flutter run
 ```
+
+### Build APK Release
+
+APK release ditandatangani dengan keystore milik tim, bukan kunci debug.
+Keystore dan password-nya tidak masuk repo. Minta file `.jks` dan isi
+`key.properties` ke anggota yang memegangnya.
+
+1. Simpan keystore di luar folder repo, misalnya
+   `C:\Users\<nama>\keystores\bisindo-release.jks`.
+2. Buat `mobile/android/key.properties` (sudah di-ignore git):
+
+   ```properties
+   storePassword=<password>
+   keyPassword=<password>
+   keyAlias=bisindo
+   storeFile=C:/Users/<nama>/keystores/bisindo-release.jks
+   ```
+
+3. Build:
+
+   ```bash
+   cd mobile/
+   flutter build apk --release
+   ```
+
+   Hasilnya ada di `mobile/build/app/outputs/flutter-apk/app-release.apk`. Bila
+   `key.properties` tidak ada, Gradle memakai kunci debug sebagai cadangan dan
+   APK tersebut tidak boleh dirilis.
+
+Login Google di APK release hanya berjalan bila SHA-1 keystore release sudah
+didaftarkan di Firebase Console (Project settings, aplikasi Android, Add
+fingerprint), lalu `google-services.json` diunduh ulang. Ambil SHA-1 dengan:
+
+```bash
+keytool -list -v -keystore <path-keystore> -alias bisindo
+```
+
+Build release memakai R8 (`isMinifyEnabled = true`). Aturan keep untuk
+MediaPipe ada di `mobile/android/app/proguard-rules.pro`; tanpa aturan itu
+layar Scan crash karena nama kelas MediaPipe yang dipanggil dari kode native
+ikut diubah.
 
 ### 4. Konfigurasi Environment Machine Learning
 ```bash
