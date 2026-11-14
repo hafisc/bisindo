@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/errors/exceptions.dart';
@@ -8,6 +9,33 @@ import '../../../../core/errors/failures.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
+
+/// Memetakan error plugin `google_sign_in` ke [Failure] yang mudah dipahami.
+///
+/// Kode `ApiException: 10` berarti SHA-1 keystore perangkat belum terdaftar di
+/// Firebase (atau `google-services.json` usang). `12500` berarti layanan
+/// Google/OAuth belum dikonfigurasi, dan `network_error` berarti tidak ada
+/// koneksi.
+@visibleForTesting
+Failure mapGoogleSignInError(PlatformException e) {
+  final detail = '${e.code} ${e.message ?? ''}';
+  debugPrint('[AUTH REPO] Google sign-in PlatformException: $detail');
+
+  if (e.code == 'network_error' || detail.contains('ApiException: 7')) {
+    return const NetworkAuthFailure();
+  }
+  if (detail.contains('ApiException: 10') ||
+      detail.contains('ApiException: 12500')) {
+    return const AuthFailure(
+      'Konfigurasi Google Sign-In belum cocok (SHA-1 belum terdaftar di '
+      'Firebase). Hubungi pengembang.',
+    );
+  }
+  if (e.code == 'sign_in_canceled' || detail.contains('ApiException: 12501')) {
+    return const GoogleSignInCancelledFailure();
+  }
+  return const AuthFailure('Gagal masuk dengan Google. Silakan coba lagi.');
+}
 
 /// Concrete implementation of [AuthRepository] in the Data Layer.
 @Injectable(as: AuthRepository)
@@ -75,6 +103,8 @@ class AuthRepositoryImpl implements AuthRepository {
       return const Left(GoogleSignInCancelledFailure());
     } on FirebaseAuthException catch (e) {
       return Left(mapFirebaseAuthError(e));
+    } on PlatformException catch (e) {
+      return Left(mapGoogleSignInError(e));
     } catch (e) {
       debugPrint('[AUTH REPO] signInWithGoogle unexpected: $e');
       return const Left(AuthFailure('Gagal masuk dengan Google. Silakan coba lagi.'));
