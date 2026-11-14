@@ -29,10 +29,16 @@ class MainActivity : FlutterActivity(), HandLandmarkerHelper.LandmarkerListener 
         super.configureFlutterEngine(flutterEngine)
 
         methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
-        handLandmarkerHelper = HandLandmarkerHelper(this, this)
+        handLandmarkerHelper = try {
+            HandLandmarkerHelper(this, this)
+        } catch (e: Throwable) {
+            Log.e(TAG, "HandLandmarkerHelper gagal dibuat: ${e.message}", e)
+            null
+        }
 
         methodChannel?.setMethodCallHandler { call: MethodCall, result: MethodChannel.Result ->
             when (call.method) {
+                "isAvailable" -> result.success(handLandmarkerHelper?.isAvailable() ?: false)
                 "processJpegFrame" -> handleJpegFrame(call, result)
                 "processYuvFrame" -> handleYuvFrame(call, result)
                 "close" -> {
@@ -58,7 +64,7 @@ class MainActivity : FlutterActivity(), HandLandmarkerHelper.LandmarkerListener 
                 if (bitmap != null) {
                     handLandmarkerHelper?.detectLiveStream(bitmap, rotation)
                 }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 Log.e(TAG, "Error decode JPEG: ${e.message}", e)
             }
         }
@@ -87,7 +93,7 @@ class MainActivity : FlutterActivity(), HandLandmarkerHelper.LandmarkerListener 
                 if (bitmap != null) {
                     handLandmarkerHelper?.detectLiveStream(bitmap, rotation)
                 }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 Log.e(TAG, "Error convert YUV: ${e.message}", e)
             }
         }

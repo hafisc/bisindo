@@ -42,4 +42,7 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/status').status == 200 else 1)"
 
-CMD ["sh", "-c", "gunicorn --chdir /app/web --bind 0.0.0.0:${PORT} --workers 2 --timeout 120 run:app"]
+# Satu worker: model SVM dimuat per proses, dan aktivasi model dari panel admin
+# hanya berlaku pada proses yang melayani request tersebut. Satu worker juga
+# menghindari dua proses membuat tabel database bersamaan saat start.
+CMD ["sh", "-c", "gunicorn --chdir /app/web --bind 0.0.0.0:${PORT} --workers 1 --timeout 120 run:app"]
