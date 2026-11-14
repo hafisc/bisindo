@@ -1,0 +1,171 @@
+{
+  "baris_sebelum": 7893,
+  "baris_sesudah": 6733,
+  "baris_dibuang": 1160,
+  "dibuang_per_aturan": {
+    "nilai_tidak_terhingga": 0,
+    "penanda_dua_tangan": 0,
+    "normalisasi_tidak_sesuai": 0,
+    "duplikat_landmark": 1160
+  },
+  "sampel_per_kelas": {
+    "A": {
+      "sebelum": 223,
+      "sesudah": 203,
+      "dibuang": 20,
+      "persen_dua_tangan": 84.7
+    },
+    "B": {
+      "sebelum": 306,
+      "sesudah": 251,
+      "dibuang": 55,
+      "persen_dua_tangan": 57.4
+    },
+    "C": {
+      "sebelum": 292,
+      "sesudah": 260,
+      "dibuang": 32,
+      "persen_dua_tangan": 0.0
+    },
+    "D": {
+      "sebelum": 325,
+      "sesudah": 272,
+      "dibuang": 53,
+      "persen_dua_tangan": 73.2
+    },
+    "E": {
+      "sebelum": 311,
+      "sesudah": 277,
+      "dibuang": 34,
+      "persen_dua_tangan": 0.0
+    },
+    "F": {
+      "sebelum": 284,
+      "sesudah": 252,
+      "dibuang": 32,
+      "persen_dua_tangan": 42.5
+    },
+    "G": {
+      "sebelum": 291,
+      "sesudah": 229,
+      "dibuang": 62,
+      "persen_dua_tangan": 76.9
+    },
+    "H": {
+      "sebelum": 282,
+      "sesudah": 228,
+      "dibuang": 54,
+      "persen_dua_tangan": 82.9
+    },
+    "I": {
+      "sebelum": 353,
+      "sesudah": 311,
+      "dibuang": 42,
+      "persen_dua_tangan": 0.3
+    },
+    "J": {
+      "sebelum": 340,
+      "sesudah": 294,
+      "dibuang": 46,
+      "persen_dua_tangan": 1.7
+    },
+    "K": {
+      "sebelum": 260,
+      "sesudah": 207,
+      "dibuang": 53,
+      "persen_dua_tangan": 95.2
+    },
+    "L": {
+      "sebelum": 323,
+      "sesudah": 273,
+      "dibuang": 50,
+      "persen_dua_tangan": 0.4
+    },
+    "M": {
+      "sebelum": 355,
+      "sesudah": 321,
+      "dibuang": 34,
+      "persen_dua_tangan": 64.5
+    },
+    "N": {
+      "sebelum": 350,
+      "sesudah": 302,
+      "dibuang": 48,
+      "persen_dua_tangan": 57.0
+    },
+    "O": {
+      "sebelum": 306,
+      "sesudah": 268,
+      "dibuang": 38,
+      "persen_dua_tangan": 4.9
+    },
+    "P": {
+      "sebelum": 354,
+      "sesudah": 354,
+      "dibuang": 0,
+      "persen_dua_tangan": 61.9
+    },
+    "Q": {
+      "sebelum": 258,
+      "sesudah": 203,
+      "dibuang": 55,
+      "persen_dua_tangan": 92.1
+    },
+    "R": {
+      "sebelum": 342,
+      "sesudah": 293,
+      "dibuang": 49,
+      "persen_dua_tangan": 0.0
+    },
+    "S": {
+      "sebelum": 339,
+      "sesudah": 285,
+      "dibuang": 54,
+      "persen_dua_tangan": 82.1
+    },
+    "T": {
+      "sebelum": 271,
+      "sesudah": 224,
+      "dibuang": 47,
+      "persen_dua_tangan": 95.5
+    },
+    "U": {
+      "sebelum": 293,
+      "sesudah": 228,
+      "dibuang": 65,
+      "persen_dua_tangan": 0.9
+    },
+    "V": {
+      "sebelum": 351,
+      "sesudah": 315,
+      "dibuang": 36,
+      "persen_dua_tangan": 0.3
+    },
+    "W": {
+      "sebelum": 280,
+      "sesudah": 239,
+      "dibuang": 41,
+      "persen_dua_tangan": 90.0
+    },
+    "X": {
+      "sebelum": 291,
+      "sesudah": 234,
+      "dibuang": 57,
+      "persen_dua_tangan": 96.6
+    },
+    "Y": {
+      "sebelum": 217,
+      "sesudah": 164,
+      "dibuang": 53,
+      "persen_dua_tangan": 62.2
+    },
+    "Z": {
+      "sebelum": 296,
+      "sesudah": 246,
+      "dibuang": 50,
+      "persen_dua_tangan": 2.4
+    }
+  },
+  "kelas_tersedikit": "Y",
+  "kelas_terbanyak": "P"
+}

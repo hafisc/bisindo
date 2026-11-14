@@ -154,6 +154,8 @@ def evaluate(
             ),
             key=lambda item: item["f1"],
         )[:5],
+        "total_errors": int(len(y_test) - np.trace(matrix)),
+        "most_confused": most_confused_pairs(matrix, class_names),
     }
 
     (output_dir / "evaluation.json").write_text(
@@ -171,9 +173,34 @@ def evaluate(
     print("Kelas terlemah:")
     for item in result["weakest_classes"]:
         print(f"  {item['class']}: F1={item['f1']:.4f}")
+    print(f"Huruf paling sering tertukar ({result['total_errors']} kesalahan total):")
+    for pair in result["most_confused"]:
+        print(f"  {pair['actual']} terbaca {pair['predicted']}: {pair['count']} kali")
     print(f"Hasil disimpan di: {output_dir}")
 
     return result
+
+
+def most_confused_pairs(matrix, class_names, top: int = 5) -> list[dict]:
+    """Pasangan huruf yang paling sering tertukar, diambil dari luar diagonal.
+
+    Dipakai untuk analisis kesalahan: pasangan dengan jumlah tertinggi biasanya
+    punya bentuk tangan yang mirip, misalnya posisi jari yang hanya berbeda
+    sedikit.
+    """
+    errors = np.array(matrix, copy=True)
+    np.fill_diagonal(errors, 0)
+
+    pairs = [
+        {
+            "actual": class_names[actual],
+            "predicted": class_names[predicted],
+            "count": int(errors[actual, predicted]),
+        }
+        for actual, predicted in zip(*np.nonzero(errors))
+    ]
+    pairs.sort(key=lambda pair: (-pair["count"], pair["actual"], pair["predicted"]))
+    return pairs[:top]
 
 
 def _plot_confusion_matrix(plt, matrix, class_names, accuracy, f1, output_dir):

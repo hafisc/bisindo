@@ -7,6 +7,7 @@ import joblib
 import numpy as np
 import pytest
 
+from dataset.clean_dataset import build_report, clean_frame
 from dataset.data_loader import (
     FEATURE_COLUMNS,
     FEATURE_COUNT,
@@ -17,6 +18,7 @@ from dataset.data_loader import (
     encode_labels,
     load_dataset,
     load_real_data,
+    read_frame,
     validate_columns,
 )
 from training.train_svm import (
@@ -51,14 +53,82 @@ def test_urutan_fitur_sesuai_kontrak():
 # ── Pemuatan dataset ─────────────────────────────────────────────────────────
 
 
+# Dataset mentah 7.893 baris; 1.160 di antaranya duplikat landmark.
+RAW_ROWS = 7893
+CLEAN_ROWS = 6733
+
+
 def test_dataset_asli_terbaca():
     features, labels = load_dataset()
 
-    assert features.shape == (7893, 127)
+    assert features.shape == (CLEAN_ROWS, 127)
     assert features.dtype == np.float32
     assert set(labels) == set(ALPHABET)
     assert not np.isnan(features).any()
     assert not np.isinf(features).any()
+
+
+def test_dataset_mentah_tetap_bisa_dimuat():
+    features, _ = load_dataset(clean=False)
+
+    assert features.shape == (RAW_ROWS, 127)
+
+
+def test_data_bersih_tanpa_duplikat_landmark():
+    frame = read_frame()
+
+    assert not frame.duplicated(subset=FEATURE_COLUMNS).any()
+
+
+def _contoh_baris(label="A", two_handed=False):
+    """Satu baris valid: pergelangan di titik nol, titik 9 berjarak 1."""
+    row = {column: 0.0 for column in FEATURE_COLUMNS}
+    row["label"] = label
+    row["h1_pt9_y"] = -1.0
+    row["h1_pt8_y"] = -1.5
+    if two_handed:
+        row["h2_pt0_x"] = 2.0
+        row[TWO_HANDED_COLUMN] = 1
+    else:
+        row[TWO_HANDED_COLUMN] = 0
+    return row
+
+
+def test_pembersihan_membuang_tiap_jenis_data_tidak_valid():
+    import pandas as pd
+
+    valid = _contoh_baris("A")
+    duplikat = dict(valid)
+    nan_row = _contoh_baris("B")
+    nan_row["h1_pt4_x"] = float("nan")
+    flag_salah = _contoh_baris("C", two_handed=True)
+    flag_salah[TWO_HANDED_COLUMN] = 0
+    skala_salah = _contoh_baris("D")
+    skala_salah["h1_pt9_y"] = -2.0
+    dua_tangan = _contoh_baris("E", two_handed=True)
+
+    frame = pd.DataFrame([valid, duplikat, nan_row, flag_salah, skala_salah, dua_tangan])
+    clean, counts = clean_frame(frame)
+
+    assert list(clean["label"]) == ["A", "E"]
+    assert counts == {
+        "nilai_tidak_terhingga": 1,
+        "penanda_dua_tangan": 1,
+        "normalisasi_tidak_sesuai": 1,
+        "duplikat_landmark": 1,
+    }
+
+
+def test_laporan_jumlah_sampel_per_kelas():
+    raw = read_frame(clean=False)
+    clean, counts = clean_frame(raw)
+    report = build_report(raw, clean, counts)
+
+    assert report["baris_sebelum"] == RAW_ROWS
+    assert report["baris_sesudah"] == CLEAN_ROWS
+    assert set(report["sampel_per_kelas"]) == set(ALPHABET)
+    assert sum(row["sesudah"] for row in report["sampel_per_kelas"].values()) == CLEAN_ROWS
+    assert report["kelas_tersedikit"] == "Y"
 
 
 def test_label_terenkode_urut_abjad():
@@ -75,7 +145,7 @@ def test_split_stratified_seimbang():
 
     assert x_train.shape[1] == 127
     assert len(class_names) == 26
-    assert len(y_train) + len(y_test) == 7893
+    assert len(y_train) + len(y_test) == CLEAN_ROWS
 
     # Setiap kelas harus muncul di kedua bagian.
     assert set(y_train) == set(range(26))
@@ -105,7 +175,7 @@ def test_hitungan_tumpang_tindih_nama_berkas():
     overlap = count_filename_overlap()
 
     assert overlap["shared_names"] > 0
-    assert overlap["train_rows"] + overlap["test_rows"] == 7893
+    assert overlap["train_rows"] + overlap["test_rows"] == CLEAN_ROWS
 
 
 # ── Model ────────────────────────────────────────────────────────────────────
@@ -196,8 +266,28 @@ def test_evaluasi_model_tersimpan(tmp_path):
     assert result["accuracy"] >= 0.90
     assert 0.0 <= result["macro_f1"] <= 1.0
     assert len(result["weakest_classes"]) == 5
+    assert 1 <= len(result["most_confused"]) <= 5
+    assert result["total_errors"] >= sum(pair["count"] for pair in result["most_confused"])
     assert (output_dir / "classification_report.txt").exists()
     assert (output_dir / "evaluation.json").exists()
+
+
+def test_pasangan_huruf_tertukar_diurutkan_dari_terbanyak():
+    from evaluation.evaluate_svm import most_confused_pairs
+
+    matrix = np.array(
+        [
+            [9, 1, 0],
+            [3, 7, 0],
+            [0, 2, 8],
+        ]
+    )
+    pairs = most_confused_pairs(matrix, ["A", "B", "C"], top=2)
+
+    assert pairs == [
+        {"actual": "B", "predicted": "A", "count": 3},
+        {"actual": "C", "predicted": "B", "count": 2},
+    ]
 
 
 def test_evaluasi_tanpa_model_memberi_pesan_jelas(tmp_path):
