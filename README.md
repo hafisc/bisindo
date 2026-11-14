@@ -6,14 +6,14 @@ Aplikasi ini dikembangkan sebagai proyek mata kuliah (Project Based Learning) un
 
 ## Status Pengembangan Proyek
 
-Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keseluruhan mencapai **85%** (per 15 November 2026). Angka keseluruhan adalah rata-rata berbobot: Mobile 40%, Web 30%, Machine Learning 30%.
+Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keseluruhan mencapai **87%** (per 15 November 2026). Angka keseluruhan adalah rata-rata berbobot: Mobile 40%, Web 30%, Machine Learning 30%.
 
 ### Ringkasan per Komponen
 
 | Komponen | Status | Penyelesaian | Deskripsi |
 | :--- | :--- | :---: | :--- |
 | Mobile (Flutter) | Dalam Pengembangan | 78% | Autentikasi (email, Google, lupa password, verifikasi email), Beranda, scan realtime dengan MediaPipe native dan TTS, riwayat lokal yang tersinkron ke server, serta edit profil, foto profil, ganti password, dan hapus akun sudah berjalan. Sisa: Mode Belajar dan Favorit (masih "segera hadir"), konten kamus yang masih dummy tanpa gambar peragaan dan belum mengambil data dari `/api/dictionary`. |
-| Web Dashboard & API | Fitur Lengkap | 95% | Panel admin (dashboard, pengguna, log, dataset, model) dan seluruh endpoint `/api/predict`, `/api/history`, `/api/profile`, `/api/dictionary` selesai dengan 151 test lolos. Docker dan Procfile untuk deploy sudah disiapkan. Sisa: verifikasi Firebase ID token (lihat bagian Keamanan API) dan menjalankan deploy ke cloud. |
+| Web Dashboard & API | Selesai | 100% | Panel admin (dashboard, pengguna, log, dataset, model) dan seluruh endpoint `/api/predict`, `/api/history`, `/api/profile`, `/api/dictionary` selesai dengan 151 test lolos. Docker dan Procfile untuk deploy sudah disiapkan. Verifikasi Firebase ID token dan deploy ke cloud dicatat sebagai pengembangan lanjutan (lihat bagian Keamanan API). |
 | Machine Learning | Dalam Pengembangan | 85% | Model SVM RBF dilatih pada 127 fitur landmark untuk huruf A-Z dengan akurasi 97,91%. Evaluasi (confusion matrix, F1 per kelas, perbandingan kernel) selesai dan model sudah disajikan lewat web API. Sisa: model baru mengenali huruf, belum kosa kata umum. |
 
 Catatan arsitektur: inferensi saat ini dilakukan di server Flask, bukan on-device. Model SVM tidak bisa dikonversi langsung ke TFLite, sehingga rencana TFLite perlu diputuskan ulang oleh tim (tetap di server, atau melatih model jaringan saraf terpisah untuk mode offline).
