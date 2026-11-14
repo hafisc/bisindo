@@ -62,3 +62,4 @@ Thumbs.db
 # ── Custom Exclusions ─────────────────────────────────────────────────────────
 /bisindo/
 /docs/
+mobile/android/build/reports/
