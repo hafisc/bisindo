@@ -144,6 +144,7 @@ ml/
     dataset/
       data_loader.py                  # baca CSV, bersihkan, susun 127 fitur, split
       clean_dataset.py                # aturan pembersihan dan laporan per huruf
+      extract_landmarks.py            # foto per huruf -> CSV landmark MediaPipe
       dataset_bisindo_landmarks.csv   # data mentah (7.893 baris, 6.733 setelah bersih)
     training/
       train_svm.py                    # latih SVM dan simpan artefak
@@ -167,6 +168,25 @@ Pasang dependency:
 
 ```bash
 pip install -r ml/requirements.txt
+```
+
+Membuat dataset dari foto (opsional, CSV di repo sudah jadi). Susun foto dalam
+subfolder per huruf, misalnya `ml/data/raw/A/`, `ml/data/raw/B/`, lalu:
+
+```bash
+python ml/src/dataset/extract_landmarks.py --input ml/data/raw --output ml/data/processed/landmarks.csv --flip
+```
+
+`--flip` menambahkan versi cermin tiap foto dengan `is_flip=1`, sama seperti
+dataset asli. Model MediaPipe diambil dari aset Android
+(`hand_landmarker.task`), jadi tidak perlu diunduh terpisah. Normalisasinya
+identik dengan server (`web/app/api/services.py`). Tangan dengan pergelangan
+paling kiri di gambar menjadi tangan 1; aturan ini cocok dengan 96% sampel dua
+tangan di dataset asli, dan server tetap menguji kedua urutan tangan saat
+prediksi. Hasilnya bisa langsung dilatih:
+
+```bash
+python ml/src/training/train_svm.py --csv ml/data/processed/landmarks.csv
 ```
 
 Latih model dan simpan artefak:
