@@ -130,7 +130,12 @@ def test_halaman_model_kosong_menampilkan_model_bawaan(client):
     html = client.get("/admin/model").get_data(as_text=True)
 
     assert "Belum ada versi model yang diunggah" in html
-    assert "97,9%" in html or "97.9%" in html
+    # Angka diambil dari metrics.json supaya test tidak perlu diubah setiap
+    # kali model dilatih ulang.
+    from app.admin import format_percent
+
+    accuracy = json.loads((ARTIFACT_DIR / "metrics.json").read_text())["accuracy"]
+    assert format_percent(accuracy) in html
     assert "127" in html
     assert "26" in html
 
