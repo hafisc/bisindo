@@ -74,6 +74,7 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
   List<DetectedHand> detectedHands = const [];
 
   bool ttsEnabled = true;
+  bool showSkeleton = true;
 
   String? _userId;
   String? _userName;
@@ -177,6 +178,11 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
     _stabilizer.reset();
     notifyListeners();
     unawaited(_checkServer());
+  }
+
+  void toggleSkeleton() {
+    showSkeleton = !showSkeleton;
+    notifyListeners();
   }
 
   Future<void> toggleTts() async {
