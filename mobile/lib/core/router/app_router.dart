@@ -16,6 +16,7 @@ import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/history/presentation/pages/history_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/pages/main_wrapper_page.dart';
+import '../../features/learn/presentation/pages/learn_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/scan/presentation/pages/scan_page.dart';
@@ -34,6 +35,7 @@ abstract class AppRoutes {
   static const String emailVerification = '/email-verification';
   static const String home = '/home';
   static const String scan = '/scan';
+  static const String learn = '/learn';
   static const String notifications = '/notifications';
   static const String dictionary = '/dictionary';
   static const String dictionaryDetail = '/dictionary/:id';
@@ -155,6 +157,12 @@ class AppRouter {
         path: AppRoutes.scan,
         name: 'scan',
         builder: (context, state) => const ScanPage(),
+      ),
+      // Mode Belajar memakai kamera layar penuh seperti Scan.
+      GoRoute(
+        path: AppRoutes.learn,
+        name: 'learn',
+        builder: (context, state) => const LearnPage(),
       ),
       // Notifikasi dibuka dari lonceng Beranda lewat context.push, tanpa
       // bottom nav, dan bisa kembali dengan tombol back.
