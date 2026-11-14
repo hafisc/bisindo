@@ -30,6 +30,12 @@
       <a id="nav-logs" href="{{ url_for('admin.logs') }}" class="{{ 'active' if request.endpoint == 'admin.logs' }}">
         {{ icon("logs") }} Log Deteksi
       </a>
+      <a id="nav-dataset" href="{{ url_for('admin.dataset') }}" class="{{ 'active' if request.endpoint == 'admin.dataset' }}">
+        {{ icon("dataset") }} Dataset
+      </a>
+      <a id="nav-model" href="{{ url_for('admin.model_versions') }}" class="{{ 'active' if request.endpoint == 'admin.model_versions' }}">
+        {{ icon("model") }} Model
+      </a>
     </nav>
 
     <div class="sidebar-foot">

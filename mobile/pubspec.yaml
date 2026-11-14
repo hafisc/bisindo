@@ -43,7 +43,6 @@ dependencies:
   # ── Camera & ML ───────────────────────────────────────────────
   camera: ^0.11.0
   # tflite_flutter: ^0.11.0  # Aktifkan saat model .tflite sudah siap
-  image: ^4.5.4
 
   # ── Text to Speech ────────────────────────────────────────────
   flutter_tts: ^4.2.0
@@ -68,8 +67,7 @@ dependencies:
   # ── Utils ─────────────────────────────────────────────────────
   intl: ^0.20.2
   connectivity_plus: ^7.3.1
-  flutter_image_compress: ^2.5.1
-  image_picker: ^1.2.4
+  image_picker: ^1.2.1
 
 dev_dependencies:
   flutter_test:
