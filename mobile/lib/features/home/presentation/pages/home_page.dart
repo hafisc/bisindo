@@ -52,7 +52,7 @@ class HomePage extends StatelessWidget {
                 const SizedBox(height: 18),
                 HomeMenuGrid(
                   onDictionaryTap: () => context.go(AppRoutes.dictionary),
-                  onLearnTap: () => _showComingSoon(context),
+                  onLearnTap: () => context.push(AppRoutes.learn),
                   onHistoryTap: () => context.go(AppRoutes.history),
                   onFavoriteTap: () => _showComingSoon(context),
                 ),

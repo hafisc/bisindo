@@ -28,6 +28,8 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
     CameraService? cameraService,
     NativeHandLandmarkerService? landmarkerService,
     this.onLetterCommitted,
+    this.onLetterRecognized,
+    this.recordHistory = true,
   })  : _apiClient = apiClient ?? PredictionApiClient(),
         _ttsService = ttsService ?? TtsService(),
         _stabilizer = stabilizer ?? PredictionStabilizer(),
@@ -59,6 +61,14 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
   /// Dipanggil setiap kali satu huruf dikunci, agar layar bisa menyimpannya ke
   /// riwayat lokal.
   final void Function(HistoryItem item)? onLetterCommitted;
+
+  /// Dipanggil setiap kali stabilizer mengunci satu huruf, dipakai Mode
+  /// Belajar untuk mencocokkan huruf dengan target.
+  final void Function(String letter, double confidence)? onLetterRecognized;
+
+  /// `false` untuk Mode Belajar: huruf yang dikunci tidak ditambahkan ke
+  /// teks hasil, tidak disimpan ke riwayat, dan tidak dibacakan.
+  final bool recordHistory;
 
   StreamSubscription<List<DetectedHand>>? _landmarkSub;
   Timer? _handsLostTimer;
@@ -257,7 +267,8 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
 
       final committed = _stabilizer.add(result);
       if (committed != null) {
-        _commitLetter(committed, result.confidence);
+        onLetterRecognized?.call(committed, result.confidence);
+        if (recordHistory) _commitLetter(committed, result.confidence);
       }
       notifyListeners();
     } on PredictionException catch (error) {

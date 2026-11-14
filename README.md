@@ -6,29 +6,44 @@ Aplikasi ini dikembangkan sebagai proyek mata kuliah (Project Based Learning) un
 
 ## Status Pengembangan Proyek
 
-Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keseluruhan mencapai **87%** (per 15 November 2026). Angka keseluruhan adalah rata-rata berbobot: Mobile 40%, Web 30%, Machine Learning 30%.
+Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keseluruhan mencapai **93%** (per 15 November 2026). Angka keseluruhan adalah rata-rata berbobot: Mobile 40%, Web 30%, Machine Learning 30%.
 
 ### Ringkasan per Komponen
 
 | Komponen | Status | Penyelesaian | Deskripsi |
 | :--- | :--- | :---: | :--- |
-| Mobile (Flutter) | Dalam Pengembangan | 78% | Autentikasi (email, Google, lupa password, verifikasi email), Beranda, scan realtime dengan MediaPipe native dan TTS, riwayat lokal yang tersinkron ke server, serta edit profil, foto profil, ganti password, dan hapus akun sudah berjalan. Sisa: Mode Belajar dan Favorit (masih "segera hadir"), konten kamus yang masih dummy tanpa gambar peragaan dan belum mengambil data dari `/api/dictionary`. |
+| Mobile (Flutter) | Dalam Pengembangan | 92% | Autentikasi (email, Google, lupa password, verifikasi email), Beranda, scan realtime dengan MediaPipe native dan TTS, Mode Belajar (latihan huruf acak dengan kamera dan skor), riwayat lokal yang tersinkron ke server, serta edit profil, foto profil, ganti password, dan hapus akun sudah berjalan. Sisa: menu Favorit (masih "segera hadir"), foto peragaan dan penjelasan cara memperagakan di kamus yang masih dummy, dan rilis APK release. |
 | Web Dashboard & API | Selesai | 100% | Panel admin (dashboard, pengguna, log, dataset, model) dan seluruh endpoint `/api/predict`, `/api/history`, `/api/profile`, `/api/dictionary` selesai dengan 151 test lolos. Docker dan Procfile untuk deploy sudah disiapkan. Verifikasi Firebase ID token dan deploy ke cloud dicatat sebagai pengembangan lanjutan (lihat bagian Keamanan API). |
-| Machine Learning | Dalam Pengembangan | 85% | Model SVM RBF dilatih pada 127 fitur landmark untuk huruf A-Z dengan akurasi 97,91%. Evaluasi (confusion matrix, F1 per kelas, perbandingan kernel) selesai dan model sudah disajikan lewat web API. Sisa: model baru mengenali huruf, belum kosa kata umum. |
+| Machine Learning | Dalam Pengembangan | 88% | Model SVM RBF dilatih pada 127 fitur landmark untuk huruf A-Z dengan akurasi 97,91%. Evaluasi (metrik per kelas, confusion matrix 26x26, analisis huruf yang sering tertukar, perbandingan kernel) selesai dan model sudah disajikan lewat web API. Sisa: script ekstraksi landmark MediaPipe belum masuk repo (baru hasil CSV-nya), pembersihan data tidak valid, dan dokumentasi jumlah sampel per kelas. |
 
-Catatan arsitektur: inferensi saat ini dilakukan di server Flask, bukan on-device. Model SVM tidak bisa dikonversi langsung ke TFLite, sehingga rencana TFLite perlu diputuskan ulang oleh tim (tetap di server, atau melatih model jaringan saraf terpisah untuk mode offline).
+### Perubahan Lingkup karena Arsitektur
+
+Dua rencana awal di issue tidak lagi dikerjakan dan tidak dihitung dalam progres:
+
+1. **Konversi dan integrasi TFLite** (Issue #1 dan #3). Model akhir adalah SVM, yang tidak bisa dikonversi langsung ke TFLite. Prediksi dijalankan di server lewat `POST /api/predict`, mobile cukup mengirim landmark MediaPipe.
+2. **Endpoint `/api/auth/register`, `/api/auth/login`, dan `/api/auth/me`** (Issue #2). Login dan register ditangani langsung oleh Firebase Auth dari aplikasi, sedangkan server mengenali pengguna dari Firebase UID.
+
+Pengenalan kosa kata (bukan hanya huruf) dan mode offline dicatat sebagai pengembangan lanjutan.
 
 ### Pembagian Tugas dan Status Tim
 
 | Anggota Tim | Fokus Tugas | Referensi Task | Progres |
 | :--- | :--- | :--- | :---: |
-| Aryaputra Ferdiananta | Modul Kamus BISINDO & Konversi Model TFLite | [Issue #1](https://github.com/hafisc/bisindo/issues/1) | 45% |
-| Fadhil Taufiqurrachman | Modul Autentikasi & Pipeline Dataset MediaPipe | [Issue #2](https://github.com/hafisc/bisindo/issues/2) | 90% |
-| M. Aldyth Rafiansyah Fauzi | Antarmuka Scan Kamera & Training Model Klasifikasi | [Issue #3](https://github.com/hafisc/bisindo/issues/3) | 90% |
-| Mohammad Al Hafis H. | Halaman Beranda, Dashboard Admin, & Evaluasi Model | [Issue #4](https://github.com/hafisc/bisindo/issues/4) | 90% |
-| Mokhamad Rizki Hadiono S. | Riwayat Deteksi, Manajemen Profil, & Pengumpulan Data | [Issue #5](https://github.com/hafisc/bisindo/issues/5) | 90% |
+| Aryaputra Ferdiananta | Modul Kamus BISINDO & Konversi Model TFLite | [Issue #1](https://github.com/hafisc/bisindo/issues/1) | 80% |
+| Fadhil Taufiqurrachman | Modul Autentikasi & Pipeline Dataset MediaPipe | [Issue #2](https://github.com/hafisc/bisindo/issues/2) | 94% |
+| M. Aldyth Rafiansyah Fauzi | Antarmuka Scan Kamera & Training Model Klasifikasi | [Issue #3](https://github.com/hafisc/bisindo/issues/3) | 100% |
+| Mohammad Al Hafis H. | Halaman Beranda, Dashboard Admin, & Evaluasi Model | [Issue #4](https://github.com/hafisc/bisindo/issues/4) | 95% |
+| Mokhamad Rizki Hadiono S. | Riwayat Deteksi, Manajemen Profil, & Pengumpulan Data | [Issue #5](https://github.com/hafisc/bisindo/issues/5) | 91% |
 
-Progres per anggota dihitung dari kondisi modul yang menjadi tanggung jawabnya di kode, bukan dari jumlah commit.
+Progres per anggota dihitung dari checklist di issue masing-masing: jumlah item yang selesai dibagi jumlah item, dengan item yang baru sebagian selesai dihitung setengah. Item yang keluar dari lingkup (lihat bagian sebelumnya) tidak ikut dihitung.
+
+| Anggota | Item selesai | Sisa pekerjaan |
+| :--- | :---: | :--- |
+| Aryaputra | 4 dari 5 | Foto atau ilustrasi peragaan tiap huruf, penjelasan cara memperagakan yang masih teks dummy |
+| Fadhil | 7,5 dari 8 | Script ekstraksi MediaPipe dari foto mentah belum masuk repo |
+| Aldyth | 9 dari 9 | Tidak ada. Mode Belajar dikerjakan di luar lingkup issue |
+| Hafis | 10,5 dari 11 | Rilis APK release (APK debug sudah bisa dibangun) |
+| Rizki | 14,5 dari 16 | Pembersihan data tidak valid, dokumentasi jumlah sampel per kelas |
 
 ## Daftar Fitur
 
