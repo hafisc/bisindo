@@ -4,7 +4,14 @@ from ..extensions import db
 from ..models import DetectionLog
 from . import bp
 from .identity import resolve_user_id
-from .services import get_model, predict_landmarks, preprocess_landmarks
+from .services import (
+    FEATURE_COUNT,
+    get_classes,
+    get_model,
+    get_model_info,
+    predict_variants,
+    preprocess_landmarks_variants,
+)
 
 
 @bp.get("/status")
@@ -15,14 +22,30 @@ def status():
         "status": "online",
         "service": "BISINDO Sign Language Prediction API",
         "model_loaded": model is not None,
+        "feature_count": FEATURE_COUNT,
+        "class_count": len(get_classes()),
     })
+
+
+@bp.get("/model")
+def model_info():
+    """Informasi model aktif, dipakai mobile untuk cek kompatibilitas.
+
+    Berisi jumlah fitur, daftar kelas, dan akurasi model. Aplikasi bisa
+    membandingkan ``feature_count`` dengan yang dikirimnya sebelum memanggil
+    ``/api/predict``, sehingga kesalahan format terdeteksi lebih awal.
+    """
+    info = get_model_info()
+    return jsonify(info), 200 if info.get("loaded") else 503
 
 
 @bp.post("/predict")
 def predict():
     """
-    Endpoint utama prediksi huruf BISINDO dari 21 titik landmark tangan.
-    Menerima format array landmark (21 titik).
+    Endpoint utama prediksi huruf BISINDO dari landmark tangan.
+
+    Menerima 21 titik (satu tangan) atau 42 titik (dua tangan), dalam bentuk
+    list koordinat, dict ``{x, y, z}``, maupun flat array 63/126 nilai.
     Mengembalikan prediksi huruf dan confidence score.
     """
     if not request.is_json:
@@ -33,29 +56,33 @@ def predict():
         return jsonify({"error": "JSON body tidak valid atau kosong."}), 400
 
     try:
-        features = preprocess_landmarks(payload)
+        variants = preprocess_landmarks_variants(payload)
     except ValueError as val_err:
         return jsonify({"error": f"Validasi data landmark gagal: {str(val_err)}"}), 400
     except Exception as e:
         return jsonify({"error": f"Terjadi kesalahan saat memproses data: {str(e)}"}), 400
 
-    result, err = predict_landmarks(features)
+    result, err = predict_variants(variants)
     if err:
         return jsonify({"error": err}), 503
 
-    # Simpan hasil deteksi ke riwayat database (DetectionLog)
-    # Ini otomatis memberi makan dashboard admin tim
+    # Simpan hasil deteksi ke riwayat database hanya bila diminta lewat
+    # "log": true. Aplikasi mobile memanggil endpoint ini sekitar lima kali per
+    # detik, jadi menyimpan setiap frame akan membanjiri tabel. Riwayat yang
+    # benar-benar dipakai dikirim sekali per huruf ke POST /api/history.
     try:
-        # Mobile mengirim Firebase UID, bukan primary key. Helper ini
-        # menerjemahkannya supaya log terhubung ke profil yang benar.
-        raw_user = payload.get("user_id") if isinstance(payload, dict) else None
-        log = DetectionLog(
-            user_id=resolve_user_id(raw_user),
-            letter=result["prediction"],
-            confidence=result["confidence"],
-        )
-        db.session.add(log)
-        db.session.commit()
+        simpan_log = isinstance(payload, dict) and payload.get("log") is True
+        if simpan_log:
+            # Mobile mengirim Firebase UID, bukan primary key. Helper ini
+            # menerjemahkannya supaya log terhubung ke profil yang benar.
+            raw_user = payload.get("user_id")
+            log = DetectionLog(
+                user_id=resolve_user_id(raw_user),
+                letter=result["prediction"],
+                confidence=result["confidence"],
+            )
+            db.session.add(log)
+            db.session.commit()
     except Exception:
         db.session.rollback()
 

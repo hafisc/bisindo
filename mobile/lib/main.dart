@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
+import 'core/config/api_config.dart';
 import 'core/di/injection.dart';
 
 void main() async {
@@ -20,6 +21,9 @@ void main() async {
   // Initialize SharedPreferences
   final prefs = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(prefs);
+
+  // Muat alamat server yang tersimpan di perangkat (bisa diubah di layar Scan).
+  await ApiConfig.load();
 
   // Initialize Firebase
   // ⚠️ Pastikan google-services.json sudah ada di android/app/

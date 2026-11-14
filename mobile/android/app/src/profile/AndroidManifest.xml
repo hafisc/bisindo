@@ -4,4 +4,9 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Sama seperti build debug: profil dipakai untuk mengukur performa di
+         jaringan lokal, dan server pengembangan memakai HTTP polos. Build
+         release tidak memakai file ini. -->
+    <application android:usesCleartextTraffic="true"/>
 </manifest>

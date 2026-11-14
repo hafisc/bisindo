@@ -218,7 +218,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  initialValue: _selectedRole,
+                  // `initialValue` baru ada di Flutter 3.35, sedangkan README
+                  // menetapkan minimal 3.32. `value` jalan di kedua versi.
+                  value: _selectedRole,
                   decoration: _inputDecoration(
                     icon: Icons.groups_outlined,
                   ),
