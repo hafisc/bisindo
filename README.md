@@ -12,7 +12,7 @@ Proyek ini sedang dalam tahap pengembangan aktif dengan estimasi progres keselur
 
 | Komponen | Status | Penyelesaian | Deskripsi |
 | :--- | :--- | :---: | :--- |
-| Mobile (Flutter) | Dalam Pengembangan | 92% | Autentikasi (email, Google, lupa password, verifikasi email), Beranda, scan realtime dengan MediaPipe native dan TTS, Mode Belajar (latihan huruf acak dengan kamera dan skor), riwayat lokal yang tersinkron ke server, serta edit profil, foto profil, ganti password, dan hapus akun sudah berjalan. Sisa: menu Favorit (masih "segera hadir"), foto peragaan dan penjelasan cara memperagakan di kamus yang masih dummy, dan rilis APK release. |
+| Mobile (Flutter) | Dalam Pengembangan | 92% | Autentikasi (email, Google, lupa password, verifikasi email), Beranda, scan realtime dengan MediaPipe native dan TTS, Mode Belajar (latihan huruf acak dengan kamera dan skor), riwayat lokal yang tersinkron ke server, serta edit profil, foto profil, ganti password, dan hapus akun sudah berjalan. Sisa: menu Favorit (masih "segera hadir"), serta foto peragaan dan penjelasan cara memperagakan di kamus yang masih dummy. APK beta tersedia di [Releases](https://github.com/hafisc/bisindo/releases/tag/v0.9.0-beta). |
 | Web Dashboard & API | Selesai | 100% | Panel admin (dashboard, pengguna, log, dataset, model) dan seluruh endpoint `/api/predict`, `/api/history`, `/api/profile`, `/api/dictionary` selesai dengan 151 test lolos. Docker dan Procfile untuk deploy sudah disiapkan. Verifikasi Firebase ID token dan deploy ke cloud dicatat sebagai pengembangan lanjutan (lihat bagian Keamanan API). |
 | Machine Learning | Dalam Pengembangan | 88% | Model SVM RBF dilatih pada 127 fitur landmark untuk huruf A-Z dengan akurasi 97,91%. Evaluasi (metrik per kelas, confusion matrix 26x26, analisis huruf yang sering tertukar, perbandingan kernel) selesai dan model sudah disajikan lewat web API. Sisa: script ekstraksi landmark MediaPipe belum masuk repo (baru hasil CSV-nya), pembersihan data tidak valid, dan dokumentasi jumlah sampel per kelas. |
 
@@ -32,7 +32,7 @@ Pengenalan kosa kata (bukan hanya huruf) dan mode offline dicatat sebagai pengem
 | Aryaputra Ferdiananta | Modul Kamus BISINDO & Konversi Model TFLite | [Issue #1](https://github.com/hafisc/bisindo/issues/1) | 80% |
 | Fadhil Taufiqurrachman | Modul Autentikasi & Pipeline Dataset MediaPipe | [Issue #2](https://github.com/hafisc/bisindo/issues/2) | 94% |
 | M. Aldyth Rafiansyah Fauzi | Antarmuka Scan Kamera & Training Model Klasifikasi | [Issue #3](https://github.com/hafisc/bisindo/issues/3) | 100% |
-| Mohammad Al Hafis H. | Halaman Beranda, Dashboard Admin, & Evaluasi Model | [Issue #4](https://github.com/hafisc/bisindo/issues/4) | 95% |
+| Mohammad Al Hafis H. | Halaman Beranda, Dashboard Admin, & Evaluasi Model | [Issue #4](https://github.com/hafisc/bisindo/issues/4) | 100% |
 | Mokhamad Rizki Hadiono S. | Riwayat Deteksi, Manajemen Profil, & Pengumpulan Data | [Issue #5](https://github.com/hafisc/bisindo/issues/5) | 91% |
 
 Progres per anggota dihitung dari checklist di issue masing-masing: jumlah item yang selesai dibagi jumlah item, dengan item yang baru sebagian selesai dihitung setengah. Item yang keluar dari lingkup (lihat bagian sebelumnya) tidak ikut dihitung.
@@ -42,7 +42,7 @@ Progres per anggota dihitung dari checklist di issue masing-masing: jumlah item 
 | Aryaputra | 4 dari 5 | Foto atau ilustrasi peragaan tiap huruf, penjelasan cara memperagakan yang masih teks dummy |
 | Fadhil | 7,5 dari 8 | Script ekstraksi MediaPipe dari foto mentah belum masuk repo |
 | Aldyth | 9 dari 9 | Tidak ada. Mode Belajar dikerjakan di luar lingkup issue |
-| Hafis | 10,5 dari 11 | Rilis APK release (APK debug sudah bisa dibangun) |
+| Hafis | 11 dari 11 | Tidak ada. APK release dirilis sebagai [v0.9.0-beta](https://github.com/hafisc/bisindo/releases/tag/v0.9.0-beta) |
 | Rizki | 14,5 dari 16 | Pembersihan data tidak valid, dokumentasi jumlah sampel per kelas |
 
 ## Daftar Fitur
