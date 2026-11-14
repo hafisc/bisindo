@@ -10,6 +10,7 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/presentation/pages/email_verification_page.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
+import '../../features/auth/presentation/pages/legal_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
@@ -23,7 +24,7 @@ import '../../features/scan/presentation/pages/scan_page.dart';
 import '../../features/home/presentation/pages/notification_page.dart';
 import '../../features/dictionary/presentation/pages/dictionary_page.dart';
 import '../../features/dictionary/presentation/pages/dictionary_detail_page.dart';
-
+import '../../features/dictionary/presentation/pages/favorite_page.dart';
 
 /// App-wide route names as constants.
 abstract class AppRoutes {
@@ -42,6 +43,9 @@ abstract class AppRoutes {
   static const String history = '/history';
   static const String profile = '/profile';
   static const String editProfile = '/profile/edit';
+  static const String favorites = '/favorites';
+  static const String terms = '/terms';
+  static const String privacy = '/privacy';
 }
 
 @singleton
@@ -50,10 +54,9 @@ class AppRouter {
 
   @factoryMethod
   AppRouter({AuthRepository? authRepository})
-      : _authRepository = authRepository ??
-            AuthRepositoryImpl(
-              remoteDataSource: AuthRemoteDataSourceImpl(),
-            );
+    : _authRepository =
+          authRepository ??
+          AuthRepositoryImpl(remoteDataSource: AuthRemoteDataSourceImpl());
 
   GoRouter get config => _router;
 
@@ -88,6 +91,9 @@ class AppRouter {
         AppRoutes.forgotPassword,
         AppRoutes.emailVerification,
         AppRoutes.splash,
+        // Dibuka dari halaman Daftar sebelum pengguna punya akun.
+        AppRoutes.terms,
+        AppRoutes.privacy,
       ];
 
       final isPublicRoute = publicRoutes.contains(location);
@@ -178,6 +184,25 @@ class AppRouter {
         name: 'editProfile',
         builder: (context, state) => const EditProfilePage(),
       ),
+      // Favorit dibuka dari menu Beranda lewat context.push, layar penuh
+      // tanpa bottom nav seperti Notifikasi.
+      GoRoute(
+        path: AppRoutes.favorites,
+        name: 'favorites',
+        builder: (context, state) => const FavoritePage(),
+      ),
+      GoRoute(
+        path: AppRoutes.terms,
+        name: 'terms',
+        builder: (context, state) =>
+            const LegalPage(document: LegalDocument.terms),
+      ),
+      GoRoute(
+        path: AppRoutes.privacy,
+        name: 'privacy',
+        builder: (context, state) =>
+            const LegalPage(document: LegalDocument.privacy),
+      ),
       ShellRoute(
         builder: (context, state, child) => MainWrapperPage(child: child),
         routes: [
@@ -194,9 +219,8 @@ class AppRouter {
               GoRoute(
                 path: ':id',
                 name: 'dictionaryDetail',
-                builder: (context, state) => DictionaryDetailPage(
-                  id: state.pathParameters['id'] ?? '',
-                ),
+                builder: (context, state) =>
+                    DictionaryDetailPage(id: state.pathParameters['id'] ?? ''),
               ),
             ],
           ),

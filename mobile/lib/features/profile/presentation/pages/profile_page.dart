@@ -208,10 +208,7 @@ class ProfilePage extends ConsumerWidget {
                         color: AppPalette.gray400,
                         size: 20,
                       ),
-                      onTap: () => _showComingSoon(
-                        context,
-                        'Pengaturan notifikasi segera hadir.',
-                      ),
+                      onTap: () => context.push(AppRoutes.notifications),
                     ),
                     ProfileInfoTile(
                       icon: Icons.language_rounded,
@@ -282,20 +279,6 @@ class ProfilePage extends ConsumerWidget {
           ),
         ],
       );
-
-  static void _showComingSoon(BuildContext context, String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message, style: GoogleFonts.poppins(fontSize: 13)),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      );
-  }
 }
 
 class _EditProfileButton extends StatelessWidget {

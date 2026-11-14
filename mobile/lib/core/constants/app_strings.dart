@@ -50,7 +50,6 @@ class AppStrings {
   static const String homeTipsTitle = 'Tips Hari Ini';
   static const String homeTipsBody =
       'Latih gesture setiap hari\nuntuk meningkatkan akurasi deteksi.';
-  static const String featureComingSoon = 'Fitur ini segera hadir.';
 
   // ── Notification ──────────────────────────────────────────────
   static const String notificationTitle = 'Notifikasi';

@@ -354,9 +354,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                                     ),
                                                     WidgetSpan(
                                                       child: GestureDetector(
-                                                        onTap: () {
-                                                          // TODO: buka halaman syarat & ketentuan
-                                                        },
+                                                        onTap: () =>
+                                                            context.push(
+                                                              AppRoutes.terms,
+                                                            ),
                                                         child: Text(
                                                           'Syarat dan Ketentuan',
                                                           style:
@@ -378,9 +379,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                                     ),
                                                     WidgetSpan(
                                                       child: GestureDetector(
-                                                        onTap: () {
-                                                          // TODO: buka halaman kebijakan privasi
-                                                        },
+                                                        onTap: () =>
+                                                            context.push(
+                                                              AppRoutes.privacy,
+                                                            ),
                                                         child: Text(
                                                           'Kebijakan Privasi',
                                                           style:
