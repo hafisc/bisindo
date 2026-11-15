@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/config/api_config.dart';
 import '../../domain/models/history_item.dart';
@@ -44,15 +45,30 @@ abstract class HistoryRemoteDataSource {
 }
 
 class HistoryRemoteDataSourceImpl implements HistoryRemoteDataSource {
-  HistoryRemoteDataSourceImpl({Dio? dio, String? baseUrl})
-      : _dio = dio ?? Dio(),
-        _baseUrlOverride = baseUrl {
+  HistoryRemoteDataSourceImpl({
+    Dio? dio,
+    String? baseUrl,
+    Future<String?> Function()? idToken,
+  })  : _dio = dio ?? Dio(),
+        _baseUrlOverride = baseUrl,
+        _idToken = idToken ?? _firebaseIdToken {
     _dio.options.connectTimeout ??= const Duration(seconds: 3);
     _dio.options.receiveTimeout ??= const Duration(seconds: 5);
   }
 
   final Dio _dio;
   final String? _baseUrlOverride;
+  final Future<String?> Function() _idToken;
+
+  /// ID token akun yang sedang login. Firebase memperbaruinya sendiri bila
+  /// sudah kedaluwarsa (berlaku sekitar satu jam).
+  static Future<String?> _firebaseIdToken() async {
+    try {
+      return await FirebaseAuth.instance.currentUser?.getIdToken();
+    } catch (_) {
+      return null;
+    }
+  }
 
   /// Jumlah maksimal yang dilayani server dalam satu permintaan.
   static const int pageLimit = 200;
@@ -62,10 +78,18 @@ class HistoryRemoteDataSourceImpl implements HistoryRemoteDataSource {
 
   String get _baseUrl => _baseUrlOverride ?? ApiConfig.baseUrl;
 
-  Options _options(String uid) => Options(
-        headers: {'X-User-Id': uid},
-        contentType: Headers.jsonContentType,
-      );
+  /// Server memverifikasi `Authorization` (Firebase ID token). `X-User-Id`
+  /// tetap dikirim untuk server lokal yang verifikasinya belum diwajibkan.
+  Future<Options> _options(String uid) async {
+    final token = await _idToken();
+    return Options(
+      headers: {
+        'X-User-Id': uid,
+        if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+      },
+      contentType: Headers.jsonContentType,
+    );
+  }
 
   @override
   Future<List<HistoryItem>> fetch(HistoryOwner owner) {
@@ -73,7 +97,7 @@ class HistoryRemoteDataSourceImpl implements HistoryRemoteDataSource {
       final response = await _dio.get<Map<String, dynamic>>(
         '$_baseUrl/api/history',
         queryParameters: {'limit': pageLimit},
-        options: _options(owner.uid),
+        options: await _options(owner.uid),
       );
       final items = response.data?['items'];
       if (items is! List) {
@@ -92,7 +116,7 @@ class HistoryRemoteDataSourceImpl implements HistoryRemoteDataSource {
       final response = await _dio.post<Map<String, dynamic>>(
         '$_baseUrl/api/history',
         data: item.toServerJson(),
-        options: _options(owner.uid),
+        options: await _options(owner.uid),
       );
       final id = response.data?['id'];
       if (id is! num) {
@@ -108,7 +132,7 @@ class HistoryRemoteDataSourceImpl implements HistoryRemoteDataSource {
       try {
         await _dio.delete<Map<String, dynamic>>(
           '$_baseUrl/api/history/$remoteId',
-          options: _options(owner.uid),
+          options: await _options(owner.uid),
         );
       } on DioException catch (error) {
         // Entri sudah tidak ada di server, misalnya dihapus dari perangkat
@@ -127,7 +151,7 @@ class HistoryRemoteDataSourceImpl implements HistoryRemoteDataSource {
     return _guard(owner, () async {
       await _dio.delete<Map<String, dynamic>>(
         '$_baseUrl/api/history',
-        options: _options(owner.uid),
+        options: await _options(owner.uid),
       );
     });
   }
@@ -162,7 +186,7 @@ class HistoryRemoteDataSourceImpl implements HistoryRemoteDataSource {
           'name': name.isEmpty ? 'Pengguna BISINDO' : name,
           'email': email.isEmpty ? 'pengguna-${owner.uid}@bisindo.local' : email,
         },
-        options: _options(owner.uid),
+        options: await _options(owner.uid),
       );
     } on DioException catch (error) {
       // 409: email sudah terdaftar. Profil dengan UID ini mungkin sudah ada,

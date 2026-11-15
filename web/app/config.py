@@ -46,6 +46,12 @@ class Config:
     ADMIN_LOGIN_MAX_ATTEMPTS = 5
     ADMIN_LOGIN_LOCK_SECONDS = 10 * 60
 
+    # Verifikasi Firebase ID token untuk /api/history dan /api/profile.
+    # Di server publik nyalakan REQUIRE_FIREBASE_AUTH=1 agar header X-User-Id
+    # yang tidak bisa diverifikasi ditolak.
+    FIREBASE_PROJECT_ID = os.environ.get("FIREBASE_PROJECT_ID", "bisindo-translator-5b185")
+    REQUIRE_FIREBASE_AUTH = os.environ.get("REQUIRE_FIREBASE_AUTH", "0") in ("1", "true", "True")
+
     ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
     ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
 
