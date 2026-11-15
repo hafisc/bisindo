@@ -27,6 +27,9 @@ class HomePage extends ConsumerWidget {
     final userName = greetingName(
       ref.watch(profileNotifierProvider.select((state) => state.profile.name)),
     );
+    final avatarUrl = ref.watch(
+      profileNotifierProvider.select((state) => state.profile.avatarUrl),
+    );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -44,6 +47,7 @@ class HomePage extends ConsumerWidget {
               children: [
                 HomeHeader(
                   userName: userName,
+                  avatarUrl: avatarUrl,
                   onNotificationTap: () =>
                       context.push(AppRoutes.notifications),
                   onAvatarTap: () => context.go(AppRoutes.profile),
