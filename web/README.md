@@ -16,8 +16,8 @@ Server mendengarkan di `0.0.0.0:5000`, dan saat start mencetak alamat IP laptop 
 
 | Variabel | Bawaan | Keterangan |
 | :--- | :--- | :--- |
-| `SECRET_KEY` | nilai pengembangan | Wajib diganti di server sungguhan |
-| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | `admin` / `admin123` | Akun login `/admin`, wajib diganti di server sungguhan |
+| `SECRET_KEY` | acak, disimpan di `instance/secret_key` | Isi sendiri di cloud agar sesi admin tetap sama setelah redeploy |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | `admin` / `admin123` | Akun login `/admin`. Ganti sebelum demo di WiFi umum; `run.py` memberi peringatan selama masih bawaan. Login dikunci 10 menit setelah 5 kali salah |
 | `DATABASE_URL` | SQLite di `web/instance/bisindo.db` | Connection string Postgres untuk produksi |
 | `MODEL_PATH` | `ml/models/svm_rbf_bisindo.joblib` | Lokasi model SVM |
 | `INSTANCE_DIR` | `web/instance` | Folder unggahan dataset dan model |

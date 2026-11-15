@@ -69,6 +69,11 @@ def _print_banner(host: str, port: int) -> None:
     else:
         print(f"  Dari HP (WiFi)  : http://{host}:{port}")
 
+    if app.config["ADMIN_PASSWORD"] == "admin123":
+        print("")
+        print("  PERINGATAN: password panel admin masih bawaan (admin123).")
+        print("  Siapa pun di WiFi yang sama bisa membuka /admin. Ganti lewat")
+        print("  ADMIN_PASSWORD di web/.env sebelum demo di jaringan umum.")
     print("  Hentikan dengan Ctrl+C")
     print(line)
 
