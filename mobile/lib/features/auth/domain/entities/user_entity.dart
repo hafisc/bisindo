@@ -15,6 +15,10 @@ class UserEntity extends Equatable {
   /// (ganti password / hapus akun) memerlukan password saat ini.
   final bool hasPassword;
 
+  /// Waktu akun dibuat menurut Firebase Auth. Dipakai sebagai tanggal
+  /// bergabung bila dokumen profil di Firestore belum mencatatnya.
+  final DateTime? createdAt;
+
   const UserEntity({
     required this.id,
     required this.email,
@@ -23,6 +27,7 @@ class UserEntity extends Equatable {
     this.isEmailVerified = false,
     this.isGoogleUser = false,
     this.hasPassword = false,
+    this.createdAt,
   });
 
   /// An unauthenticated / empty guest user representation
@@ -45,6 +50,7 @@ class UserEntity extends Equatable {
     bool? isEmailVerified,
     bool? isGoogleUser,
     bool? hasPassword,
+    DateTime? createdAt,
   }) {
     return UserEntity(
       id: id ?? this.id,
@@ -54,6 +60,7 @@ class UserEntity extends Equatable {
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
       isGoogleUser: isGoogleUser ?? this.isGoogleUser,
       hasPassword: hasPassword ?? this.hasPassword,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 
@@ -66,5 +73,6 @@ class UserEntity extends Equatable {
         isEmailVerified,
         isGoogleUser,
         hasPassword,
+        createdAt,
       ];
 }

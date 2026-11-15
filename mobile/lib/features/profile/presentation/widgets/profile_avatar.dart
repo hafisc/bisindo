@@ -1,11 +1,15 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_palette.dart';
+import '../../domain/avatar_data_uri.dart';
 
 /// Avatar bulat untuk halaman profil.
 ///
-/// Menampilkan foto dari [avatarUrl] bila tersedia, dan jatuh kembali ke
-/// ilustrasi default bila URL kosong atau gagal dimuat.
+/// [avatarUrl] bisa berupa data URI (foto yang diunggah dari aplikasi, lihat
+/// [AvatarDataUri]) atau URL biasa (foto akun Google). Bila kosong atau gagal
+/// dimuat, yang tampil ilustrasi default.
 class ProfileAvatar extends StatelessWidget {
   static const String defaultAsset = 'assets/images/avatar_default.png';
 
@@ -24,7 +28,53 @@ class ProfileAvatar extends StatelessWidget {
     this.isLoading = false,
   });
 
-  bool get _hasRemotePhoto => (avatarUrl ?? '').trim().isNotEmpty;
+  // Hasil decode terakhir disimpan agar foto tidak di-decode ulang dan
+  // berkedip setiap kali halaman di-rebuild.
+  static String? _cachedUri;
+  static Uint8List? _cachedBytes;
+
+  static Uint8List? _bytesOf(String uri) {
+    if (uri != _cachedUri) {
+      _cachedUri = uri;
+      _cachedBytes = AvatarDataUri.decode(uri);
+    }
+    return _cachedBytes;
+  }
+
+  /// Foto dari [url] (data URI atau URL biasa), atau ilustrasi bawaan bila
+  /// kosong atau gagal dimuat. Dipakai juga oleh avatar di Beranda.
+  static Widget photo(String? url, {required double size}) {
+    final value = (url ?? '').trim();
+    Widget fallback() => Image.asset(
+          defaultAsset,
+          fit: BoxFit.cover,
+          width: size,
+          height: size,
+        );
+
+    if (value.isEmpty) return fallback();
+
+    if (AvatarDataUri.isDataUri(value)) {
+      final bytes = _bytesOf(value);
+      if (bytes == null) return fallback();
+      return Image.memory(
+        bytes,
+        fit: BoxFit.cover,
+        width: size,
+        height: size,
+        gaplessPlayback: true,
+        errorBuilder: (context, error, stackTrace) => fallback(),
+      );
+    }
+
+    return Image.network(
+      value,
+      fit: BoxFit.cover,
+      width: size,
+      height: size,
+      errorBuilder: (context, error, stackTrace) => fallback(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,14 +97,7 @@ class ProfileAvatar extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            _hasRemotePhoto
-                ? Image.network(
-                    avatarUrl!.trim(),
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        _defaultImage(),
-                  )
-                : _defaultImage(),
+            photo(avatarUrl, size: size),
             if (isLoading)
               Container(
                 color: Colors.black.withValues(alpha: 0.35),
@@ -90,15 +133,6 @@ class ProfileAvatar extends StatelessWidget {
             ),
         ],
       ),
-    );
-  }
-
-  Widget _defaultImage() {
-    return Image.asset(
-      defaultAsset,
-      fit: BoxFit.cover,
-      width: size,
-      height: size,
     );
   }
 }
