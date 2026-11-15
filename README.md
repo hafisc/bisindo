@@ -1,459 +1,165 @@
-# BISINDO Translator
+<div align="center">
 
-Aplikasi mobile untuk menerjemahkan Bahasa Isyarat Indonesia (BISINDO) secara real-time melalui kamera smartphone.
+<img src="mobile/assets/images/bisindo-logo2.webp" alt="BISINDO Translator" width="300">
 
-Aplikasi ini dikembangkan sebagai proyek mata kuliah (Project Based Learning) untuk memfasilitasi komunikasi bagi komunitas tunarungu.
+**Penerjemah Bahasa Isyarat Indonesia (BISINDO) secara real-time lewat kamera smartphone**
 
-## Status Pengembangan Proyek
+[![Flutter](https://img.shields.io/badge/Flutter-3.32-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
+[![Flask](https://img.shields.io/badge/Flask-API-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com)
+[![scikit-learn](https://img.shields.io/badge/SVM-96%2C36%25-F7931E?logo=scikitlearn&logoColor=white)](ml/README.md)
+[![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com)
+[![Release](https://img.shields.io/github/v/release/hafisc/bisindo?include_prereleases&label=APK)](https://github.com/hafisc/bisindo/releases)
 
-Seluruh lingkup tugas di Issue #1 sampai #5 sudah selesai, dengan progres keseluruhan **100%** (per 15 November 2026). Angka keseluruhan adalah rata-rata berbobot: Mobile 40%, Web 30%, Machine Learning 30%.
+Proyek Project Based Learning semester 5 untuk membantu komunikasi dengan teman tuli.
 
-### Ringkasan per Komponen
+[Fitur](#fitur) · [Arsitektur](#arsitektur) · [Menjalankan Proyek](#menjalankan-proyek) · [Model](#model-machine-learning) · [Tim](#tim-dan-progres)
 
-| Komponen | Status | Penyelesaian | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| Mobile (Flutter) | Selesai | 100% | Autentikasi (email, Google, lupa password, verifikasi email), Beranda dengan sapaan nama pengguna, scan realtime dengan MediaPipe native dan TTS, Mode Belajar, Kamus A-Z dengan ilustrasi peragaan dari data asli, Favorit, riwayat yang tersinkron ke server, profil lengkap, serta halaman Syarat dan Ketentuan dan Kebijakan Privasi. APK release tersedia di [Releases](https://github.com/hafisc/bisindo/releases). 67 test lolos. |
-| Web Dashboard & API | Selesai | 100% | Panel admin (dashboard, pengguna, log, dataset, model) dan seluruh endpoint `/api/predict`, `/api/history`, `/api/profile`, `/api/dictionary` selesai dengan 151 test lolos. Docker dan Procfile untuk deploy sudah disiapkan. Verifikasi Firebase ID token dan deploy ke cloud dicatat sebagai pengembangan lanjutan (lihat bagian Keamanan API). |
-| Machine Learning | Selesai | 100% | Dataset dibersihkan dari 1.160 baris duplikat, lalu model SVM RBF dilatih ulang pada 127 fitur landmark untuk huruf A-Z dengan akurasi 96,36%. Evaluasi (metrik per kelas, confusion matrix 26x26, analisis huruf yang sering tertukar, perbandingan kernel), script ekstraksi landmark dari foto, dan dokumentasi jumlah sampel per huruf tersedia. 27 test lolos. |
+</div>
 
-### Perubahan Lingkup karena Arsitektur
+---
 
-Dua rencana awal di issue tidak lagi dikerjakan dan tidak dihitung dalam progres:
+## Fitur
 
-1. **Konversi dan integrasi TFLite** (Issue #1 dan #3). Model akhir adalah SVM, yang tidak bisa dikonversi langsung ke TFLite. Prediksi dijalankan di server lewat `POST /api/predict`, mobile cukup mengirim landmark MediaPipe.
-2. **Endpoint `/api/auth/register`, `/api/auth/login`, dan `/api/auth/me`** (Issue #2). Login dan register ditangani langsung oleh Firebase Auth dari aplikasi, sedangkan server mengenali pengguna dari Firebase UID.
+| Fitur | Keterangan |
+| :--- | :--- |
+| **Scan real-time** | Kamera mendeteksi tangan dengan MediaPipe, lalu huruf A-Z ditebak oleh model SVM dan dibacakan dengan Text-to-Speech |
+| **Mode Belajar** | Latihan huruf acak dengan kamera dan skor |
+| **Kamus BISINDO** | Ilustrasi peragaan huruf A-Z dari sampel asli dataset, panduan cara memperagakan, dan perbandingan dengan huruf yang sering tertukar |
+| **Favorit** | Simpan huruf atau kata yang sering dilatih |
+| **Riwayat** | Hasil terjemahan tersimpan dan tersinkron ke server |
+| **Akun** | Daftar dan login (email atau Google), verifikasi email, lupa password, edit profil, ganti password, hapus akun |
+| **Panel Admin (web)** | Dashboard, data pengguna, log deteksi, kelola dataset dan versi model |
 
-Pengenalan kosa kata (bukan hanya huruf), mode offline, verifikasi Firebase ID token di server, dan deploy ke cloud dicatat sebagai pengembangan lanjutan.
+## Tampilan
 
-### Pembagian Tugas dan Status Tim
+<table>
+  <tr>
+    <td align="center"><img src="design/beranda.png" alt="Beranda" width="220"></td>
+    <td align="center"><img src="design/riwayat.png" alt="Riwayat" width="220"></td>
+    <td align="center"><img src="design/profil.png" alt="Profil" width="220"></td>
+  </tr>
+</table>
 
-| Anggota Tim | Fokus Tugas | Referensi Task | Progres |
-| :--- | :--- | :--- | :---: |
-| Aryaputra Ferdiananta | Modul Kamus BISINDO & Konversi Model TFLite | [Issue #1](https://github.com/hafisc/bisindo/issues/1) | 100% |
-| Fadhil Taufiqurrachman | Modul Autentikasi & Pipeline Dataset MediaPipe | [Issue #2](https://github.com/hafisc/bisindo/issues/2) | 100% |
-| M. Aldyth Rafiansyah Fauzi | Antarmuka Scan Kamera & Training Model Klasifikasi | [Issue #3](https://github.com/hafisc/bisindo/issues/3) | 100% |
-| Mohammad Al Hafis H. | Halaman Beranda, Dashboard Admin, & Evaluasi Model | [Issue #4](https://github.com/hafisc/bisindo/issues/4) | 100% |
-| Mokhamad Rizki Hadiono S. | Riwayat Deteksi, Manajemen Profil, & Pengumpulan Data | [Issue #5](https://github.com/hafisc/bisindo/issues/5) | 100% |
+<details>
+<summary>Onboarding, login, dan register</summary>
+<br>
 
-Progres per anggota dihitung dari checklist di issue masing-masing: jumlah item yang selesai dibagi jumlah item. Item yang keluar dari lingkup (lihat bagian sebelumnya) tidak ikut dihitung.
+![Onboarding](design/onboarding%201-2%20dan%203.png)
+![Login dan Register](design/login-register.png)
 
-| Anggota | Item | Penyelesaian item terakhir |
-| :--- | :---: | :--- |
-| Aryaputra | 5 dari 5 | Ilustrasi peragaan tiap huruf diambil dari sampel asli dataset, dan panduan cara memperagakan diturunkan dari data (`ml/src/dataset/export_dictionary_poses.py`) |
-| Fadhil | 8 dari 8 | Script ekstraksi landmark MediaPipe dari foto (`ml/src/dataset/extract_landmarks.py`) |
-| Aldyth | 9 dari 9 | Mode Belajar dikerjakan di luar lingkup issue |
-| Hafis | 11 dari 11 | APK release dirilis sebagai [v0.9.0-beta](https://github.com/hafisc/bisindo/releases/tag/v0.9.0-beta) |
-| Rizki | 16 dari 16 | Pembersihan data tidak valid dan tabel jumlah sampel per huruf (`ml/src/dataset/clean_dataset.py`, `ml/README.md`) |
+</details>
 
-### Yang perlu dilakukan sebelum demo
+## Arsitektur
 
-- Daftarkan SHA-1 keystore release dan SHA-1 debug laptop tiap anggota di Firebase Console agar login Google berjalan (lihat bagian Build APK Release).
-- Uji Scan dan Mode Belajar di HP asli, karena emulator x86_64 tidak memiliki MediaPipe native.
+```mermaid
+flowchart LR
+    A["Kamera HP"] --> B["MediaPipe<br/>(di HP)"]
+    B -- "21 / 42 titik landmark" --> C["Flask API<br/>POST /api/predict"]
+    C --> D["Model SVM RBF<br/>127 fitur"]
+    D -- "huruf + confidence" --> E["Aplikasi Flutter<br/>teks dan suara"]
+    E <-- "login" --> F["Firebase Auth"]
+    E <-- "riwayat dan profil" --> C
+```
 
-## Daftar Fitur
+Gambar kamera tidak pernah dikirim. HP hanya mengirim koordinat titik tangan, lalu server menormalkan koordinat itu dan menjalankan model. Model SVM tidak bisa dikonversi ke TFLite, jadi prediksi dijalankan di server.
 
-- Scanner Real-time: Mendeteksi gestur tangan dan menerjemahkannya secara langsung.
-- Text-to-Speech: Mengubah hasil deteksi teks menjadi output suara.
-- Kamus BISINDO: Ilustrasi peragaan huruf A-Z dari data asli, panduan cara memperagakan, perbandingan dengan huruf yang sering tertukar, serta kosa kata umum.
-- Favorit: Menyimpan gesture kamus yang sering dilatih.
-- Mode Belajar: Latihan huruf acak dengan kamera dan skor.
-- Riwayat Terjemahan: Menyimpan log hasil terjemahan sebelumnya.
-- Manajemen Akun: Pendaftaran, pengaturan profil, ganti password, dan hapus akun.
+## Teknologi
 
-## Preview Aplikasi
-
-- Onboarding
-  ![Onboarding](design/onboarding%201-2%20dan%203.png)
-- Login & Register
-  ![Login dan Register](design/login-register.png)
+| Bagian | Teknologi |
+| :--- | :--- |
+| Mobile | Flutter 3.32 (Dart 3.8), Riverpod, GoRouter, GetIt + Injectable, MediaPipe Hand Landmarker, flutter_tts, sqflite, SharedPreferences |
+| Backend | Flask, SQLAlchemy (SQLite atau Postgres), Gunicorn, Docker |
+| Machine Learning | Python, scikit-learn (SVM RBF), MediaPipe, pandas |
+| Layanan | Firebase Auth, Firestore, Storage |
 
 ## Struktur Repositori
 
-Proyek ini menggunakan struktur monorepo yang memisahkan bagian mobile, machine learning, dan web:
-
-- `mobile/`: Berisi kode sumber aplikasi berbasis Flutter.
-- `ml/`: Berisi pipeline Machine Learning menggunakan Python (dataset, notebook, script training).
-- `design/`: Berisi aset desain dan mockup aplikasi.
-- `web/`: Berisi kode sumber dashboard admin menggunakan Flask.
-
-## Teknologi yang Digunakan
-
-Aplikasi Mobile:
-- Framework: Flutter 3.32 (Dart 3.8)
-- State Management: Riverpod + Equatable
-- Routing: GoRouter
-- Dependency Injection: GetIt + Injectable
-- Layanan Cloud: Firebase (Auth, Firestore, Storage)
-- Penyimpanan Lokal: sqflite (riwayat deteksi) dan SharedPreferences (favorit, pengaturan)
-- Text-to-Speech: flutter_tts
-
-Machine Learning:
-- Bahasa: Python 3.12
-- Model: SVM kernel RBF (scikit-learn), 127 fitur landmark
-- Akurasi data uji: 96,36% (6.733 baris setelah pembersihan)
-- Ekstraksi Fitur: MediaPipe
-- Inferensi: di server Flask lewat `POST /api/predict` (mobile mengirim landmark MediaPipe)
-
-Web Dashboard:
-- Framework: Flask (Python)
-
-## REST API (Web)
-
-Server Flask menyediakan endpoint JSON untuk aplikasi mobile. Semua endpoint
-riwayat memakai header `X-User-Id` berisi Firebase UID pengguna yang sudah
-login. Sebagai alternatif, UID boleh dikirim lewat query string `user_id` atau
-field `user_id` di body JSON.
-
-| Method | Endpoint | Keterangan |
-| :--- | :--- | :--- |
-| GET | `/api/status` | Status layanan dan kesiapan model prediksi |
-| GET | `/api/model` | Informasi model aktif: jumlah fitur, daftar kelas, akurasi |
-| POST | `/api/predict` | Prediksi huruf BISINDO dari 21 atau 42 titik landmark tangan |
-| GET | `/api/dictionary` | Daftar seluruh huruf kamus BISINDO |
-| GET | `/api/dictionary/<huruf>` | Detail satu huruf kamus |
-| GET | `/api/history` | Riwayat deteksi milik pengguna, terbaru lebih dulu |
-| POST | `/api/history` | Simpan satu entri riwayat baru |
-| DELETE | `/api/history/<id>` | Hapus satu entri riwayat |
-| DELETE | `/api/history` | Hapus seluruh riwayat pengguna |
-| GET | `/api/profile` | Ambil profil pengguna |
-| PUT | `/api/profile` | Buat atau perbarui profil pengguna |
-
-Contoh prediksi satu tangan:
-
-```bash
-curl -X POST http://127.0.0.1:5000/api/predict \
-  -H "Content-Type: application/json" \
-  -d '{"landmarks": [{"x": 0.1, "y": 0.2, "z": 0.0}, "... 21 titik"]}'
+```
+bisindo/
+├── mobile/    Aplikasi Flutter, lihat mobile/README.md
+├── web/       Server Flask: REST API dan panel admin, lihat web/README.md
+├── ml/        Dataset, training, evaluasi model, lihat ml/README.md
+└── design/    Mockup tampilan aplikasi
 ```
 
-Respons berisi `prediction`, `confidence`, `class_index`, `hand_order`, dan
-`mirrored`. Model memakai 127 fitur, tetapi server yang menyusunnya: kirim 21
-titik untuk satu tangan atau 42 titik untuk dua tangan. Bila hanya 21 titik yang
-dikirim, 63 nilai tangan kedua diisi nol dan `is_two_handed` bernilai 0.
+## Menjalankan Proyek
 
-Server melakukan dua normalisasi yang wajib, sama seperti saat dataset latih
-dibuat: mengurangi posisi pergelangan tangan pertama, lalu membagi dengan jarak
-pergelangan ke titik 9 (pangkal jari tengah). Landmark mentah MediaPipe boleh
-dikirim apa adanya dalam koordinat gambar 0-1.
+**Persyaratan:** Flutter 3.32 atau lebih baru, Python 3.10 atau lebih baru, Android Studio atau VS Code, dan HP Android asli. Emulator tidak bisa menjalankan MediaPipe.
 
-Ada dua ketidakpastian yang tidak bisa diketahui server, jadi keduanya diuji
-sebagai kandidat lalu dipilih hasil dengan confidence tertinggi:
+### 1. Clone
 
-1. **Urutan tangan.** MediaPipe mengembalikan tangan sesuai urutan deteksi,
-   sedangkan dataset latih selalu menaruh tangan pertama di kolom awal. Tanpa
-   penanganan ini, akurasi dua tangan jatuh dari 99,58% menjadi 9,92%. Nilai
-   `hand_order` berisi `as_is` atau `swapped`.
-2. **Pencerminan.** Kamera depan dan konvensi koordinat berbeda antar perangkat.
-   Tanpa kandidat cermin, data yang tercermin hanya dikenali 51,34%. Dengan
-   kandidat cermin, akurasi kembali di atas 96%. Nilai `mirrored` berisi `true`
-   bila kandidat cermin yang menang.
-
-Total ada empat kandidat untuk dua tangan (dua urutan dikali dua cermin) dan dua
-kandidat untuk satu tangan. Biaya tambahannya kecil: satu permintaan prediksi
-selesai sekitar 2 sampai 3 ms di laptop pengembangan.
-
-Contoh menyimpan riwayat:
-
-```bash
-curl -X POST http://127.0.0.1:5000/api/history \
-  -H "Content-Type: application/json" \
-  -H "X-User-Id: <firebase-uid>" \
-  -d '{
-    "title": "Halo",
-    "type": "Kata",
-    "category": "Teks",
-    "mode": "BISINDO -> Teks",
-    "confidence": 0.95,
-    "timestamp": "2026-11-11T10:20:00"
-  }'
-```
-
-Nilai `type` yang diterima adalah `Kata` atau `Huruf`, sedangkan `category`
-adalah `Teks` atau `Suara`. Field `confidence` harus di antara 0.0 dan 1.0.
-Field `timestamp` bersifat opsional; bila kosong, server memakai waktu saat
-request diterima.
-
-Contoh sinkronisasi profil setelah login:
-
-```bash
-curl -X PUT http://127.0.0.1:5000/api/profile \
-  -H "Content-Type: application/json" \
-  -H "X-User-Id: <firebase-uid>" \
-  -d '{
-    "name": "Budi Santoso",
-    "email": "budi@mail.com",
-    "student_id": "2210512001",
-    "role": "Mahasiswa"
-  }'
-```
-
-`PUT /api/profile` bersifat upsert: panggilan pertama membuat baris pengguna
-dan membalas 201, panggilan berikutnya memperbarui field yang dikirim saja dan
-membalas 200. Field `name` dan `email` wajib pada panggilan pertama. Mengirim
-string kosong pada `student_id`, `role`, atau `avatar_url` akan mengosongkan
-nilai tersebut.
-
-### Keamanan API
-
-Endpoint riwayat dan profil memakai header `X-User-Id` yang belum diverifikasi
-tanda tangannya, begitu juga `user_id` pada body `/api/predict`. Artinya siapa
-pun yang mengetahui UID seseorang bisa membaca riwayatnya. Untuk demo lokal hal
-ini masih bisa diterima, tetapi sebelum server dipasang di internet sebaiknya
-diganti dengan verifikasi Firebase ID token memakai `firebase-admin`: mobile
-mengirim `Authorization: Bearer <id-token>`, server memverifikasinya lalu
-mengambil UID dari token tersebut.
-
-### Menjalankan test web
-
-```bash
-cd web/
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements-dev.txt
-pytest
-```
-
-### Menjalankan server secara lokal
-
-```bash
-cd web/
-.venv\Scripts\activate
-python run.py
-```
-
-Server berjalan di `http://127.0.0.1:5000`. Model SVM dimuat dari
-`ml/models/svm_rbf_bisindo.joblib`. Bila path berbeda, atur lewat variabel
-lingkungan `MODEL_PATH`.
-
-### Panel admin
-
-Halaman admin tersedia di `/admin` setelah login memakai `ADMIN_USERNAME` dan
-`ADMIN_PASSWORD`. Selain dashboard, pengguna, dan log deteksi, ada dua halaman
-untuk mengelola berkas:
-
-| Halaman | Endpoint | Keterangan |
-| :--- | :--- | :--- |
-| Dataset | `GET /admin/dataset` | Daftar snapshot CSV, statistik baris dan kelas, peringatan nama berkas lintas kelas |
-| Unggah dataset | `POST /admin/dataset/upload` | Simpan CSV landmark 127 kolom, tolak kolom kurang atau berkas ganda |
-| Model | `GET /admin/model` | Daftar versi model dan ringkasan model yang sedang dilayani server |
-| Unggah model | `POST /admin/model/upload` | Simpan `.joblib` beserta `label_map.json` dan `metrics.json` opsional |
-
-Berkas unggahan disimpan di `web/instance/datasets/` dan `web/instance/models/`
-sehingga tidak masuk git. Server menolak model yang jumlah fiturnya bukan 127
-atau tidak memiliki `predict_proba`.
-
-Mengaktifkan versi model langsung memuat ulang model pada proses yang berjalan
-(`services.reload_model()`), dan pilihan itu dipulihkan otomatis saat server
-dijalankan ulang. Model aktif tidak bisa dihapus sebelum ada versi lain yang
-diaktifkan.
-
-Pelatihan tetap dijalankan dari terminal, bukan dari panel admin, karena
-melatih SVM memblokir request Flask:
-
-```bash
-python ml/src/training/train_svm.py --csv data/landmarks.csv
-```
-
-Setelah artefak jadi, unggah `svm_rbf_bisindo.joblib` di halaman Model lalu
-tekan Aktifkan.
-
-### Deploy ke cloud
-
-Repositori sudah menyiapkan dua jalur deploy yang portabel, tidak terikat satu
-penyedia.
-
-Docker:
-
-```bash
-docker build -t bisindo-api .
-docker run -p 8000:8000 bisindo-api
-```
-
-`Procfile` dipakai platform yang menjalankan perintah `web:` seperti Heroku atau
-Render. Keduanya menjalankan `gunicorn` dengan aplikasi `web/run.py` memakai
-satu worker, supaya model yang diaktifkan lewat panel admin konsisten di semua
-request.
-
-Model tidak dilatih di dalam image. Alur yang benar: latih lewat CLI
-(`python ml/src/training/train_svm.py`), lalu deploy artefaknya. Training di
-dalam request Flask akan memblokir server.
-
-Catatan ukuran: karena tidak lagi memakai TensorFlow, image hanya berisi Flask,
-NumPy, scikit-learn, dan joblib. Tanpa TensorFlow, image jauh lebih kecil dan
-server mulai di bawah satu detik.
-
-#### Data yang harus bertahan
-
-Filesystem container cloud dibuang setiap redeploy. Ada dua hal yang harus
-disiapkan agar riwayat dan unggahan tidak hilang:
-
-1. **Database.** Isi `DATABASE_URL` dengan connection string Postgres, misalnya
-   dari add-on database penyedia. `postgres://` otomatis dinormalkan menjadi
-   `postgresql://`. Tanpa itu server memakai SQLite di dalam container, dan
-   seluruh riwayat hilang saat redeploy.
-2. **Folder unggahan.** Dataset dan model dari panel admin disimpan di
-   `web/instance`. Arahkan env `INSTANCE_DIR` ke folder volume persisten, atau
-   pasang volume ke `/app/web/instance`.
-
-Isi juga `SECRET_KEY` dan `ADMIN_PASSWORD` dengan nilai acak. Nilai bawaan di
-`web/app/config.py` hanya untuk pengembangan lokal.
-
-#### Alamat server di aplikasi mobile
-
-Aplikasi mobile tidak menyimpan alamat server di dalam kode. Ada dua cara
-mengaturnya:
-
-- **Saat build**, lewat `--dart-define`:
-
-  ```bash
-  flutter run -d <id-hp> --dart-define=API_BASE_URL=http://127.0.0.1:5000
-  ```
-
-- **Saat aplikasi berjalan**, lewat ikon gerigi di kanan atas layar Scan. Cara
-  ini tidak butuh build ulang, jadi teman yang memakai laptop berbeda cukup
-  mengganti alamat di sana.
-
-Alamat bawaan adalah `http://127.0.0.1:5000`, yaitu jalur kabel USB:
-
-```bash
-adb reverse tcp:5000 tcp:5000
-flutter run -d <id-hp>
-```
-
-`adb reverse` meneruskan port 5000 di HP ke port 5000 di laptop, sehingga
-Windows Firewall tidak ikut campur. Perintah itu perlu diulang setiap kabel
-dicabut atau HP di-reboot. Alamat ini tidak memakai alias emulator `10.0.2.2`,
-karena emulator x86_64 tidak punya MediaPipe native sehingga kamera tidak bisa
-diuji di sana.
-
-Untuk demo di WiFi yang sama, jalankan `python web/run.py`. Server mencetak
-alamat `http://<ip-laptop>:5000` yang bisa langsung diisi di layar Scan.
-
-Catatan HTTP polos: semua build type, termasuk release, mengizinkan HTTP polos
-lewat `android/app/src/main/res/xml/network_security_config.xml`, karena server
-demo berjalan di laptop tanpa HTTPS. Firebase tetap memakai HTTPS. Setelah
-server di-deploy dengan HTTPS, ubah `cleartextTrafficPermitted` di file itu
-menjadi `false`.
-
-## Panduan Instalasi dan Penggunaan
-
-### Persyaratan Sistem
-- Flutter SDK (Minimal versi 3.32)
-- Dart SDK (Minimal versi 3.8)
-- Python (Minimal versi 3.10)
-- Android Studio atau VSCode
-- Git
-
-### 1. Clone Repositori
 ```bash
 git clone https://github.com/hafisc/bisindo.git
 cd bisindo
 ```
 
-### 2. Konfigurasi Firebase (Wajib)
-Langkah ini diperlukan agar aplikasi dapat berjalan dengan normal:
-1. Buat proyek baru bernama `bisindo-translator` di Firebase Console.
-2. Tambahkan aplikasi Android dengan package name `com.bisindo.bisindo_translator`.
-3. Unduh file `google-services.json` dan letakkan di dalam direktori `mobile/android/app/`.
-4. Aktifkan layanan Authentication (Email/Password & Google Sign-In) dan Firestore Database.
-
-### 3. Menjalankan Aplikasi Mobile
-```bash
-cd mobile/
-flutter pub get
-dart run build_runner build --delete-conflicting-outputs
-flutter run
-```
-
-### Build APK Release
-
-APK release ditandatangani dengan keystore milik tim, bukan kunci debug.
-Keystore dan password-nya tidak masuk repo. Minta file `.jks` dan isi
-`key.properties` ke anggota yang memegangnya.
-
-1. Simpan keystore di luar folder repo, misalnya
-   `C:\Users\<nama>\keystores\bisindo-release.jks`.
-2. Buat `mobile/android/key.properties` (sudah di-ignore git):
-
-   ```properties
-   storePassword=<password>
-   keyPassword=<password>
-   keyAlias=bisindo
-   storeFile=C:/Users/<nama>/keystores/bisindo-release.jks
-   ```
-
-3. Build:
-
-   ```bash
-   cd mobile/
-   flutter build apk --release
-   ```
-
-   Hasilnya ada di `mobile/build/app/outputs/flutter-apk/app-release.apk`. Bila
-   `key.properties` tidak ada, Gradle memakai kunci debug sebagai cadangan dan
-   APK tersebut tidak boleh dirilis.
-
-Login Google di APK release hanya berjalan bila SHA-1 keystore release sudah
-didaftarkan di Firebase Console (Project settings, aplikasi Android, Add
-fingerprint), lalu `google-services.json` diunduh ulang. Ambil SHA-1 dengan:
+### 2. Jalankan server
 
 ```bash
-keytool -list -v -keystore <path-keystore> -alias bisindo
-```
-
-Build release memakai R8 (`isMinifyEnabled = true`). Aturan keep untuk
-MediaPipe ada di `mobile/android/app/proguard-rules.pro`; tanpa aturan itu
-layar Scan crash karena nama kelas MediaPipe yang dipanggil dari kode native
-ikut diubah.
-
-### 4. Konfigurasi Environment Machine Learning
-```bash
-cd ml/
+cd web
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
+python run.py
 ```
 
-## Alur Navigasi Aplikasi
+Server berjalan di `http://127.0.0.1:5000`, dan panel admin ada di `/admin`. Model dimuat otomatis dari `ml/models/svm_rbf_bisindo.joblib`.
 
-1. Splash Screen
-2. Onboarding (Hanya muncul saat pertama kali dibuka)
-3. Login / Register
-4. Halaman Utama (Beranda)
-   - Menu Scanner
-   - Menu Kamus
-   - Menu Riwayat
-   - Menu Profil
+### 3. Jalankan aplikasi
 
-## Pipeline Machine Learning
+Letakkan `google-services.json` dari Firebase Console (package `com.bisindo.bisindo_translator`) di `mobile/android/app/`. Setelah itu, sambungkan HP lewat USB:
 
-Alur kerja pelatihan model hingga siap digunakan di aplikasi:
-1. `ml/src/dataset/extract_landmarks.py`: Mendeteksi tangan pada foto per huruf dengan MediaPipe dan menulis CSV landmark (opsional, CSV di repo sudah jadi).
-2. `ml/src/dataset/data_loader.py` dan `clean_dataset.py`: Membaca CSV, membuang data tidak valid dan duplikat, menyusun 127 fitur, lalu membagi data latih dan uji.
-3. `ml/src/training/train_svm.py`: Melatih SVM RBF dan menyimpan `svm_rbf_bisindo.joblib`, `label_map.json`, serta `metrics.json`.
-4. `ml/src/evaluation/evaluate_svm.py`: Menghitung akurasi, confusion matrix, F1 per kelas, huruf yang sering tertukar, dan membandingkan kernel linear, polynomial, dan RBF.
-5. `ml/src/dataset/export_dictionary_poses.py`: Mengekspor pose referensi tiap huruf ke `mobile/assets/data/bisindo_poses.json` untuk ilustrasi Kamus. Jalankan ulang setelah dataset atau model berubah.
-6. `ml/tests/`: Memastikan susunan fitur, pembersihan, ekstraksi, dan artefak model tetap konsisten.
-
-Detail lengkap ada di [`ml/README.md`](ml/README.md).
-
-## Daftar Perintah Penting
-
-Perintah Flutter:
 ```bash
+cd mobile
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
-flutter analyze
-flutter test
-flutter build apk --release
+adb reverse tcp:5000 tcp:5000
+flutter run
 ```
 
-Perintah Python (ML):
-```bash
-pip install -r ml/requirements.txt
-python ml/src/dataset/clean_dataset.py
-python ml/src/training/train_svm.py
-python ml/src/evaluation/evaluate_svm.py --compare
-python ml/src/dataset/export_dictionary_poses.py
-python -m pytest ml/tests -q
-```
+`adb reverse` menghubungkan HP ke server di laptop. Untuk koneksi lewat WiFi, isi alamat yang dicetak `run.py` di ikon gerigi pada layar Scan. Cara build APK release ada di [mobile/README.md](mobile/README.md).
+
+### 4. Menjalankan test
+
+| Bagian | Dari folder | Perintah | Jumlah test |
+| :--- | :--- | :--- | :---: |
+| Mobile | `mobile/` | `flutter analyze` lalu `flutter test` | 68 |
+| Web | `web/` | `pip install -r requirements-dev.txt` lalu `pytest` | 151 |
+| ML | akar repo | `pip install -r ml/requirements.txt` lalu `python -m pytest ml/tests -q` | 27 |
+
+## Model Machine Learning
+
+| | |
+| :--- | :--- |
+| Model | SVM kernel RBF (`C=10`, `gamma='scale'`) |
+| Fitur | 127: 21 titik x 3 koordinat untuk tiap tangan (dua tangan), ditambah penanda dua tangan |
+| Dataset | 6.733 baris setelah 1.160 baris duplikat dibuang |
+| Akurasi data uji | **96,36%** (macro F1 0,96) |
+| Huruf terlemah | Y dan B, F1 sekitar 0,89 sampai 0,90 |
+
+Alur pipeline, tabel jumlah sampel tiap huruf, dan cara melatih ulang model ada di [ml/README.md](ml/README.md).
+
+## Tim dan Progres
+
+Seluruh tugas di Issue #1 sampai #5 sudah selesai (**100%**, per 15 November 2026).
+
+| Anggota | Tugas | Issue | Progres |
+| :--- | :--- | :---: | :---: |
+| Aryaputra Ferdiananta | Modul Kamus BISINDO | [#1](https://github.com/hafisc/bisindo/issues/1) | 100% |
+| Fadhil Taufiqurrachman | Autentikasi dan pipeline dataset MediaPipe | [#2](https://github.com/hafisc/bisindo/issues/2) | 100% |
+| M. Aldyth Rafiansyah Fauzi | Scan kamera dan training model | [#3](https://github.com/hafisc/bisindo/issues/3) | 100% |
+| Mohammad Al Hafis H. | Beranda, dashboard admin, dan evaluasi model | [#4](https://github.com/hafisc/bisindo/issues/4) | 100% |
+| Mokhamad Rizki Hadiono S. | Riwayat, profil, dan pengumpulan data | [#5](https://github.com/hafisc/bisindo/issues/5) | 100% |
+
+**Di luar lingkup.** Dua rencana di issue tidak dikerjakan dan tidak ikut dihitung dalam progres:
+
+- **Konversi model ke TFLite:** model SVM tidak bisa dikonversi, jadi prediksi dijalankan di server.
+- **Endpoint `/api/auth/*`:** login sudah ditangani Firebase Auth.
+
+**Pengembangan lanjutan:** pengenalan kosa kata, mode offline, verifikasi Firebase ID token di server, dan deploy ke cloud.
+
+### Sebelum demo
+
+- [ ] Daftarkan SHA-1 keystore release dan SHA-1 debug tiap laptop di Firebase Console agar login Google berjalan
+- [ ] Uji Scan dan Mode Belajar di HP asli
+- [ ] Pastikan HP dan laptop terhubung (`adb reverse` atau WiFi yang sama)
