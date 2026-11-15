@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -24,6 +25,14 @@ class HistoryPage extends ConsumerWidget {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
+        // Panah back hanya saat dibuka dari menu Beranda (context.push),
+        // bukan dari tab bottom nav.
+        leading: context.canPop()
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppPalette.navy),
+                onPressed: () => context.pop(),
+              )
+            : null,
         title: Text(
           'Riwayat Translasi',
           style: GoogleFonts.poppins(
