@@ -11,7 +11,6 @@ dependencies:
     sdk: flutter
 
   # ── State Management ──────────────────────────────────────────
-  flutter_bloc: ^9.1.1
   flutter_riverpod: ^2.6.1
   equatable: ^2.0.7
 
@@ -34,39 +33,26 @@ dependencies:
 
   # ── Local Storage ────────────────────────────────────────────
   shared_preferences: ^2.5.0
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
   sqflite: ^2.4.1
   path_provider: ^2.1.5
   path: ^1.9.0
 
   # ── Camera & ML ───────────────────────────────────────────────
   camera: ^0.11.0
-  # tflite_flutter: ^0.11.0  # Aktifkan saat model .tflite sudah siap
 
   # ── Text to Speech ────────────────────────────────────────────
   flutter_tts: ^4.2.0
 
   # ── Functional Programming ───────────────────────────────────
   dartz: ^0.10.1
-  fpdart: ^1.1.0
-
-  # ── Code Generation ───────────────────────────────────────────
-  # freezed_annotation: ^2.4.4
-  # json_annotation: ^4.9.0
 
   # ── UI & Assets ───────────────────────────────────────────────
   flutter_svg: ^2.0.17
-  cached_network_image: ^3.4.1
-  lottie: ^3.3.1
-  shimmer: ^3.0.0
-  gap: ^3.0.1
   flutter_screenutil: ^5.9.3
   google_fonts: ^6.2.1
 
   # ── Utils ─────────────────────────────────────────────────────
   intl: ^0.20.2
-  connectivity_plus: ^7.3.1
   image_picker: ^1.2.1
 
 dev_dependencies:
@@ -77,17 +63,13 @@ dev_dependencies:
   # ── Code Generation ───────────────────────────────────────────
   build_runner: ^2.4.15
   injectable_generator: ^2.6.2
-  # freezed: ^2.5.8
-  # json_serializable: ^6.9.5
 
 flutter:
   uses-material-design: true
 
   assets:
     - assets/images/
-    - assets/models/
     - assets/data/
-    - assets/animations/
     - assets/icons/
 
   # Font Poppins diload otomatis oleh package google_fonts

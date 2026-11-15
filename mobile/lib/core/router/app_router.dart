@@ -48,7 +48,11 @@ abstract class AppRoutes {
   static const String privacy = '/privacy';
 }
 
-@singleton
+/// Dibuat saat pertama kali diminta (`getIt<AppRouter>()` di `app.dart`),
+/// bukan saat `configureDependencies()`. Dengan `@singleton` biasa, injectable
+/// membuat router sebelum [AuthRepository] terdaftar sehingga aplikasi
+/// berhenti di splash screen.
+@lazySingleton
 class AppRouter {
   final AuthRepository _authRepository;
 
