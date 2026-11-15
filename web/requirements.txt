@@ -10,4 +10,6 @@ numpy>=1.24
 # dihapus pada scikit-learn 1.11, sedangkan artefak ml/models memakainya.
 scikit-learn>=1.4,<1.11
 joblib>=1.3
+# Memeriksa tanda tangan Firebase ID token (lihat app/api/identity.py).
+PyJWT[crypto]>=2.8
 gunicorn>=21.0

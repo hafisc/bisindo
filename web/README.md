@@ -26,7 +26,7 @@ Test dijalankan dengan `pip install -r requirements-dev.txt` lalu `pytest`.
 
 ## REST API
 
-Endpoint riwayat dan profil membaca Firebase UID pengguna dari header `X-User-Id`. Sebagai alternatif, UID boleh dikirim lewat query `user_id` atau field `user_id` di body.
+Endpoint riwayat dan profil membaca Firebase UID dari token di header `Authorization` (lihat [Keamanan](#keamanan)). Di server lokal tanpa verifikasi wajib, UID juga boleh dikirim lewat header `X-User-Id`, query `user_id`, atau field `user_id` di body.
 
 | Method | Endpoint | Keterangan |
 | :--- | :--- | :--- |
@@ -81,7 +81,14 @@ curl -X POST http://127.0.0.1:5000/api/history \
 
 ### Keamanan
 
-Header `X-User-Id` belum diverifikasi, jadi siapa pun yang tahu UID seseorang bisa membaca riwayatnya. Untuk demo lokal ini masih bisa diterima. Sebelum server dibuka ke internet, ganti dengan verifikasi Firebase ID token memakai `firebase-admin`: mobile mengirim `Authorization: Bearer <id-token>`, lalu server mengambil UID dari token tersebut.
+Aplikasi mobile mengirim `Authorization: Bearer <Firebase ID token>`. Server memeriksa tanda tangan token dengan kunci publik Google, lalu memakai UID di dalamnya, sehingga UID tidak bisa dipalsukan.
+
+| Variabel | Bawaan | Keterangan |
+| :--- | :--- | :--- |
+| `FIREBASE_PROJECT_ID` | `bisindo-translator-5b185` | Project Firebase yang menerbitkan token |
+| `REQUIRE_FIREBASE_AUTH` | `0` | `1` berarti request tanpa token ditolak. Wajib `1` di server publik |
+
+Selama `REQUIRE_FIREBASE_AUTH=0`, header `X-User-Id` tanpa token masih diterima supaya pengembangan lokal tetap mudah. Header ini tidak diverifikasi.
 
 ## Panel Admin
 
@@ -110,15 +117,28 @@ Setelah training selesai, unggah `svm_rbf_bisindo.joblib` di halaman Model, lalu
 
 ## Deploy
 
+### Render dan Neon (gratis)
+
+`render.yaml` di akar repo berisi pengaturan service: Docker, region Singapura, paket gratis, health check `/api/status`, dan variabel lingkungan.
+
+1. Buat database di [Neon](https://console.neon.tech) dengan region Singapura, lalu salin connection string-nya.
+2. Di [Render](https://dashboard.render.com/blueprints), pilih **New Blueprint Instance**, lalu pilih repo ini.
+3. Isi `DATABASE_URL` dengan connection string Neon dan `ADMIN_PASSWORD` dengan password baru, lalu klik **Apply**.
+4. Setelah deploy selesai, buka `https://<nama-service>.onrender.com/api/status`.
+
+Paket gratis Render tertidur setelah 15 menit tanpa request dan butuh sekitar satu menit untuk bangun. Buka `/api/status` sebelum demo. Berkas yang diunggah lewat panel admin hilang setiap restart, jadi ganti model lewat commit ke `ml/models/`.
+
+### Docker
+
 ```bash
 docker build -t bisindo-api .
 docker run -p 8000:8000 bisindo-api
 ```
 
-`Procfile` disediakan untuk platform seperti Heroku atau Render. Docker maupun Procfile menjalankan `gunicorn` dengan satu worker, supaya model yang diaktifkan lewat panel admin sama di semua request.
+`Procfile` disediakan untuk platform seperti Heroku. Docker maupun Procfile menjalankan `gunicorn` dengan satu worker, supaya model yang diaktifkan lewat panel admin sama di semua request.
 
 Filesystem container dihapus setiap kali redeploy, jadi siapkan:
 
 1. **`DATABASE_URL`** yang mengarah ke Postgres. Awalan `postgres://` otomatis diubah menjadi `postgresql://`. Tanpa variabel ini, riwayat ikut hilang setiap redeploy.
 2. **Volume persisten** untuk `INSTANCE_DIR`, atau pasang volume ke `/app/web/instance`, supaya dataset dan model hasil unggahan tidak hilang.
-3. **Nilai acak** untuk `SECRET_KEY` dan `ADMIN_PASSWORD`.
+3. **Nilai acak** untuk `SECRET_KEY` dan `ADMIN_PASSWORD`, serta `REQUIRE_FIREBASE_AUTH=1`.
