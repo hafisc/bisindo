@@ -1,10 +1,17 @@
 from datetime import datetime, timedelta, timezone
 
+import secrets
+
 import pytest
 
 from app import create_app
 from app.extensions import db
 from app.models import DetectionLog, User, utcnow
+
+# Kata sandi khusus test dibuat acak saat modul dimuat supaya tidak ada kata
+# sandi yang tertulis di berkas (sama seperti test_dataset_admin.py).
+ADMIN_PASSWORD = secrets.token_hex(16)
+WRONG_PASSWORD = secrets.token_hex(16)
 
 
 @pytest.fixture()
@@ -15,7 +22,7 @@ def app(tmp_path):
             "SQLALCHEMY_DATABASE_URI": f"sqlite:///{(tmp_path / 'test.db').as_posix()}",
             "SECRET_KEY": "test-secret",
             "ADMIN_USERNAME": "admin",
-            "ADMIN_PASSWORD": "rahasia123",
+            "ADMIN_PASSWORD": ADMIN_PASSWORD,
             "ADMIN_PER_PAGE": 3,
         }
     )
@@ -37,7 +44,7 @@ def _csrf(client, path="/admin/login"):
         return sess["_csrf"]
 
 
-def login(client, username="admin", password="rahasia123"):
+def login(client, username="admin", password=ADMIN_PASSWORD):
     token = _csrf(client)
     return client.post(
         "/admin/login",
@@ -89,7 +96,7 @@ def test_root_mengarah_ke_dashboard(client):
 
 
 def test_login_salah_ditolak(client):
-    response = login(client, password="salah")
+    response = login(client, password=WRONG_PASSWORD)
     assert response.status_code == 200
     assert "Username atau password salah" in response.get_data(as_text=True)
     assert client.get("/admin/dashboard").status_code == 302
@@ -98,7 +105,7 @@ def test_login_salah_ditolak(client):
 def test_login_tanpa_csrf_ditolak(client):
     client.get("/admin/login")
     response = client.post(
-        "/admin/login", data={"username": "admin", "password": "rahasia123"}
+        "/admin/login", data={"username": "admin", "password": ADMIN_PASSWORD}
     )
     assert response.status_code == 400
 
@@ -114,7 +121,7 @@ def test_login_redirect_next_hanya_ke_admin(client):
     token = _csrf(client)
     response = client.post(
         "/admin/login?next=https://situs-lain.com",
-        data={"username": "admin", "password": "rahasia123", "csrf_token": token},
+        data={"username": "admin", "password": ADMIN_PASSWORD, "csrf_token": token},
     )
     assert response.headers["Location"].endswith("/admin/dashboard")
 
@@ -132,7 +139,7 @@ def test_logout_menghapus_sesi(client):
 def test_login_dikunci_setelah_terlalu_banyak_gagal(app, client):
     app.config["ADMIN_LOGIN_MAX_ATTEMPTS"] = 3
     for _ in range(3):
-        assert login(client, password="salah").status_code == 200
+        assert login(client, password=WRONG_PASSWORD).status_code == 200
 
     # Password benar pun ditolak selama terkunci.
     response = login(client)
@@ -143,13 +150,13 @@ def test_login_dikunci_setelah_terlalu_banyak_gagal(app, client):
 
 def test_login_berhasil_mereset_hitungan_gagal(app, client):
     app.config["ADMIN_LOGIN_MAX_ATTEMPTS"] = 3
-    login(client, password="salah")
-    login(client, password="salah")
+    login(client, password=WRONG_PASSWORD)
+    login(client, password=WRONG_PASSWORD)
     assert login(client).status_code == 302
     client.post("/admin/logout", data={"csrf_token": _csrf(client, "/admin/dashboard")})
 
-    login(client, password="salah")
-    login(client, password="salah")
+    login(client, password=WRONG_PASSWORD)
+    login(client, password=WRONG_PASSWORD)
     assert login(client).status_code == 302
 
 
