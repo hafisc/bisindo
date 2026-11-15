@@ -1,33 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_palette.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../profile/presentation/providers/profile_provider.dart';
 import '../widgets/home_banner.dart';
 import '../widgets/home_header.dart';
 import '../widgets/home_menu_grid.dart';
 import '../widgets/home_tips_card.dart';
 
 /// Halaman Beranda.
-class HomePage extends StatelessWidget {
-  /// Nama yang tampil di sapaan. Sementara masih default, nanti diisi dari
-  /// data pengguna yang login.
-  final String userName;
+class HomePage extends ConsumerWidget {
+  const HomePage({super.key});
 
-  const HomePage({super.key, this.userName = 'User'});
-
-  void _showComingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(content: Text(AppStrings.featureComingSoon)),
-      );
+  /// Nama depan untuk sapaan, supaya nama panjang tidak memenuhi header.
+  static String greetingName(String fullName) {
+    final trimmed = fullName.trim();
+    if (trimmed.isEmpty) return 'Teman';
+    return trimmed.split(RegExp(r'\s+')).first;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userName = greetingName(
+      ref.watch(profileNotifierProvider.select((state) => state.profile.name)),
+    );
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.transparent,
@@ -44,7 +44,8 @@ class HomePage extends StatelessWidget {
               children: [
                 HomeHeader(
                   userName: userName,
-                  onNotificationTap: () => context.push(AppRoutes.notifications),
+                  onNotificationTap: () =>
+                      context.push(AppRoutes.notifications),
                   onAvatarTap: () => context.go(AppRoutes.profile),
                 ),
                 const SizedBox(height: 24),
@@ -54,7 +55,7 @@ class HomePage extends StatelessWidget {
                   onDictionaryTap: () => context.go(AppRoutes.dictionary),
                   onLearnTap: () => context.push(AppRoutes.learn),
                   onHistoryTap: () => context.go(AppRoutes.history),
-                  onFavoriteTap: () => _showComingSoon(context),
+                  onFavoriteTap: () => context.push(AppRoutes.favorites),
                 ),
                 const SizedBox(height: 26),
                 const HomeTipsCard(),
