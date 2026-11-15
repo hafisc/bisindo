@@ -190,6 +190,17 @@ class AppRouter {
         path: AppRoutes.favorites,
         name: 'favorites',
         builder: (context, state) => const FavoritePage(),
+        // Detail dari Favorit harus di luar ShellRoute. Kalau memakai
+        // 'dictionaryDetail' (di dalam shell), go_router membangun shell kedua
+        // di atas Favorit dan crash karena key navigator bentrok.
+        routes: [
+          GoRoute(
+            path: ':id',
+            name: 'favoriteDetail',
+            builder: (context, state) =>
+                DictionaryDetailPage(id: state.pathParameters['id'] ?? ''),
+          ),
+        ],
       ),
       GoRoute(
         path: AppRoutes.terms,

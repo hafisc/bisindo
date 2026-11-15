@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/constants/app_palette.dart';
+import '../../../../core/router/app_router.dart';
 import '../../data/repositories/dummy_dictionary_repository.dart';
 import '../../data/repositories/letter_pose_repository.dart';
 import '../../domain/models/dictionary_item.dart';
@@ -127,7 +128,11 @@ class DictionaryDetailPage extends ConsumerWidget {
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
                   onPressed: () => context.pushNamed(
-                    'dictionaryDetail',
+                    GoRouterState.of(
+                          context,
+                        ).uri.path.startsWith(AppRoutes.favorites)
+                        ? 'favoriteDetail'
+                        : 'dictionaryDetail',
                     pathParameters: {'id': 'letter_$confusedWith'},
                   ),
                   icon: const Icon(Icons.compare_arrows_rounded),
