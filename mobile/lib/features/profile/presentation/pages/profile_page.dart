@@ -210,18 +210,6 @@ class ProfilePage extends ConsumerWidget {
                       ),
                       onTap: () => context.push(AppRoutes.notifications),
                     ),
-                    ProfileInfoTile(
-                      icon: Icons.language_rounded,
-                      title: 'Bahasa Aplikasi',
-                      trailing: Text(
-                        'Indonesia',
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: AppPalette.gray400,
-                        ),
-                      ),
-                    ),
 
                     const SizedBox(height: 28),
 

@@ -87,8 +87,6 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
   bool showSkeleton = true;
 
   String? _userId;
-  String? _userName;
-  String? _userEmail;
 
   bool _isDisposed = false;
   bool _isPredicting = false;
@@ -117,8 +115,6 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
     try {
       final user = FirebaseAuth.instance.currentUser;
       _userId = user?.uid;
-      _userName = user?.displayName;
-      _userEmail = user?.email;
     } catch (error) {
       debugPrint('[ScanController] Firebase belum siap: $error');
     }
@@ -311,28 +307,9 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
       confidence: letterConfidence,
     );
 
+    // Riwayat disimpan dan dikirim ke server oleh HistoryNotifier.
     onLetterCommitted?.call(item);
     unawaited(_ttsService.speak(letter));
-    unawaited(_syncHistory(item));
-  }
-
-  Future<void> _syncHistory(HistoryItem item) async {
-    final uid = _userId;
-    if (uid == null || uid.isEmpty) return;
-
-    await _apiClient.syncHistory(
-      uid: uid,
-      name: _userName,
-      email: _userEmail,
-      entry: {
-        'title': item.title,
-        'type': item.type,
-        'category': item.category,
-        'mode': item.mode,
-        'confidence': item.confidence,
-        'timestamp': item.timestamp,
-      },
-    );
   }
 
   void appendSpace() {
