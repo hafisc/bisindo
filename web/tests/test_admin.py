@@ -129,6 +129,48 @@ def test_logout_menghapus_sesi(client):
     assert client.get("/admin/dashboard").status_code == 302
 
 
+def test_login_dikunci_setelah_terlalu_banyak_gagal(app, client):
+    app.config["ADMIN_LOGIN_MAX_ATTEMPTS"] = 3
+    for _ in range(3):
+        assert login(client, password="salah").status_code == 200
+
+    # Password benar pun ditolak selama terkunci.
+    response = login(client)
+    assert response.status_code == 429
+    assert "Terlalu banyak percobaan gagal" in response.get_data(as_text=True)
+    assert client.get("/admin/dashboard").status_code == 302
+
+
+def test_login_berhasil_mereset_hitungan_gagal(app, client):
+    app.config["ADMIN_LOGIN_MAX_ATTEMPTS"] = 3
+    login(client, password="salah")
+    login(client, password="salah")
+    assert login(client).status_code == 302
+    client.post("/admin/logout", data={"csrf_token": _csrf(client, "/admin/dashboard")})
+
+    login(client, password="salah")
+    login(client, password="salah")
+    assert login(client).status_code == 302
+
+
+def test_header_keamanan_terpasang(client):
+    response = client.get("/admin/login")
+    assert response.headers["X-Frame-Options"] == "DENY"
+    assert response.headers["X-Content-Type-Options"] == "nosniff"
+
+
+def test_secret_key_acak_dibuat_dan_dipakai_ulang(tmp_path, monkeypatch):
+    import app as app_module
+
+    monkeypatch.setattr(app_module, "INSTANCE_DIR", tmp_path)
+    first = app_module._load_or_create_secret_key()
+    second = app_module._load_or_create_secret_key()
+
+    assert len(first) == 64
+    assert first == second
+    assert (tmp_path / "secret_key").read_text(encoding="utf-8") == first
+
+
 # ── Dashboard ─────────────────────────────────────────────────────
 
 def test_dashboard_kosong(client):
