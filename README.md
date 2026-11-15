@@ -108,10 +108,20 @@ Pengujian otomatis: 85 test mobile (`flutter test`), 151 test web (`pytest`), da
 
 ## Tim
 
-| Anggota | Peran |
-| :--- | :--- |
-| Aryaputra Ferdiananta | Kamus BISINDO |
-| Fadhil Taufiqurrachman | Autentikasi dan pipeline dataset |
-| M. Aldyth Rafiansyah Fauzi | Scan kamera dan training model |
-| Mohammad Al Hafis H. | Beranda, panel admin, dan evaluasi model |
-| Mokhamad Rizki Hadiono S. | Riwayat, profil, dan pengumpulan data |
+<div align="center">
+
+![Progres](https://img.shields.io/badge/progres%20proyek-100%25-16A34A?style=for-the-badge)
+
+**Pekerjaan dibagi rata.** Setiap anggota memegang satu bagian di aplikasi mobile, server web, dan machine learning, sehingga beban tiap orang sama besar, yaitu 20% dari keseluruhan proyek.
+
+</div>
+
+| Anggota | Mobile | Web | Machine Learning | Progres |
+| :--- | :--- | :--- | :--- | :---: |
+| Aryaputra Ferdiananta | Kamus BISINDO | API kamus | Konversi model\* | 100% |
+| Fadhil Taufiqurrachman | Onboarding, login, register | API autentikasi\* | Ekstraksi landmark MediaPipe | 100% |
+| M. Aldyth Rafiansyah Fauzi | Scan kamera | API prediksi | Training model | 100% |
+| Mohammad Al Hafis H. | Beranda dan navigasi | Panel admin | Evaluasi model | 100% |
+| Mokhamad Rizki Hadiono S. | Riwayat dan profil | API riwayat dan profil | Pengumpulan dan pembersihan dataset | 100% |
+
+<sub>\* Disesuaikan selama pengerjaan: model SVM tidak bisa dikonversi ke TFLite sehingga prediksi dijalankan di server, dan login ditangani langsung oleh Firebase Auth. Progres per 15 November 2026.</sub>
