@@ -61,7 +61,7 @@ class FavoritePage extends ConsumerWidget {
                         item: item,
                         isFavorite: true,
                         onTap: () => context.pushNamed(
-                          'dictionaryDetail',
+                          'favoriteDetail',
                           pathParameters: {'id': item.id},
                         ),
                       );
