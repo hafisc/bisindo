@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/constants/app_palette.dart';
 import '../../data/repositories/dummy_dictionary_repository.dart';
 import '../../data/repositories/letter_pose_repository.dart';
@@ -19,13 +20,16 @@ class DictionaryDetailPage extends ConsumerWidget {
     final item = DummyDictionaryRepository.getItemById(id);
 
     if (item == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Detail Gesture')),
-        body: const Center(child: Text('Item tidak ditemukan.')),
+      return Theme(
+        data: AppTheme.light,
+        child: Scaffold(
+          appBar: AppBar(title: const Text('Detail Gesture')),
+          body: const Center(child: Text('Item tidak ditemukan.')),
+        ),
       );
     }
 
-    final theme = Theme.of(context);
+    final theme = AppTheme.light;
     final isLetter = item.category == DictionaryCategory.huruf;
     final badgeColor = isLetter ? Colors.orange : Colors.blue;
     final posesAsync = isLetter ? ref.watch(letterPosesProvider) : null;
@@ -40,107 +44,110 @@ class DictionaryDetailPage extends ConsumerWidget {
     final tips = pose?.tips ?? item.tips;
     final confusedWith = pose?.confusedWith;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Detail Gesture'),
-        centerTitle: true,
+    return Theme(
+      data: AppTheme.light,
+      child: Scaffold(
         backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _IllustrationBox(
-              isLetter: isLetter,
-              pose: pose,
-              isLoading: posesAsync?.isLoading ?? false,
-            ),
-            if (pose != null) ...[
-              const SizedBox(height: 10),
-              _IllustrationCaption(pose: pose),
-            ],
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    item.title,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+        appBar: AppBar(
+          title: const Text('Detail Gesture'),
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _IllustrationBox(
+                isLetter: isLetter,
+                pose: pose,
+                isLoading: posesAsync?.isLoading ?? false,
+              ),
+              if (pose != null) ...[
+                const SizedBox(height: 10),
+                _IllustrationCaption(pose: pose),
+              ],
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      item.title,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: badgeColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      item.categoryName,
+                      style: TextStyle(
+                        color: badgeColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              Text(
+                'Cara Melakukan',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
+              ),
+              const SizedBox(height: 16),
+              if (instructions == null)
+                Text(
+                  posesAsync?.hasError == true
+                      ? 'Panduan peragaan gagal dimuat. Tutup lalu buka lagi halaman ini.'
+                      : 'Memuat panduan peragaan...',
+                  style: TextStyle(color: Colors.grey[600], height: 1.5),
+                )
+              else
+                ...instructions.asMap().entries.map(
+                  (entry) =>
+                      _InstructionRow(number: entry.key + 1, text: entry.value),
+                ),
+              const SizedBox(height: 24),
+              if (tips.isNotEmpty) _TipsBox(text: tips),
+              if (confusedWith != null) ...[
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: () => context.pushNamed(
+                    'dictionaryDetail',
+                    pathParameters: {'id': 'letter_$confusedWith'},
                   ),
-                  decoration: BoxDecoration(
-                    color: badgeColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    item.categoryName,
-                    style: TextStyle(
-                      color: badgeColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                  icon: const Icon(Icons.compare_arrows_rounded),
+                  label: Text('Bandingkan dengan huruf $confusedWith'),
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
                     ),
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 32),
-            Text(
-              'Cara Melakukan',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (instructions == null)
-              Text(
-                posesAsync?.hasError == true
-                    ? 'Panduan peragaan gagal dimuat. Tutup lalu buka lagi halaman ini.'
-                    : 'Memuat panduan peragaan...',
-                style: TextStyle(color: Colors.grey[600], height: 1.5),
-              )
-            else
-              ...instructions.asMap().entries.map(
-                (entry) =>
-                    _InstructionRow(number: entry.key + 1, text: entry.value),
-              ),
-            const SizedBox(height: 24),
-            if (tips.isNotEmpty) _TipsBox(text: tips),
-            if (confusedWith != null) ...[
-              const SizedBox(height: 16),
-              OutlinedButton.icon(
-                onPressed: () => context.pushNamed(
-                  'dictionaryDetail',
-                  pathParameters: {'id': 'letter_$confusedWith'},
-                ),
-                icon: const Icon(Icons.compare_arrows_rounded),
-                label: Text('Bandingkan dengan huruf $confusedWith'),
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-              ),
+              const SizedBox(height: 48),
             ],
-            const SizedBox(height: 48),
-          ],
+          ),
         ),
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: _FavoriteButton(itemId: item.id),
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: _FavoriteButton(itemId: item.id),
+          ),
         ),
       ),
     );
