@@ -8,6 +8,10 @@ tangan.
 Susunan 127 fitur di sini harus sama persis dengan yang dipakai saat
 pelatihan model SVM (``dataset_bisindo_landmarks.npz``) dan dengan yang
 dikirim aplikasi mobile ke ``POST /api/predict``.
+
+CSV di repo adalah data mentah dan tidak diubah. Pembersihan (lihat
+``clean_dataset.py``) dijalankan saat data dimuat, sehingga hanya ada satu
+sumber data dan pelatihan selalu memakai versi bersih.
 """
 
 from __future__ import annotations
@@ -63,11 +67,11 @@ def validate_columns(frame: pd.DataFrame) -> None:
         raise ValueError(f"Kolom wajib tidak ditemukan: {preview}{suffix}")
 
 
-def load_dataset(csv_path: str | Path | None = None) -> tuple[np.ndarray, np.ndarray]:
-    """Baca CSV landmark dan kembalikan ``(X, labels)``.
+def read_frame(csv_path: str | Path | None = None, clean: bool = True) -> pd.DataFrame:
+    """Baca CSV landmark sebagai DataFrame, dibersihkan secara bawaan.
 
-    ``X`` berbentuk ``(n_samples, 127)`` bertipe float32, sedangkan
-    ``labels`` berisi huruf A-Z sebagai string.
+    Semua fungsi lain memuat data lewat sini supaya baris yang dipakai untuk
+    pelatihan dan untuk perhitungan kebocoran data selalu sama.
     """
     path = Path(csv_path) if csv_path else DEFAULT_CSV
 
@@ -76,6 +80,27 @@ def load_dataset(csv_path: str | Path | None = None) -> tuple[np.ndarray, np.nda
 
     frame = pd.read_csv(path)
     validate_columns(frame)
+
+    if clean:
+        # Impor lokal karena clean_dataset juga mengimpor modul ini.
+        from dataset.clean_dataset import clean_frame
+
+        frame, _ = clean_frame(frame)
+
+    return frame
+
+
+def load_dataset(
+    csv_path: str | Path | None = None,
+    clean: bool = True,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Baca CSV landmark dan kembalikan ``(X, labels)``.
+
+    ``X`` berbentuk ``(n_samples, 127)`` bertipe float32, sedangkan
+    ``labels`` berisi huruf A-Z sebagai string. ``clean=False`` mengembalikan
+    data mentah tanpa pembersihan.
+    """
+    frame = read_frame(csv_path, clean=clean)
 
     features = frame[FEATURE_COLUMNS].to_numpy(dtype=np.float32)
 
@@ -148,8 +173,7 @@ def count_filename_overlap(
     Dipakai sebagai peringatan kebocoran data: bila satu nama berkas muncul
     di kedua bagian, versi augmentasi dari gambar yang sama ikut terbagi.
     """
-    frame = pd.read_csv(Path(csv_path) if csv_path else DEFAULT_CSV)
-    validate_columns(frame)
+    frame = read_frame(csv_path)
 
     index_train, index_test = train_test_split(
         np.arange(len(frame)),
