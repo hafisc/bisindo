@@ -1,7 +1,6 @@
 """Test pipeline pelatihan dan evaluasi model SVM BISINDO."""
 
 import json
-from pathlib import Path
 
 import joblib
 import numpy as np

@@ -84,7 +84,7 @@ Aplikasi Mobile:
 - Routing: GoRouter
 - Dependency Injection: GetIt + Injectable
 - Layanan Cloud: Firebase (Auth, Firestore, Storage)
-- Local Database: Hive
+- Penyimpanan Lokal: sqflite (riwayat deteksi) dan SharedPreferences (favorit, pengaturan)
 - Text-to-Speech: flutter_tts
 
 Machine Learning:
