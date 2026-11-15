@@ -43,6 +43,28 @@ Alamat server tidak ditulis di dalam kode. Ada dua cara mengaturnya:
 
 Semua build, termasuk release, mengizinkan HTTP polos lewat `android/app/src/main/res/xml/network_security_config.xml`, karena server demo berjalan di laptop tanpa HTTPS. Setelah server memakai HTTPS, ubah `cleartextTrafficPermitted` menjadi `false`.
 
+## Firestore untuk Profil
+
+Data profil (nama, NIM, peran, tanggal bergabung, dan foto) disimpan di dokumen `users/{uid}`. Foto dikecilkan ke 256 px lalu disimpan di dokumen yang sama, jadi Cloud Storage dan paket Blaze tidak diperlukan.
+
+Satu kali per project Firebase:
+
+1. Firebase Console, **Build > Firestore Database > Create database**, pilih lokasi `asia-southeast2` (Jakarta), mode production.
+2. Buka tab **Rules**, ganti isinya dengan aturan berikut, lalu **Publish**:
+
+   ```
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /users/{uid} {
+         allow read, write: if request.auth != null && request.auth.uid == uid;
+       }
+     }
+   }
+   ```
+
+Selama Firestore belum aktif, nama dan email tetap tampil dari Firebase Auth, tetapi NIM, peran, dan foto tidak bisa disimpan, dan halaman Profil menampilkan pesan "Gagal memuat profil dari server."
+
 ## Build APK Release
 
 APK release ditandatangani dengan keystore tim. Keystore dan password-nya tidak masuk repo, jadi minta file `.jks` dan isi `key.properties` ke anggota yang memegangnya.
