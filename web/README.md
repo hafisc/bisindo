@@ -117,6 +117,47 @@ Setelah training selesai, unggah `svm_rbf_bisindo.joblib` di halaman Model, lalu
 
 ## Deploy
 
+### PythonAnywhere (gratis, tanpa kartu)
+
+Akun gratis PythonAnywhere tidak meminta kartu dan server tidak tertidur. Database memakai SQLite di akun itu, karena akun gratis tidak bisa terhubung ke Postgres luar. Model dibuat dengan scikit-learn 1.9, jadi pasang dependensi di virtualenv sendiri, jangan memakai versi bawaan PythonAnywhere.
+
+1. Daftar akun Beginner di [pythonanywhere.com](https://www.pythonanywhere.com/registration/register/beginner/). Username menjadi alamat server: `https://<username>.pythonanywhere.com`.
+2. Buka **Consoles**, lalu **Bash**, dan jalankan:
+
+   ```bash
+   git clone https://github.com/hafisc/bisindo.git
+   python3.13 -m venv ~/.venvs/bisindo
+   source ~/.venvs/bisindo/bin/activate
+   pip install --no-cache-dir -r bisindo/web/requirements.txt
+   ```
+
+3. Buat `bisindo/web/.env` (ganti password-nya):
+
+   ```bash
+   cat > bisindo/web/.env <<'END'
+   ADMIN_USERNAME=admin
+   ADMIN_PASSWORD=ganti-dengan-password-kuat
+   REQUIRE_FIREBASE_AUTH=1
+   SESSION_COOKIE_SECURE=1
+   END
+   ```
+
+4. Buka tab **Web**, lalu **Add a new web app**. Pilih **Manual configuration** dan Python 3.13.
+5. Di tab Web isi **Source code** `/home/<username>/bisindo/web` dan **Virtualenv** `/home/<username>/.venvs/bisindo`. Nyalakan **Force HTTPS**.
+6. Klik tautan **WSGI configuration file**, ganti seluruh isinya dengan kode berikut, lalu simpan:
+
+   ```python
+   import sys
+
+   sys.path.insert(0, "/home/<username>/bisindo/web")
+
+   from run import app as application  # noqa: E402
+   ```
+
+7. Klik **Reload**, lalu buka `https://<username>.pythonanywhere.com/api/status`.
+
+Untuk memperbarui server: `cd ~/bisindo && git pull` di konsol Bash, lalu klik **Reload**. Aplikasi gratis berhenti bila tidak diperpanjang, jadi klik tombol perpanjangan di tab Web sebulan sekali. Bila muncul error, lihat **Error log** di tab Web.
+
 ### Render dan Neon (gratis)
 
 `render.yaml` di akar repo berisi pengaturan service: Docker, region Singapura, paket gratis, health check `/api/status`, dan variabel lingkungan.
