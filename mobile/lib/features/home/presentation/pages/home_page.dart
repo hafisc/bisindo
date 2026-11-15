@@ -56,9 +56,9 @@ class HomePage extends ConsumerWidget {
                 HomeBanner(onScanTap: () => context.push(AppRoutes.scan)),
                 const SizedBox(height: 18),
                 HomeMenuGrid(
-                  onDictionaryTap: () => context.go(AppRoutes.dictionary),
+                  onDictionaryTap: () => context.push(AppRoutes.dictionary),
                   onLearnTap: () => context.push(AppRoutes.learn),
-                  onHistoryTap: () => context.go(AppRoutes.history),
+                  onHistoryTap: () => context.push(AppRoutes.history),
                   onFavoriteTap: () => context.push(AppRoutes.favorites),
                 ),
                 const SizedBox(height: 26),

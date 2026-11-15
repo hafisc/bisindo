@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../domain/models/dictionary_item.dart';
 import '../../data/repositories/dummy_dictionary_repository.dart';
 import '../providers/favorites_provider.dart';
@@ -37,112 +38,72 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
           .toList();
     }
 
-    final theme = Theme.of(context);
+    final theme = AppTheme.light;
 
-    return Scaffold(
-      backgroundColor: const Color(
-        0xFFF8FAFC,
-      ), // Light blue-ish grey background
-      appBar: AppBar(
-        title: const Text('Kamus BISINDO'),
-        centerTitle: false,
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Container(
-              padding: const EdgeInsets.all(24.0),
-              color: Colors.white,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Pelajari gesture bahasa isyarat Indonesia secara lengkap.',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  // Search Bar
-                  TextField(
-                    controller: _searchController,
-                    onChanged: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Cari huruf atau kata...',
-                      prefixIcon: const Icon(Icons.search),
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
+    return Theme(
+      data: AppTheme.light,
+      child: Scaffold(
+        backgroundColor: const Color(
+          0xFFF8FAFC,
+        ), // Light blue-ish grey background
+        appBar: AppBar(
+          title: const Text('Kamus BISINDO'),
+          centerTitle: false,
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Container(
+                padding: const EdgeInsets.all(24.0),
+                color: Colors.white,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Pelajari gesture bahasa isyarat Indonesia secara lengkap.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
                       ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  // Categories
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildFilterChip('Semua', null),
-                        const SizedBox(width: 8),
-                        _buildFilterChip('Huruf', DictionaryCategory.huruf),
-                        const SizedBox(width: 8),
-                        _buildFilterChip(
-                          'Kata Umum',
-                          DictionaryCategory.kataUmum,
+                    const SizedBox(height: 24),
+                    // Search Bar
+                    TextField(
+                      controller: _searchController,
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Cari huruf atau kata...',
+                        prefixIcon: const Icon(Icons.search),
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
                         ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
-          if (_searchQuery.isEmpty && _selectedCategory == null) ...[
-            // Section for Huruf A-Z
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24.0,
-                  vertical: 8.0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Huruf A-Z',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                        ),
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _selectedCategory = DictionaryCategory.huruf;
-                        });
-                      },
+                    const SizedBox(height: 24),
+                    // Categories
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
                       child: Row(
                         children: [
-                          Text(
-                            'Lihat Semua',
-                            style: TextStyle(color: theme.primaryColor),
-                          ),
-                          Icon(
-                            Icons.arrow_forward,
-                            size: 16,
-                            color: theme.primaryColor,
+                          _buildFilterChip('Semua', null),
+                          const SizedBox(width: 8),
+                          _buildFilterChip('Huruf', DictionaryCategory.huruf),
+                          const SizedBox(width: 8),
+                          _buildFilterChip(
+                            'Kata Umum',
+                            DictionaryCategory.kataUmum,
                           ),
                         ],
                       ),
@@ -151,84 +112,129 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
                 ),
               ),
             ),
-            _buildGridSection(
-              items: DummyDictionaryRepository.getItemsByCategory(
-                DictionaryCategory.huruf,
-              ).take(12).toList(),
-            ),
 
-            // Section for Kata Umum
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24.0,
-                  vertical: 16.0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Kata Umum',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+            if (_searchQuery.isEmpty && _selectedCategory == null) ...[
+              // Section for Huruf A-Z
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 8.0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Huruf A-Z',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _selectedCategory = DictionaryCategory.kataUmum;
-                        });
-                      },
-                      child: Row(
-                        children: [
-                          Text(
-                            'Lihat Semua',
-                            style: TextStyle(color: theme.primaryColor),
-                          ),
-                          Icon(
-                            Icons.arrow_forward,
-                            size: 16,
-                            color: theme.primaryColor,
-                          ),
-                        ],
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedCategory = DictionaryCategory.huruf;
+                          });
+                        },
+                        child: Row(
+                          children: [
+                            Text(
+                              'Lihat Semua',
+                              style: TextStyle(color: theme.primaryColor),
+                            ),
+                            Icon(
+                              Icons.arrow_forward,
+                              size: 16,
+                              color: theme.primaryColor,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            _buildGridSection(
-              items: DummyDictionaryRepository.getItemsByCategory(
-                DictionaryCategory.kataUmum,
-              ).take(4).toList(),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 48)),
-          ] else ...[
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24.0,
-                  vertical: 8.0,
-                ),
-                child: Text(
-                  'Hasil Pencarian (${filteredItems.length})',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    ],
                   ),
                 ),
               ),
-            ),
-            _buildGridSection(items: filteredItems),
-            const SliverToBoxAdapter(child: SizedBox(height: 48)),
+              _buildGridSection(
+                items: DummyDictionaryRepository.getItemsByCategory(
+                  DictionaryCategory.huruf,
+                ).take(12).toList(),
+              ),
+
+              // Section for Kata Umum
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 16.0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Kata Umum',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedCategory = DictionaryCategory.kataUmum;
+                          });
+                        },
+                        child: Row(
+                          children: [
+                            Text(
+                              'Lihat Semua',
+                              style: TextStyle(color: theme.primaryColor),
+                            ),
+                            Icon(
+                              Icons.arrow_forward,
+                              size: 16,
+                              color: theme.primaryColor,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              _buildGridSection(
+                items: DummyDictionaryRepository.getItemsByCategory(
+                  DictionaryCategory.kataUmum,
+                ).take(4).toList(),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 48)),
+            ] else ...[
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 8.0,
+                  ),
+                  child: Text(
+                    'Hasil Pencarian (${filteredItems.length})',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              _buildGridSection(items: filteredItems),
+              const SliverToBoxAdapter(child: SizedBox(height: 48)),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildFilterChip(String label, DictionaryCategory? category) {
     final isSelected = _selectedCategory == category;
-    final theme = Theme.of(context);
+    final theme = AppTheme.light;
 
     return ChoiceChip(
       label: Text(label),
