@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/repositories/letter_pose_repository.dart';
 import '../../domain/models/dictionary_item.dart';
-import 'hand_pose_view.dart';
+import 'gesture_thumbnail.dart';
 
 /// Kartu item kamus. Huruf menampilkan ilustrasi pose dari dataset, kata
 /// menampilkan ikon karena belum ada data pose untuk kata.
-class DictionaryCard extends ConsumerWidget {
+class DictionaryCard extends StatelessWidget {
   final DictionaryItem item;
   final VoidCallback onTap;
   final bool isFavorite;
@@ -20,13 +18,9 @@ class DictionaryCard extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final isLetter = item.category == DictionaryCategory.huruf;
-    final background = isLetter
-        ? const Color(0xFFFDEEE8)
-        : const Color(0xFFE8F4FD);
-    final poses = isLetter ? ref.watch(letterPosesProvider).valueOrNull : null;
-    final pose = poses == null ? null : poses[item.title.toUpperCase()];
+    final background = GestureThumbnail.backgroundFor(isLetter: isLetter);
 
     return GestureDetector(
       onTap: onTap,
@@ -57,23 +51,10 @@ class DictionaryCard extends ConsumerWidget {
                 child: Stack(
                   children: [
                     Positioned.fill(
-                      child: pose != null
-                          ? HandPoseView(
-                              pose: pose,
-                              strokeRatio: 0.028,
-                              showJoints: false,
-                            )
-                          : Center(
-                              child: Icon(
-                                isLetter
-                                    ? Icons.back_hand
-                                    : Icons.sign_language,
-                                size: 40,
-                                color: isLetter
-                                    ? Colors.orange[300]
-                                    : Colors.blue[300],
-                              ),
-                            ),
+                      child: GestureThumbnail(
+                        title: item.title,
+                        isLetter: isLetter,
+                      ),
                     ),
                     if (isFavorite)
                       const Positioned(
