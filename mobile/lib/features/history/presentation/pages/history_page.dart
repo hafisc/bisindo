@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_palette.dart';
+import '../../../dictionary/presentation/widgets/gesture_thumbnail.dart';
 import '../../domain/models/history_item.dart';
 import '../providers/history_provider.dart';
 import '../widgets/delete_confirm_dialog.dart';
@@ -211,18 +212,22 @@ class HistoryPage extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Icon Avatar
+              // Ilustrasi tangan sama seperti kartu Kamus.
               Container(
                 width: 52,
                 height: 52,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF1F5F9),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    item.type == 'Huruf' ? '✋🏽' : '☝🏽',
-                    style: const TextStyle(fontSize: 26),
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: GestureThumbnail.backgroundFor(
+                    isLetter: item.type == 'Huruf',
                   ),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: GestureThumbnail(
+                  title: item.title,
+                  isLetter: item.type == 'Huruf',
+                  iconSize: 28,
+                  strokeRatio: 0.035,
                 ),
               ),
               const SizedBox(width: 16),
