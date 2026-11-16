@@ -8,8 +8,8 @@ import '../providers/profile_provider.dart';
 
 enum _AvatarAction { gallery, camera, remove }
 
-/// Menampilkan pilihan sumber foto profil, lalu mengunggah hasilnya ke
-/// Cloud Storage dan menyimpan URL-nya ke Firestore.
+/// Menampilkan pilihan sumber foto profil, lalu menyimpan hasilnya ke
+/// dokumen Firestore pengguna.
 Future<void> showAvatarPicker(BuildContext context, WidgetRef ref) async {
   final currentUrl =
       (ref.read(profileNotifierProvider).profile.avatarUrl ?? '').trim();
@@ -40,9 +40,10 @@ Future<void> showAvatarPicker(BuildContext context, WidgetRef ref) async {
     source: action == _AvatarAction.gallery
         ? ImageSource.gallery
         : ImageSource.camera,
-    maxWidth: 1024,
-    maxHeight: 1024,
-    imageQuality: 85,
+    // Foto disimpan di dokumen Firestore (batas 1 MiB), jadi dikecilkan dulu.
+    maxWidth: 256,
+    maxHeight: 256,
+    imageQuality: 75,
   );
 
   if (picked == null || !context.mounted) return;

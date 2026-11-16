@@ -221,9 +221,22 @@ def model_versions():
         versions=versions,
         active=active,
         live_info=services.get_model_info(),
-        model_path=current_app.config.get("MODEL_PATH"),
+        model_path=_display_path(current_app.config.get("MODEL_PATH")),
         feature_count=storage.FEATURE_COUNT,
     )
+
+
+def _display_path(raw: str | None) -> str:
+    """Path model relatif terhadap folder proyek, agar struktur folder
+    komputer server tidak ikut tampil di halaman."""
+    if not raw:
+        return "-"
+    path = Path(raw).resolve()
+    root = Path(current_app.root_path).resolve().parent.parent
+    try:
+        return path.relative_to(root).as_posix()
+    except ValueError:
+        return path.name
 
 
 @bp.post("/model/upload")

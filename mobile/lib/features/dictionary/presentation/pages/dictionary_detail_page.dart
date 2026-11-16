@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/constants/app_palette.dart';
 import '../../../../core/router/app_router.dart';
 import '../../data/repositories/dummy_dictionary_repository.dart';
 import '../../data/repositories/letter_pose_repository.dart';
@@ -214,9 +213,15 @@ class _IllustrationCaption extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 4),
             child: Wrap(
               spacing: 16,
-              children: const [
-                _LegendDot(color: AppPalette.primary, label: 'Tangan kiri'),
-                _LegendDot(color: AppPalette.yellow, label: 'Tangan kanan'),
+              children: [
+                _LegendDot(
+                  color: HandPosePainter.skinColors[0],
+                  label: 'Tangan kiri (lebih gelap)',
+                ),
+                _LegendDot(
+                  color: HandPosePainter.skinColors[1],
+                  label: 'Tangan kanan (lebih terang)',
+                ),
               ],
             ),
           ),
@@ -243,7 +248,11 @@ class _LegendDot extends StatelessWidget {
         Container(
           width: 10,
           height: 10,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            border: Border.all(color: HandPosePainter.outlineColor),
+          ),
         ),
         const SizedBox(width: 6),
         Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[700])),

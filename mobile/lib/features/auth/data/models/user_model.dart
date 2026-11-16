@@ -12,6 +12,7 @@ class UserModel extends UserEntity {
     super.isEmailVerified = false,
     super.isGoogleUser = false,
     super.hasPassword = false,
+    super.createdAt,
   });
 
   /// Creates a [UserModel] from a Firebase [User].
@@ -31,6 +32,7 @@ class UserModel extends UserEntity {
       isEmailVerified: user.emailVerified || isGoogle,
       isGoogleUser: isGoogle,
       hasPassword: hasPassword,
+      createdAt: user.metadata.creationTime,
     );
   }
 
@@ -43,6 +45,7 @@ class UserModel extends UserEntity {
       isEmailVerified: json['isEmailVerified'] as bool? ?? false,
       isGoogleUser: json['isGoogleUser'] as bool? ?? false,
       hasPassword: json['hasPassword'] as bool? ?? false,
+      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? ''),
     );
   }
 
@@ -55,6 +58,7 @@ class UserModel extends UserEntity {
       'isEmailVerified': isEmailVerified,
       'isGoogleUser': isGoogleUser,
       'hasPassword': hasPassword,
+      'createdAt': createdAt?.toIso8601String(),
     };
   }
 }
