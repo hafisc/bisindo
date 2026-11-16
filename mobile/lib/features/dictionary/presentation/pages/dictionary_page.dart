@@ -100,11 +100,6 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
                           _buildFilterChip('Semua', null),
                           const SizedBox(width: 8),
                           _buildFilterChip('Huruf', DictionaryCategory.huruf),
-                          const SizedBox(width: 8),
-                          _buildFilterChip(
-                            'Kata Umum',
-                            DictionaryCategory.kataUmum,
-                          ),
                         ],
                       ),
                     ),
@@ -162,51 +157,6 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
                 ).take(12).toList(),
               ),
 
-              // Section for Kata Umum
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24.0,
-                    vertical: 16.0,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Kata Umum',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _selectedCategory = DictionaryCategory.kataUmum;
-                          });
-                        },
-                        child: Row(
-                          children: [
-                            Text(
-                              'Lihat Semua',
-                              style: TextStyle(color: theme.primaryColor),
-                            ),
-                            Icon(
-                              Icons.arrow_forward,
-                              size: 16,
-                              color: theme.primaryColor,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              _buildGridSection(
-                items: DummyDictionaryRepository.getItemsByCategory(
-                  DictionaryCategory.kataUmum,
-                ).take(4).toList(),
-              ),
               const SliverToBoxAdapter(child: SizedBox(height: 48)),
             ] else ...[
               SliverToBoxAdapter(
@@ -224,7 +174,7 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
                 ),
               ),
               _buildGridSection(items: filteredItems),
-              const SliverToBoxAdapter(child: SizedBox(height: 48)),
+              const SliverToBoxAdapter(child: SizedBox(height: 250)),
             ],
           ],
         ),

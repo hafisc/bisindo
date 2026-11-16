@@ -48,7 +48,10 @@ class MainWrapperPage extends StatelessWidget {
     final selectedIndex = _calculateSelectedIndex(context);
 
     return Scaffold(
-      body: child,
+      body: Padding(
+        padding: const EdgeInsets.only(bottom: 80),
+        child: child,
+      ),
       extendBody: true, // Allows body background to flow under the notch
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Container(
