@@ -10,6 +10,12 @@ import 'auth_remote_data_source.dart';
 /// Implementation of [AuthRemoteDataSource] using Firebase Auth and Google Sign-In SDK.
 @Injectable(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+  /// Web Client ID dari Firebase Console (OAuth client_type: 3 pada google-services.json).
+  /// Wajib diberikan agar Google Play Services di Android mengembalikan `idToken`
+  /// yang dibutuhkan oleh Firebase Authentication.
+  static const String defaultServerClientId =
+      '345785652894-fci445o76jv5u4a41ql8kqnlr15i8ml9.apps.googleusercontent.com';
+
   final FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
 
@@ -19,8 +25,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl({
     FirebaseAuth? auth,
     GoogleSignIn? googleSignIn,
+    String? serverClientId,
   })  : _auth = auth ?? FirebaseAuth.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn();
+        _googleSignIn = googleSignIn ??
+            GoogleSignIn(
+              scopes: ['email', 'profile'],
+              serverClientId: serverClientId ?? defaultServerClientId,
+            );
 
   @override
   Stream<UserModel?> get authStateChanges => _auth.authStateChanges().map(
@@ -83,6 +94,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
 
     final googleAuth = await googleUser.authentication;
+    debugPrint(
+      '[AUTH DATA] Google token received - idToken: ${googleAuth.idToken != null ? "ada" : "NULL"}, '
+      'accessToken: ${googleAuth.accessToken != null ? "ada" : "NULL"}',
+    );
+    if (googleAuth.idToken == null && googleAuth.accessToken == null) {
+      throw const AppException(
+        'Gagal memperoleh token autentikasi Google. Pastikan SHA-1/SHA-256 telah terdaftar di Firebase Console.',
+      );
+    }
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
@@ -203,6 +223,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
 
     final googleAuth = await googleUser.authentication;
+    debugPrint(
+      '[AUTH DATA] Google token received - idToken: ${googleAuth.idToken != null ? "ada" : "NULL"}, '
+      'accessToken: ${googleAuth.accessToken != null ? "ada" : "NULL"}',
+    );
+    if (googleAuth.idToken == null && googleAuth.accessToken == null) {
+      throw const AppException(
+        'Gagal memperoleh token autentikasi Google. Pastikan SHA-1/SHA-256 telah terdaftar di Firebase Console.',
+      );
+    }
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
