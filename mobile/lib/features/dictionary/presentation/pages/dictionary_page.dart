@@ -154,7 +154,7 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
               _buildGridSection(
                 items: DummyDictionaryRepository.getItemsByCategory(
                   DictionaryCategory.huruf,
-                ).take(12).toList(),
+                ).take(26).toList(),
               ),
 
               const SliverToBoxAdapter(child: SizedBox(height: 48)),
