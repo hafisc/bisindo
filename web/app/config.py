@@ -30,7 +30,27 @@ def _database_uri() -> str:
 class Config:
     """Konfigurasi dasar. Nilainya dibaca dari environment (file .env)."""
 
-    SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-ganti-di-env")
+    # Kosong berarti create_app membuat kunci acak dan menyimpannya di
+    # INSTANCE_DIR. Jangan pakai nilai tetap di kode: siapa pun yang tahu
+    # kuncinya bisa memalsukan cookie sesi admin.
+    SECRET_KEY = os.environ.get("SECRET_KEY") or None
+
+    # Cookie sesi admin tidak ikut terkirim dari situs lain. Aktifkan
+    # SESSION_COOKIE_SECURE=1 bila server sudah memakai HTTPS.
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "0") in ("1", "true", "True")
+
+    # Login admin dikunci sementara setelah beberapa kali gagal dari alamat
+    # yang sama, supaya password tidak bisa ditebak berulang-ulang.
+    ADMIN_LOGIN_MAX_ATTEMPTS = 5
+    ADMIN_LOGIN_LOCK_SECONDS = 10 * 60
+
+    # Verifikasi Firebase ID token untuk /api/history dan /api/profile.
+    # Di server publik nyalakan REQUIRE_FIREBASE_AUTH=1 agar header X-User-Id
+    # yang tidak bisa diverifikasi ditolak.
+    FIREBASE_PROJECT_ID = os.environ.get("FIREBASE_PROJECT_ID", "bisindo-translator-5b185")
+    REQUIRE_FIREBASE_AUTH = os.environ.get("REQUIRE_FIREBASE_AUTH", "0") in ("1", "true", "True")
 
     ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
     ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")

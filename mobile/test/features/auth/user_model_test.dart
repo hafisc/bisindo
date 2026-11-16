@@ -30,6 +30,25 @@ void main() {
       expect(model.hasPassword, isFalse);
       expect(model.isGoogleUser, isTrue);
     });
+
+    test('menyimpan createdAt pada serialisasi JSON', () {
+      final model = UserModel(
+        id: 'uid-4',
+        email: 'baru@example.com',
+        displayName: 'Baru',
+        createdAt: DateTime.utc(2026, 9, 1, 8),
+      );
+
+      final restored = UserModel.fromJson(model.toJson());
+
+      expect(restored.createdAt, DateTime.utc(2026, 9, 1, 8));
+    });
+
+    test('createdAt null bila tidak ada di JSON', () {
+      final model = UserModel.fromJson({'id': 'uid-5', 'email': 'x@y.z'});
+
+      expect(model.createdAt, isNull);
+    });
   });
 
   group('UserEntity', () {

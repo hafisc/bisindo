@@ -94,11 +94,4 @@ class AppStrings {
   static const String errorEmailInUse = 'Email sudah terdaftar.';
   static const String errorCameraPermission =
       'Izin kamera diperlukan untuk fitur ini.';
-
-  // ── Asset Paths ───────────────────────────────────────────────
-  static const String logoPath = 'assets/images/logo.png';
-  static const String splashLottiePath = 'assets/animations/splash.json';
-  static const String emptyLottiePath = 'assets/animations/empty.json';
-  static const String tfliteModelPath = 'assets/models/bisindo_model.tflite';
-  static const String tfliteLabelsPath = 'assets/models/labels.txt';
 }

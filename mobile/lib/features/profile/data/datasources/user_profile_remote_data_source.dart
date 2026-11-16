@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../domain/avatar_data_uri.dart';
 import '../models/user_profile_model.dart';
 
-/// Kontrak akses data profil pengguna di penyimpanan remote
-/// (Firestore untuk data teks, Cloud Storage untuk foto).
+/// Kontrak akses data profil pengguna di Firestore. Foto profil ikut
+/// disimpan di dokumen yang sama, lihat [AvatarDataUri].
 abstract class UserProfileRemoteDataSource {
   /// Mengambil dokumen `users/{uid}`.
   /// Mengembalikan `null` jika dokumen belum pernah dibuat.
@@ -19,33 +19,24 @@ abstract class UserProfileRemoteDataSource {
   /// Menghapus dokumen `users/{uid}` (dipakai saat hapus akun).
   Future<void> deleteProfile(String uid);
 
-  /// Mengunggah foto profil ke `avatars/{uid}.jpg`, menyimpan URL-nya ke
-  /// dokumen `users/{uid}`, lalu mengembalikan URL tersebut.
+  /// Menyimpan foto dari [filePath] ke field `avatarUrl` dokumen
+  /// `users/{uid}` dalam bentuk data URI, lalu mengembalikan data URI itu.
   Future<String> uploadAvatar({required String uid, required String filePath});
 
-  /// Menghapus foto profil dari Cloud Storage dan mengosongkan field
-  /// `avatarUrl` di dokumen pengguna.
+  /// Mengosongkan field `avatarUrl` di dokumen pengguna.
   Future<void> deleteAvatar(String uid);
 }
 
 class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
   static const String collectionName = 'users';
-  static const String avatarFolder = 'avatars';
 
   final FirebaseFirestore _firestore;
-  final FirebaseStorage _storage;
 
-  UserProfileRemoteDataSourceImpl({
-    FirebaseFirestore? firestore,
-    FirebaseStorage? storage,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _storage = storage ?? FirebaseStorage.instance;
+  UserProfileRemoteDataSourceImpl({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> get _users =>
       _firestore.collection(collectionName);
-
-  Reference _avatarRef(String uid) =>
-      _storage.ref().child(avatarFolder).child('$uid.jpg');
 
   @override
   Future<UserProfileModel?> fetchProfile(String uid) async {
@@ -85,35 +76,22 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
       throw const FileSystemException('File foto tidak ditemukan.');
     }
 
-    final uploadTask = await _avatarRef(uid).putFile(
-      file,
-      SettableMetadata(contentType: 'image/jpeg'),
-    );
+    final dataUri = AvatarDataUri.encode(await file.readAsBytes());
 
-    final downloadUrl = await uploadTask.ref.getDownloadURL();
-
-    // Simpan URL ke dokumen agar tidak perlu diunggah ulang tiap buka app.
     await _users.doc(uid).set(
           {
-            'avatarUrl': downloadUrl,
+            'avatarUrl': dataUri,
             'updatedAt': FieldValue.serverTimestamp(),
           },
           SetOptions(merge: true),
         );
 
     debugPrint('[PROFILE DATA] Avatar users/$uid diperbarui.');
-    return downloadUrl;
+    return dataUri;
   }
 
   @override
   Future<void> deleteAvatar(String uid) async {
-    try {
-      await _avatarRef(uid).delete();
-    } on FirebaseException catch (e) {
-      // object-not-found berarti foto memang belum pernah diunggah.
-      if (e.code != 'object-not-found') rethrow;
-    }
-
     await _users.doc(uid).set(
           {
             'avatarUrl': null,
