@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -10,11 +10,24 @@ import '../../domain/models/history_item.dart';
 import '../providers/history_provider.dart';
 import '../widgets/delete_confirm_dialog.dart';
 
-class HistoryPage extends ConsumerWidget {
+class HistoryPage extends ConsumerStatefulWidget {
   const HistoryPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HistoryPage> createState() => _HistoryPageState();
+}
+
+class _HistoryPageState extends ConsumerState<HistoryPage> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final historyState = ref.watch(historyNotifierProvider);
     final historyNotifier = ref.read(historyNotifierProvider.notifier);
     final filteredItems = historyState.filteredItems;
@@ -28,10 +41,10 @@ class HistoryPage extends ConsumerWidget {
         automaticallyImplyLeading: false,
         // Panah back hanya saat dibuka dari menu Beranda (context.push),
         // bukan dari tab bottom nav.
-        leading: context.canPop()
+        leading: (ModalRoute.of(context)?.canPop ?? false)
             ? IconButton(
                 icon: const Icon(Icons.arrow_back, color: AppPalette.navy),
-                onPressed: () => context.pop(),
+                onPressed: () => Navigator.of(context).maybePop(),
               )
             : null,
         title: Text(
@@ -42,12 +55,51 @@ class HistoryPage extends ConsumerWidget {
             color: AppPalette.navy,
           ),
         ),
+        actions: [
+          if (historyState.items.isNotEmpty)
+            IconButton(
+              tooltip: 'Hapus Semua Riwayat',
+              icon: const Icon(
+                Icons.delete_sweep_outlined,
+                color: AppPalette.coral,
+                size: 26,
+              ),
+              onPressed: () {
+                DeleteConfirmDialog.show(
+                  context: context,
+                  title: 'Hapus Semua Riwayat',
+                  message:
+                      'Apakah Anda yakin ingin menghapus seluruh riwayat translasi?',
+                  onConfirm: () async {
+                    final ok = await historyNotifier.clearAll();
+                    if (!context.mounted) return;
+                    if (ok) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Semua riwayat berhasil dihapus'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Sebagian riwayat di server belum terhapus'),
+                          backgroundColor: AppPalette.coral,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
+                );
+              },
+            ),
+        ],
       ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Description & Filter Pills
+            // Header Description, Search Bar & Filter Pills
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
@@ -62,7 +114,68 @@ class HistoryPage extends ConsumerWidget {
                       height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
+                  // Search Bar
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFFE2E8F0),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.02),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (val) {
+                        historyNotifier.setSearchQuery(val);
+                        setState(() {});
+                      },
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: AppPalette.navy,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Cari hasil terjemahan...',
+                        hintStyle: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: const Color(0xFF94A3B8),
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.search_rounded,
+                          color: Color(0xFF94A3B8),
+                          size: 20,
+                        ),
+                        suffixIcon: _searchController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(
+                                  Icons.close_rounded,
+                                  color: Color(0xFF94A3B8),
+                                  size: 18,
+                                ),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  historyNotifier.setSearchQuery('');
+                                  setState(() {});
+                                },
+                              )
+                            : null,
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   // Filter Pills Row (Semua, Teks, Suara)
                   _buildFilterPills(context, historyState, historyNotifier),
                   const SizedBox(height: 16),
@@ -85,7 +198,10 @@ class HistoryPage extends ConsumerWidget {
                               physics: const AlwaysScrollableScrollPhysics(),
                               children: [
                                 const SizedBox(height: 40),
-                                _buildEmptyState(historyState.activeFilter),
+                                _buildEmptyState(
+                                  historyState.activeFilter,
+                                  historyState.searchQuery,
+                                ),
                               ],
                             )
                           : ListView.builder(
@@ -164,6 +280,27 @@ class HistoryPage extends ConsumerWidget {
     HistoryItem item,
     HistoryNotifier notifier,
   ) {
+    final confPercent = item.confidence > 1
+        ? item.confidence.round()
+        : (item.confidence * 100).round();
+
+    final Color confColor = confPercent >= 80
+        ? AppPalette.teal
+        : confPercent >= 60
+            ? AppPalette.warning
+            : AppPalette.coral;
+
+    void copyToClipboard() {
+      Clipboard.setData(ClipboardData(text: item.title));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Teks "${item.title}" disalin ke clipboard'),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -206,153 +343,213 @@ class HistoryPage extends ConsumerWidget {
             },
           );
         },
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Icon Avatar
-              // Ilustrasi tangan sama seperti kartu Kamus.
-              Container(
-                width: 52,
-                height: 52,
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: GestureThumbnail.backgroundFor(
-                    isLetter: item.type == 'Huruf',
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: copyToClipboard,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Icon Avatar
+                  // Ilustrasi tangan sama seperti kartu Kamus.
+                  Container(
+                    width: 52,
+                    height: 52,
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: GestureThumbnail.backgroundFor(
+                        isLetter: item.type == 'Huruf',
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: GestureThumbnail(
+                      title: item.title,
+                      isLetter: item.type == 'Huruf',
+                      iconSize: 28,
+                      strokeRatio: 0.035,
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: GestureThumbnail(
-                  title: item.title,
-                  isLetter: item.type == 'Huruf',
-                  iconSize: 28,
-                  strokeRatio: 0.035,
-                ),
-              ),
-              const SizedBox(width: 16),
+                  const SizedBox(width: 16),
 
-              // Content Column
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                  // Content Column
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Flexible(
-                          child: Text(
-                            item.title,
-                            style: GoogleFonts.poppins(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF0F172A), // AppPalette.darkBlue
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                item.title,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF0F172A), // AppPalette.darkBlue
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
+                            const SizedBox(width: 8),
 
-                        // Type Pill Badge (Kata / Huruf)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppPalette.softBlue,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            item.type,
-                            style: GoogleFonts.poppins(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: AppPalette.primary,
+                            // Type Pill Badge (Kata / Huruf)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppPalette.softBlue,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                item.type,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppPalette.primary,
+                                ),
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 6),
+
+                            // Confidence Badge
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: confColor.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '$confPercent%',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: confColor,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
+                        const SizedBox(height: 2),
 
-                    // Timestamp
-                    Text(
-                      _formatTimestamp(item.timestamp),
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF94A3B8), // AppPalette.gray400
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-
-                    // Mode Subtitle
-                    Text(
-                      item.mode,
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFFCBD5E1), // Very faint text
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Menu Options
-              PopupMenuButton<String>(
-                icon: const Icon(
-                  Icons.more_vert_rounded,
-                  color: Color(0xFF64748B), // AppPalette.gray600
-                  size: 24,
-                ),
-                padding: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                onSelected: (value) {
-                  if (value == 'delete' && item.id != null) {
-                    DeleteConfirmDialog.show(
-                      context: context,
-                      title: 'Hapus Item',
-                      message:
-                          'Apakah Anda yakin ingin menghapus "${item.title}" dari riwayat?',
-                      onConfirm: () => notifier.deleteItem(item.id!),
-                    );
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.delete_outline_rounded,
-                          color: AppPalette.coral,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
+                        // Timestamp
                         Text(
-                          'Hapus',
+                          _formatTimestamp(item.timestamp),
                           style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            color: AppPalette.coral,
+                            fontSize: 12,
                             fontWeight: FontWeight.w500,
+                            color: const Color(0xFF94A3B8), // AppPalette.gray400
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+
+                        // Mode Subtitle
+                        Text(
+                          item.mode,
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFFCBD5E1), // Very faint text
                           ),
                         ),
                       ],
                     ),
+                  ),
+
+                  // Menu Options
+                  PopupMenuButton<String>(
+                    icon: const Icon(
+                      Icons.more_vert_rounded,
+                      color: Color(0xFF64748B), // AppPalette.gray600
+                      size: 24,
+                    ),
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    onSelected: (value) {
+                      if (value == 'copy') {
+                        copyToClipboard();
+                      } else if (value == 'delete' && item.id != null) {
+                        DeleteConfirmDialog.show(
+                          context: context,
+                          title: 'Hapus Item',
+                          message:
+                              'Apakah Anda yakin ingin menghapus "${item.title}" dari riwayat?',
+                          onConfirm: () => notifier.deleteItem(item.id!),
+                        );
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'copy',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.copy_rounded,
+                              color: AppPalette.navy,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Salin Teks',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: AppPalette.navy,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.delete_outline_rounded,
+                              color: AppPalette.coral,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Hapus',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: AppPalette.coral,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildEmptyState(String filter) {
+  Widget _buildEmptyState(String filter, String searchQuery) {
+    final String message;
+    if (searchQuery.isNotEmpty) {
+      message = 'Tidak ada riwayat terjemahan yang cocok dengan "$searchQuery".';
+    } else if (filter == 'Semua') {
+      message = 'Riwayat hasil deteksi bahasa isyarat kamu akan tampil di sini.';
+    } else {
+      message = 'Tidak ada riwayat terjemahan untuk kategori "$filter".';
+    }
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -366,15 +563,15 @@ class HistoryPage extends ConsumerWidget {
                 color: AppPalette.softBlue,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.history_rounded,
+              child: Icon(
+                searchQuery.isNotEmpty ? Icons.search_off_rounded : Icons.history_rounded,
                 size: 48,
                 color: AppPalette.primary,
               ),
             ),
             const SizedBox(height: 20),
             Text(
-              'Belum Ada Riwayat',
+              searchQuery.isNotEmpty ? 'Tidak Ditemukan' : 'Belum Ada Riwayat',
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -383,9 +580,7 @@ class HistoryPage extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              filter == 'Semua'
-                  ? 'Riwayat hasil deteksi bahasa isyarat kamu akan tampil di sini.'
-                  : 'Tidak ada riwayat terjemahan untuk kategori "$filter".',
+              message,
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 fontSize: 13,
