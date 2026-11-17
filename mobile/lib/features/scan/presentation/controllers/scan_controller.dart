@@ -329,6 +329,13 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  void speakSentence() {
+    final text = resultText.trim();
+    if (text.isNotEmpty) {
+      unawaited(_ttsService.speak(text));
+    }
+  }
+
   @override
   void dispose() {
     _isDisposed = true;

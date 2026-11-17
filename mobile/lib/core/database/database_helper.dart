@@ -52,17 +52,6 @@ class DatabaseHelper {
     await db.execute(
       'CREATE INDEX idx_history_user ON history (userId, pendingDelete)',
     );
-
-    await db.execute('''
-      CREATE TABLE dictionary (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        word TEXT NOT NULL,
-        category TEXT NOT NULL,
-        description TEXT,
-        imagePath TEXT,
-        videoUrl TEXT
-      )
-    ''');
   }
 
   static Future<void> upgradeSchema(
