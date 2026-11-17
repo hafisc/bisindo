@@ -1,6 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/database/database_helper.dart';
+import '../../../auth/domain/entities/user_entity.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../data/datasources/history_local_data_source.dart';
+import '../../data/datasources/history_remote_data_source.dart';
+import '../../data/repositories/history_repository.dart';
 import '../../domain/models/history_item.dart';
 
 class HistoryState {
@@ -8,6 +12,9 @@ class HistoryState {
   final String activeFilter; // 'Semua' | 'Teks' | 'Suara'
   final String searchQuery;
   final bool isLoading;
+
+  /// Pesan bila server tidak bisa dihubungi. Riwayat di HP tetap tampil.
+  final String? syncError;
   final String? errorMessage;
 
   const HistoryState({
@@ -15,6 +22,7 @@ class HistoryState {
     this.activeFilter = 'Semua',
     this.searchQuery = '',
     this.isLoading = false,
+    this.syncError,
     this.errorMessage,
   });
 
@@ -33,6 +41,7 @@ class HistoryState {
     String? activeFilter,
     String? searchQuery,
     bool? isLoading,
+    String? Function()? syncError,
     String? errorMessage,
   }) {
     return HistoryState(
@@ -40,26 +49,40 @@ class HistoryState {
       activeFilter: activeFilter ?? this.activeFilter,
       searchQuery: searchQuery ?? this.searchQuery,
       isLoading: isLoading ?? this.isLoading,
+      syncError: syncError != null ? syncError() : this.syncError,
       errorMessage: errorMessage,
     );
   }
 }
 
 class HistoryNotifier extends StateNotifier<HistoryState> {
-  final DatabaseHelper _dbHelper;
-
-  HistoryNotifier({DatabaseHelper? dbHelper})
-      : _dbHelper = dbHelper ?? DatabaseHelper.instance,
-        super(const HistoryState()) {
+  HistoryNotifier({
+    required HistoryRepository repository,
+    required HistoryOwner? owner,
+  })  : _repository = repository,
+        _owner = owner,
+        super(const HistoryState(isLoading: true)) {
     loadHistory();
   }
 
+  final HistoryRepository _repository;
+  final HistoryOwner? _owner;
+
+  /// Tampilkan riwayat di HP lebih dulu, lalu samakan dengan server.
   Future<void> loadHistory() async {
-    state = state.copyWith(isLoading: true);
     try {
-      final items = await _dbHelper.getAllHistory();
-      state = state.copyWith(items: items, isLoading: false);
+      final local = await _repository.getLocal(_owner);
+      if (!mounted) return;
+      state = state.copyWith(items: local, isLoading: false);
+
+      final result = await _repository.sync(_owner);
+      if (!mounted) return;
+      state = state.copyWith(
+        items: result.items,
+        syncError: () => result.syncError,
+      );
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(
         isLoading: false,
         errorMessage: 'Gagal memuat riwayat terjemahan: $e',
@@ -77,35 +100,74 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
 
   Future<void> addHistoryItem(HistoryItem item) async {
     try {
-      final insertedItem = await _dbHelper.insertHistory(item);
-      state = state.copyWith(items: [insertedItem, ...state.items]);
+      final saved = await _repository.add(_owner, item);
+      if (!mounted) return;
+      state = state.copyWith(items: [saved, ...state.items]);
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(errorMessage: 'Gagal menyimpan riwayat: $e');
     }
   }
 
   Future<void> deleteItem(int id) async {
+    final index = state.items.indexWhere((item) => item.id == id);
+    if (index == -1) return;
+    final item = state.items[index];
+
+    // Langsung hilang dari daftar karena kartu riwayat dihapus dengan geser.
+    state = state.copyWith(
+      items: state.items.where((entry) => entry.id != id).toList(),
+    );
+
     try {
-      await _dbHelper.deleteHistoryItem(id);
-      state = state.copyWith(
-        items: state.items.where((item) => item.id != id).toList(),
-      );
+      await _repository.delete(_owner, item);
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(errorMessage: 'Gagal menghapus item: $e');
     }
   }
 
-  Future<void> clearAll() async {
+  /// Mengembalikan `false` bila server tidak bisa dihubungi.
+  Future<bool> clearAll() async {
     try {
-      await _dbHelper.clearAllHistory();
-      state = state.copyWith(items: []);
-    } catch (e) {
-      state = state.copyWith(errorMessage: 'Gagal menghapus riwayat: $e');
+      await _repository.clear(_owner);
+      if (mounted) state = state.copyWith(items: []);
+      return true;
+    } on HistorySyncException catch (e) {
+      if (mounted) {
+        state = state.copyWith(
+          errorMessage: 'Riwayat di server belum terhapus: ${e.message}',
+        );
+      }
+      return false;
     }
   }
 }
 
+final historyRepositoryProvider = Provider<HistoryRepository>((ref) {
+  return HistoryRepository(
+    local: HistoryLocalDataSourceImpl(),
+    remote: HistoryRemoteDataSourceImpl(),
+  );
+});
+
+/// Pemilik riwayat yang sedang login, atau `null` bila belum login.
+final historyOwnerProvider = Provider<HistoryOwner?>((ref) {
+  final auth = ref.watch(authStateProvider);
+  final UserEntity? user = auth.isLoading
+      ? ref.read(currentUserProvider)
+      : auth.valueOrNull;
+
+  if (user == null || user.isEmpty) return null;
+  return HistoryOwner(uid: user.id, name: user.displayName, email: user.email);
+});
+
+/// Dibuat ulang setiap kali akun berganti, sehingga riwayat satu akun tidak
+/// tampil di akun lain pada HP yang sama.
 final historyNotifierProvider =
     StateNotifierProvider<HistoryNotifier, HistoryState>((ref) {
-  return HistoryNotifier();
+  return HistoryNotifier(
+    repository: ref.watch(historyRepositoryProvider),
+    owner: ref.watch(historyOwnerProvider),
+  );
 });

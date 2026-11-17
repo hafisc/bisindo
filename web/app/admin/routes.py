@@ -1,7 +1,15 @@
 from flask import current_app, flash, redirect, render_template, request, session, url_for
 
 from . import bp, queries
-from .auth import check_credentials, login_required, safe_next_url, verify_csrf
+from .auth import (
+    check_credentials,
+    login_locked_for,
+    login_required,
+    record_failed_login,
+    reset_failed_logins,
+    safe_next_url,
+    verify_csrf,
+)
 
 
 def _page_number() -> int:
@@ -20,13 +28,24 @@ def login():
 
     if request.method == "POST":
         verify_csrf()
+        locked = login_locked_for()
+        if locked:
+            minutes = max(1, (locked + 59) // 60)
+            flash(
+                f"Terlalu banyak percobaan gagal. Coba lagi dalam {minutes} menit.",
+                "error",
+            )
+            return render_template("admin/login.html"), 429
+
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
         if check_credentials(username, password):
+            reset_failed_logins()
             session.clear()
             session["is_admin"] = True
             session["admin_name"] = username
             return redirect(safe_next_url(request.args.get("next")))
+        record_failed_login()
         flash("Username atau password salah.", "error")
 
     return render_template("admin/login.html")

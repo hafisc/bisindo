@@ -70,25 +70,43 @@ class HistoryPage extends ConsumerWidget {
               ),
             ),
 
-            // History List or Empty State
+            if (historyState.syncError != null)
+              const _SyncBanner(),
+
+            // History List or Empty State. Tarik ke bawah untuk sinkron ulang.
             Expanded(
               child: historyState.isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : filteredItems.isEmpty
-                      ? _buildEmptyState(historyState.activeFilter)
-                      : ListView.builder(
-                          physics: const BouncingScrollPhysics(),
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                          itemCount: filteredItems.length,
-                          itemBuilder: (context, index) {
-                            final item = filteredItems[index];
-                            return _buildHistoryCard(
-                              context,
-                              item,
-                              historyNotifier,
-                            );
-                          },
-                        ),
+                  : RefreshIndicator(
+                      color: AppPalette.primary,
+                      onRefresh: historyNotifier.loadHistory,
+                      child: filteredItems.isEmpty
+                          ? ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              children: [
+                                const SizedBox(height: 40),
+                                _buildEmptyState(historyState.activeFilter),
+                              ],
+                            )
+                          : ListView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(
+                                parent: BouncingScrollPhysics(),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 8.0,
+                              ),
+                              itemCount: filteredItems.length,
+                              itemBuilder: (context, index) {
+                                final item = filteredItems[index];
+                                return _buildHistoryCard(
+                                  context,
+                                  item,
+                                  historyNotifier,
+                                );
+                              },
+                            ),
+                    ),
             ),
           ],
         ),
@@ -399,5 +417,44 @@ class HistoryPage extends ConsumerWidget {
     } catch (_) {
       return timestampStr;
     }
+  }
+}
+
+/// Pemberitahuan bahwa riwayat belum tersinkron dengan server.
+class _SyncBanner extends StatelessWidget {
+  const _SyncBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF7E6),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFFDE2A7)),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.cloud_off_rounded,
+            size: 18,
+            color: Color(0xFFB7791F),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Server belum terhubung. Riwayat tetap tersimpan di HP dan '
+              'dikirim otomatis nanti. Tarik ke bawah untuk mencoba lagi.',
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                height: 1.4,
+                color: const Color(0xFF8A5A12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

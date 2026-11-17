@@ -1,0 +1,31 @@
+# Blueprint Render untuk server BISINDO (REST API dan panel admin).
+# Dipakai lewat Render Dashboard > New > Blueprint, lalu pilih repo ini.
+# Langkah lengkapnya ada di web/README.md bagian Deploy.
+services:
+  - type: web
+    name: bisindo-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore
+    healthCheckPath: /api/status
+    autoDeploy: true
+    envVars:
+      # Connection string Postgres dari Neon. Diisi saat membuat Blueprint.
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_USERNAME
+        value: admin
+      # Password panel admin. Diisi saat membuat Blueprint, jangan admin123.
+      - key: ADMIN_PASSWORD
+        sync: false
+      # Dibuat acak oleh Render dan tetap sama setiap redeploy.
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FIREBASE_PROJECT_ID
+        value: bisindo-translator-5b185
+      # Server publik hanya menerima request yang membawa Firebase ID token.
+      - key: REQUIRE_FIREBASE_AUTH
+        value: "1"
+      - key: SESSION_COOKIE_SECURE
+        value: "1"

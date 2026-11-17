@@ -135,7 +135,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       studentId: '',
       role: 'Pengguna BISINDO',
       avatarUrl: user.photoUrl,
-      joinedAt: DateTime.now(),
+      joinedAt: user.createdAt,
     );
   }
 
@@ -173,7 +173,11 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
           return;
         }
 
-        state = state.copyWith(isLoading: false, profile: profile);
+        // Dokumen lama mungkin belum punya joinedAt, isi dari Firebase Auth.
+        final complete = profile.joinedAt == null && user.createdAt != null
+            ? profile.copyWith(joinedAt: user.createdAt)
+            : profile;
+        state = state.copyWith(isLoading: false, profile: complete);
       },
     );
   }
@@ -281,7 +285,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
   /// Menghapus akun pengguna beserta data profilnya.
   ///
-  /// Dokumen Firestore dan foto profil dihapus lebih dulu karena setelah akun
+  /// Dokumen Firestore (termasuk foto profil) dihapus lebih dulu karena setelah akun
   /// Firebase Auth dihapus pengguna tidak lagi punya izin menulis ke database.
   /// Mengembalikan `true` jika akun berhasil dihapus.
   Future<bool> deleteAccount({String? password}) async {
@@ -307,14 +311,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     }
 
     if (uid.isNotEmpty) {
-      // Hapus foto profil lebih dulu agar tidak tertinggal di Cloud Storage.
-      final avatarCleanup = await _deleteAvatarUseCase(
-        DeleteAvatarParams(uid: uid),
-      );
-      if (avatarCleanup.isLeft()) {
-        debugPrint('[PROFILE] Gagal menghapus avatar $uid.');
-      }
-
+      // Foto profil tersimpan di dokumen yang sama, jadi ikut terhapus.
       final profileCleanup = await _deleteUserProfileUseCase(
         DeleteUserProfileParams(uid: uid),
       );
