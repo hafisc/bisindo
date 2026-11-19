@@ -201,6 +201,15 @@ class AppRouter {
           ),
         ],
       ),
+      // Detail Kamus juga harus di luar ShellRoute. DictionaryDetailPage
+      // punya bottomNavigationBar sendiri untuk tombol favorit, sehingga di
+      // dalam shell bar itu bertumpuk dengan bar navigasi utama.
+      GoRoute(
+        path: AppRoutes.dictionaryDetail,
+        name: 'dictionaryDetail',
+        builder: (context, state) =>
+            DictionaryDetailPage(id: state.pathParameters['id'] ?? ''),
+      ),
       GoRoute(
         path: AppRoutes.terms,
         name: 'terms',
@@ -225,14 +234,6 @@ class AppRouter {
             path: AppRoutes.dictionary,
             name: 'dictionary',
             builder: (context, state) => const DictionaryPage(),
-            routes: [
-              GoRoute(
-                path: ':id',
-                name: 'dictionaryDetail',
-                builder: (context, state) =>
-                    DictionaryDetailPage(id: state.pathParameters['id'] ?? ''),
-              ),
-            ],
           ),
           GoRoute(
             path: AppRoutes.history,
