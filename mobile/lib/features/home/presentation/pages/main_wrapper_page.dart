@@ -48,6 +48,11 @@ class MainWrapperPage extends StatelessWidget {
     final selectedIndex = _calculateSelectedIndex(context);
 
     return Scaffold(
+      // Keyboard tidak mengangkat kerangka ini, jadi bar bawah dan tombol scan
+      // tetap di tempatnya (tertutup keyboard) dan tidak melayang di atas isi.
+      // Tiap halaman di dalamnya punya Scaffold sendiri yang menyesuaikan diri
+      // dengan keyboard, sehingga kolom pencarian tetap terlihat.
+      resizeToAvoidBottomInset: false,
       // extendBody membuat Scaffold mengisi MediaQuery.padding.bottom dengan
       // tinggi BottomAppBar yang sebenarnya, bukan angka tebakan. SafeArea
       // memakainya supaya konten tidak tertutup bar di semua mode navigasi.
