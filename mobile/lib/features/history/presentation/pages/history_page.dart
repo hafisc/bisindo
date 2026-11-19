@@ -96,6 +96,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
         ],
       ),
       body: SafeArea(
+        bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -196,6 +197,9 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                       child: filteredItems.isEmpty
                           ? ListView(
                               physics: const AlwaysScrollableScrollPhysics(),
+                              padding: EdgeInsets.only(
+                                bottom: MediaQuery.paddingOf(context).bottom,
+                              ),
                               children: [
                                 const SizedBox(height: 40),
                                 _buildEmptyState(
@@ -208,9 +212,11 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                               physics: const AlwaysScrollableScrollPhysics(
                                 parent: BouncingScrollPhysics(),
                               ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0,
-                                vertical: 8.0,
+                              padding: EdgeInsets.fromLTRB(
+                                16,
+                                8,
+                                16,
+                                8 + MediaQuery.paddingOf(context).bottom,
                               ),
                               itemCount: filteredItems.length,
                               itemBuilder: (context, index) {

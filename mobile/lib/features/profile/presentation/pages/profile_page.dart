@@ -61,14 +61,19 @@ class ProfilePage extends ConsumerWidget {
         ),
       ),
       body: SafeArea(
+        bottom: false,
         child: state.isLoading && profile.isEmpty
             ? const Center(
                 child: CircularProgressIndicator(color: AppPalette.primary),
               )
             : SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  8,
+                  20,
+                  8 + MediaQuery.paddingOf(context).bottom,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
