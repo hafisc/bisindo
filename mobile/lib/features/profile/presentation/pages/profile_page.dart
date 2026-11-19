@@ -231,7 +231,14 @@ class ProfilePage extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        onPressed: () => LogoutDialog.show(context),
+                        onPressed: () async {
+                          final bool confirmed =
+                              await LogoutDialog.show(context);
+                          if (!confirmed || !context.mounted) return;
+                          await ref
+                              .read(profileNotifierProvider.notifier)
+                              .logout(context);
+                        },
                         icon: const Icon(
                           Icons.logout_rounded,
                           color: AppPalette.coral,

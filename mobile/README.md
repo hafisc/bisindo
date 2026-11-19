@@ -6,11 +6,9 @@ Aplikasi Flutter untuk scan, belajar, dan kamus BISINDO. Petunjuk umum proyek ad
 
 ```bash
 flutter pub get
-dart run build_runner build --delete-conflicting-outputs
 flutter run
 ```
 
-- `build_runner` membuat `lib/core/di/injection.config.dart`. File ini tidak masuk git, jadi wajib dijalankan ulang setiap selesai pull.
 - `google-services.json` harus ada di `android/app/`.
 - Fitur Scan dan Mode Belajar butuh HP Android asli, karena emulator x86_64 tidak punya MediaPipe native.
 
@@ -84,16 +82,56 @@ APK release ditandatangani dengan keystore tim. Keystore dan password-nya tidak 
    ```bash
    flutter clean
    flutter pub get
-   dart run build_runner build --delete-conflicting-outputs
    flutter build apk --release
    ```
 
 Hasilnya ada di `build/app/outputs/flutter-apk/app-release.apk`. Bila `key.properties` tidak ada, Gradle memakai kunci debug, dan APK seperti itu jangan dirilis.
 
-**Login Google** di APK release baru berjalan setelah SHA-1 keystore didaftarkan di Firebase Console (Project settings, aplikasi Android, Add fingerprint), lalu `google-services.json` diunduh ulang. SHA-1 bisa dilihat dengan:
+### Login Google dan sidik jari sertifikat
+
+Google menolak login dengan `ApiException: 10` bila sertifikat APK yang sedang berjalan belum terdaftar di Firebase. Yang diperiksa adalah **sertifikat APK**, bukan isi `google-services.json`. Karena itu APK debug juga butuh pendaftaran sendiri, dan tiap komputer punya kunci debug berbeda.
+
+Cek sidik jari APK yang benar-benar terpasang:
 
 ```bash
-keytool -list -v -keystore <path-keystore> -alias bisindo
+# Windows, ganti versi build-tools sesuai yang terpasang
+%LOCALAPPDATA%\Android\Sdk\build-tools\36.0.0\apksigner.bat verify --print-certs ^
+  build\app\outputs\flutter-apk\app-debug.apk
 ```
+
+Untuk keystore, sidik jari bisa dilihat dengan:
+
+```bash
+keytool -list -v -keystore %USERPROFILE%\.android\debug.keystore -alias androiddebugkey
+```
+
+Langkah pendaftaran:
+
+1. Firebase Console, **Project settings**, tab **Your apps**, pilih aplikasi Android `com.bisindo.bisindo_translator`.
+2. **Add fingerprint**, tempel SHA-1 hasil perintah di atas. Tambahkan juga SHA-256 bila perlu.
+3. Tunggu sekitar lima menit. Perubahan ini berlaku di sisi Google, jadi APK yang sudah terpasang tidak perlu dibangun ulang.
+4. Bila masih gagal, unduh ulang `google-services.json` dari halaman yang sama, timpa `android/app/google-services.json`, lalu build ulang.
+
+Satu aplikasi Android boleh punya beberapa sidik jari, jadi sidik jari debug tiap anggota tim dan sidik jari keystore release bisa terdaftar bersamaan. Untuk rilis lewat Play Store dengan Play App Signing, yang didaftarkan adalah SHA-1 dari Play Console, bukan keystore lokal.
+
+### Login Google saat bekerja dalam tim
+
+Yang diperiksa Google adalah sertifikat **berkas APK**, bukan akun Google yang dipakai login. Jadi akun Google siapa pun bisa masuk tanpa didaftarkan, asalkan APK-nya bertanda tangan kunci yang sudah terdaftar.
+
+Setiap komputer membuat `~/.android/debug.keystore` sendiri saat build pertama, dan isinya acak. Karena itu teman yang menjalankan `flutter run` di laptopnya akan terkena `ApiException: 10` walaupun di laptop lain login berjalan normal.
+
+| Cara teman memakai aplikasi | Perlu tambah sidik jari? |
+| :--- | :--- |
+| Menerima berkas APK lalu memasangnya sendiri | Tidak, sertifikat ikut di dalam APK |
+| Memakai HP atau emulator milik orang lain | Tidak |
+| `flutter run` atau build sendiri di laptopnya | Ya, sidik jari laptopnya harus didaftarkan |
+
+Tiga cara bekerja bersama:
+
+**Bagikan berkas APK.** Cara tercepat untuk demo. Build sekali, kirim `build/app/outputs/flutter-apk/app-debug.apk`, lalu mereka pasang. Setiap kode berubah, APK harus dibagikan ulang.
+
+**Daftarkan sidik jari tiap anggota.** Cocok saat beberapa orang mengembangkan aplikasi bersamaan. Tiap anggota menjalankan perintah `keytool` di atas, lalu hasilnya ditambahkan lewat **Add fingerprint**. Firebase tidak membatasi jumlah sidik jari, jadi 5 anggota berarti 5 baris SHA-1. Bila `debug.keystore` belum ada, jalankan `flutter build apk --debug` sekali supaya berkasnya terbentuk.
+
+**Satu keystore release bersama.** Paling rapi untuk jangka panjang. Buat satu keystore, simpan di luar repo, bagikan lewat kanal privat, lalu tiap anggota menaruh `key.properties` di `android/`. Daftarkan SHA-1 keystore itu sekali, dan semua build release menghasilkan sertifikat identik. Jangan commit `key.properties`, `*.jks`, atau `*.keystore`; ketiganya sudah diblokir `android/.gitignore`.
 
 **R8.** Build release memakai R8. Aturan keep MediaPipe ada di `android/app/proguard-rules.pro`. Tanpa aturan itu, layar Scan crash karena nama kelas MediaPipe ikut diubah.

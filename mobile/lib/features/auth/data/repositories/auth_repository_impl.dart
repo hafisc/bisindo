@@ -2,8 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
-
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/user_entity.dart';
@@ -38,7 +36,6 @@ Failure mapGoogleSignInError(PlatformException e) {
 }
 
 /// Concrete implementation of [AuthRepository] in the Data Layer.
-@Injectable(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
 
@@ -105,9 +102,11 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(mapFirebaseAuthError(e));
     } on PlatformException catch (e) {
       return Left(mapGoogleSignInError(e));
+    } on AppException catch (e) {
+      return Left(AuthFailure(e.message));
     } catch (e) {
       debugPrint('[AUTH REPO] signInWithGoogle unexpected: $e');
-      return const Left(AuthFailure('Gagal masuk dengan Google. Silakan coba lagi.'));
+      return Left(AuthFailure('Gagal masuk dengan Google: $e'));
     }
   }
 

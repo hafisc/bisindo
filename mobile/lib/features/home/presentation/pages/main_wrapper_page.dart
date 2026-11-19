@@ -48,7 +48,16 @@ class MainWrapperPage extends StatelessWidget {
     final selectedIndex = _calculateSelectedIndex(context);
 
     return Scaffold(
-      body: child,
+      // extendBody membuat Scaffold mengisi MediaQuery.padding.bottom dengan
+      // tinggi BottomAppBar yang sebenarnya, bukan angka tebakan. SafeArea
+      // memakainya supaya konten tidak tertutup bar di semua mode navigasi.
+      body: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 32),
+          child: child,
+        ),
+      ),
       extendBody: true, // Allows body background to flow under the notch
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Container(

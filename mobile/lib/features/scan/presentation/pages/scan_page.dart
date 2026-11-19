@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -155,6 +156,21 @@ class _ScanPageState extends ConsumerState<ScanPage> {
                       onSpacePressed: _controller.appendSpace,
                       onBackspacePressed: _controller.removeLastCharacter,
                       onResetPressed: _controller.resetResult,
+                      onSpeakPressed: _controller.speakSentence,
+                      onCopyPressed: () {
+                        Clipboard.setData(
+                          ClipboardData(text: _controller.resultText),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Hasil terjemahan disalin ke clipboard',
+                            ),
+                            duration: Duration(seconds: 2),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

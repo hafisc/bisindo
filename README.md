@@ -9,7 +9,7 @@
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.32-02569B?style=flat-square&logo=flutter&logoColor=white)](mobile/README.md)
 [![Flask](https://img.shields.io/badge/Flask-REST%20API-000000?style=flat-square&logo=flask&logoColor=white)](web/README.md)
-[![Model](https://img.shields.io/badge/SVM-akurasi%2096%2C36%25-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)](ml/README.md)
+[![Model](https://img.shields.io/badge/SVM%20RBF-akurasi%2086%2C6%25%20%28frame%20HP%29-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)](ml/README.md)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%26%20Firestore-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com)
 [![Release](https://img.shields.io/github/v/release/hafisc/bisindo?include_prereleases&style=flat-square&label=APK&color=2563EB)](https://github.com/hafisc/bisindo/releases)
 
@@ -55,7 +55,7 @@ flowchart LR
     D -- "huruf" --> E["Aplikasi<br/>teks dan suara"]
 ```
 
-HP hanya mengirim koordinat titik tangan, bukan gambar kamera. Server menormalkan koordinat menjadi 127 fitur, lalu model SVM (kernel RBF) menebak hurufnya. Model dilatih dengan 6.733 sampel dan mencapai **akurasi 96,36%** pada data uji.
+HP hanya mengirim koordinat titik tangan, bukan gambar kamera. Server menormalkan koordinat menjadi 127 fitur, lalu model SVM (kernel RBF) menebak hurufnya. Model dilatih dari 5.789 foto dan mencapai **akurasi 86,6%** pada foto uji yang belum pernah dilihat model, dinilai dalam bentuk frame kamera HP (rata-rata 5 pembagian per kelompok foto). Alur lengkap dari foto sampai model ada di [ml/README.md](ml/README.md).
 
 | Bagian | Teknologi |
 | :--- | :--- |
