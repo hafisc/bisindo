@@ -53,17 +53,23 @@ class MainWrapperPage extends StatelessWidget {
       // Tiap halaman di dalamnya punya Scaffold sendiri yang menyesuaikan diri
       // dengan keyboard, sehingga kolom pencarian tetap terlihat.
       resizeToAvoidBottomInset: false,
-      // extendBody membuat Scaffold mengisi MediaQuery.padding.bottom dengan
-      // tinggi BottomAppBar yang sebenarnya, bukan angka tebakan. SafeArea
-      // memakainya supaya konten tidak tertutup bar di semua mode navigasi.
-      body: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 32),
-          child: child,
-        ),
+      // extendBody membuat isi halaman mengalir sampai ke belakang bar, jadi
+      // lekukan notch memperlihatkan isi halaman, bukan kotak kosong. Scaffold
+      // mengisi MediaQuery.padding.bottom dengan tinggi bar yang sebenarnya;
+      // ditambah 32 untuk FAB yang menonjol 28. Tiap halaman memakai nilai ini
+      // sebagai padding bawah daftarnya agar item terakhir tidak tertutup bar.
+      body: Builder(
+        builder: (context) {
+          final mq = MediaQuery.of(context);
+          return MediaQuery(
+            data: mq.copyWith(
+              padding: mq.padding.copyWith(bottom: mq.padding.bottom + 32),
+            ),
+            child: child,
+          );
+        },
       ),
-      extendBody: true, // Allows body background to flow under the notch
+      extendBody: true,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Container(
         decoration: BoxDecoration(
