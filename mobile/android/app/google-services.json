@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "345785652894-s4go1j90em1f7652n95d86sgk5osu3kp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bisindo.bisindo_translator",
+            "certificate_hash": "2a079838e454344c6170120cacef91397b3e3025"
+          }
+        },
+        {
           "client_id": "345785652894-fci445o76jv5u4a41ql8kqnlr15i8ml9.apps.googleusercontent.com",
           "client_type": 3
         }
