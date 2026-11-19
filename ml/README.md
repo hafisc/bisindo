@@ -214,6 +214,68 @@ poin), jadi keunggulannya dalam akurasi tipis. Ketahanan saat tangan jauh
 keluaran probabilitas untuk server menjadi alasan tambahan. Hasil 1D-CNN
 berubah-ubah setiap dijalankan karena pelatihan TensorFlow tidak persis sama.
 
+## Pemilihan C dan gamma
+
+SVM RBF punya dua pengaturan utama. **C** menentukan seberapa keras model dihukum
+bila salah menebak data latih (C besar membuat model berusaha mengikuti data
+latih persis, dengan risiko menghafal). **gamma** menentukan seberapa jauh
+pengaruh satu foto latih ke sekitarnya (gamma kecil membuat batas antar huruf
+lebih halus, gamma besar membuat batas berliku-liku).
+
+**Cara mencari (grid search).**
+
+1. Kisi nilai dengan loncatan kira-kira 3 kali lipat (skala log): C = 1, 3, 10,
+   30, 100, 300 dan gamma = 0,001; 0,002; 0,004; 0,008; 0,016. Gamma 0,008
+   setara pengaturan bawaan scikit-learn (`'scale'`, sekitar 1/127).
+2. Data latih dibagi 3 lipatan per kelompok foto. Data uji tidak disentuh.
+3. Setiap kombinasi (30 kombinasi, masing-masing 3 lipatan) dilatih pada data
+   yang sudah diaugmentasi, lalu dinilai dalam tiga bentuk frame HP (1,6; 16:9;
+   dan 2,0).
+4. Skor kombinasi adalah rata-rata 3 lipatan. Kombinasi dengan selisih kurang
+   dari 0,3 poin dari yang terbaik dianggap setara.
+
+**Hasil** (11 kombinasi teratas dari 30; seluruhnya ada di
+`ml/models/pencarian_c_gamma.csv`):
+
+| Peringkat | C | gamma | Skor rata-rata | Simpangan antar lipatan |
+| :---: | ---: | ---: | ---: | :--- |
+| 1 | 100 | 0,008 | 0,870 | ±0,090 |
+| 2 | 300 | 0,008 | 0,870 | ±0,088 |
+| 3 | 30 | 0,016 | 0,869 | ±0,088 |
+| 4 | 300 | 0,004 | 0,869 | ±0,094 |
+| 5 | 30 | 0,008 | 0,868 | ±0,092 |
+| 6 | 100 | 0,004 | 0,868 | ±0,094 |
+| 7 | 100 | 0,016 | 0,867 | ±0,087 |
+| 8 | 300 | 0,016 | 0,865 | ±0,091 |
+| 9 | 10 | 0,016 | 0,864 | ±0,097 |
+| 10 | 300 | 0,002 | 0,864 | ±0,101 |
+| **11** | **30** | **0,004** | **0,860** | **±0,110** (dipakai server) |
+
+- Kombinasi terbaik adalah **C=100, gamma=0,008** (skor 0,870). Ada 6 kombinasi yang setara
+  dengan selisih kurang dari 0,3 poin: C = 30 sampai 300 dengan gamma 0,004
+  sampai 0,016.
+- C kecil (1 sampai 3) jelas terlalu longgar (skor 0,588 sampai 0,842). Menaikkan C
+  dari 100 ke 300 tidak menambah skor, dan pemenangnya berada di dalam kisi,
+  bukan di tepinya.
+- Pengaturan yang dipakai model server, **C=30 dan gamma=0,004**, berada di
+  peringkat 11 dari 30 dengan skor 0,860, sekitar 1,0 poin di bawah yang terbaik.
+  Angka itu dipilih dari pencarian pada versi data sebelumnya (kisi lebih
+  sempit, C 1 sampai 30 dan gamma 0,004 sampai 0,016, sebelum foto B dan P satu
+  tangan dibuang dan goyangan titik bertingkat ditambahkan). Saat itu C=30 dan
+  gamma=0,004 yang terbaik, tetapi tidak dicari ulang setelah data berubah.
+- Selisih 1,0 poin itu kecil dibanding naik-turun antar lipatan (sekitar ±9 sampai
+  ±11 poin per kombinasi). Pada perbandingan 6 algoritma, SVM RBF bawaan
+  (C=10, gamma `'scale'`) pun hanya 0,5 poin di atas pengaturan server. Jadi
+  pemilihan angka ini tidak mengubah kesimpulan, dan model tidak diganti karena
+  sudah diuji di HP. Bila ingin memakai yang terbaik, C=100 dengan gamma=0,008
+  (atau C=30 dengan gamma=0,008 yang hanya 0,2 poin di bawahnya) adalah kandidat,
+  dengan syarat dilatih ulang dan diuji lagi di HP.
+
+Kodenya ada di fungsi `search()` pada `ml/src/training/retrain_from_photos.py`
+dan, ditulis langkah demi langkah beserta peta panasnya, di bagian 3 notebook
+`02_latih_ulang_model.ipynb` versi folder `Klasifikasi_Bisindo_ML_dan_DL`.
+Atur `JALANKAN_PENCARIAN = True` untuk mencari ulang (sekitar 10 menit).
+
 ## Dataset
 
 Sumber: folder foto `images/train` (26 subfolder A-Z). Dari 9.168 foto, tangan
