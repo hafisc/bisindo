@@ -17,16 +17,6 @@ Project Based Learning Semester 5, Kelompok 1
 
 [Fitur](#fitur) &nbsp;·&nbsp; [Cara Kerja](#cara-kerja) &nbsp;·&nbsp; [Menjalankan](#menjalankan) &nbsp;·&nbsp; [Dokumentasi](#dokumentasi) &nbsp;·&nbsp; [Tim](#tim)
 
-<br>
-
-<table>
-  <tr>
-    <td align="center"><img src="design/beranda.png" alt="Beranda" width="200"><br><sub><b>Beranda</b></sub></td>
-    <td align="center"><img src="design/riwayat.png" alt="Riwayat" width="200"><br><sub><b>Riwayat</b></sub></td>
-    <td align="center"><img src="design/profil.png" alt="Profil" width="200"><br><sub><b>Profil</b></sub></td>
-  </tr>
-</table>
-
 </div>
 
 ## Tentang
