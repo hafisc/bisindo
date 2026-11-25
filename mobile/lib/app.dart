@@ -16,7 +16,11 @@ class BisindoApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+      // Seluruh halaman dirancang dengan warna terang (kartu putih, teks navy).
+      // Mengikuti mode gelap HP membuat latar dan AppBar navy bertabrakan dengan
+      // warna itu, sehingga teks tidak terbaca. Jadi aplikasi selalu memakai tema
+      // terang sampai ada tema gelap yang dirancang untuk semua halaman.
+      themeMode: ThemeMode.light,
       routerConfig: router,
     );
   }

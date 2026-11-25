@@ -171,6 +171,10 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
             _buildGridSection(items: filteredItems),
             const SliverToBoxAdapter(child: SizedBox(height: 250)),
           ],
+          // Ruang untuk bar bawah dan tombol scan.
+          SliverToBoxAdapter(
+            child: SizedBox(height: MediaQuery.paddingOf(context).bottom),
+          ),
         ],
       ),
     );
