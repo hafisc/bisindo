@@ -5,11 +5,9 @@
 mobile/.dart_tool/
 mobile/build/
 mobile/.packages
-mobile/pubspec.lock
 mobile/android/.gradle
 mobile/android/local.properties
-mobile/android/app/google-services.json       # Firebase config — jangan di-commit
-mobile/ios/GoogleService-Info.plist           # Firebase config — jangan di-commit
+mobile/ios/GoogleService-Info.plist           # Firebase config, jangan di-commit
 mobile/ios/.symlinks/
 mobile/ios/Pods/
 mobile/ios/Runner.xcworkspace/xcuserdata/
@@ -63,3 +61,4 @@ Thumbs.db
 /bisindo/
 /docs/
 mobile/android/build/reports/
+*.hprof

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bisindo_translator/app.dart';
-import 'package:bisindo_translator/core/di/injection.dart';
-import 'package:bisindo_translator/core/router/app_router.dart';
 import 'package:bisindo_translator/features/auth/domain/entities/user_entity.dart';
 import 'package:bisindo_translator/features/auth/domain/repositories/auth_repository.dart';
+import 'package:bisindo_translator/features/auth/presentation/providers/auth_provider.dart';
 
 /// Repository palsu supaya test tidak menyentuh Firebase.
 ///
@@ -23,16 +23,6 @@ class _FakeAuthRepository implements AuthRepository {
 }
 
 void main() {
-  setUp(() {
-    getIt.registerSingleton<AppRouter>(
-      AppRouter(authRepository: _FakeAuthRepository()),
-    );
-  });
-
-  tearDown(() async {
-    await getIt.reset();
-  });
-
   testWidgets('App smoke test', (WidgetTester tester) async {
     // Layar ponsel, bukan 800x600 bawaan test, supaya halaman onboarding
     // tidak overflow saat dirender.
@@ -41,7 +31,14 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const BisindoApp());
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(_FakeAuthRepository()),
+        ],
+        child: const BisindoApp(),
+      ),
+    );
     await tester.pump();
 
     expect(find.byType(MaterialApp), findsOneWidget);

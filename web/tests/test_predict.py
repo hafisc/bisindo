@@ -582,17 +582,32 @@ def _spread_samples(two_handed: bool, limit: int) -> list[tuple[str, list[float]
     return rows[::step][:limit]
 
 
+# Model dilatih untuk koordinat dari kamera HP (frame potret 9:16). MediaPipe
+# memberi x dan z dalam satuan lebar gambar, sehingga tangan yang sama tampak
+# 16/9 kali lebih lebar daripada di foto persegi pada dataset. Test akurasi
+# mengirim data dalam bentuk frame HP, yaitu kondisi yang dikirim aplikasi.
+PHONE_ASPECT = 16 / 9
+
+
+def _frame_hp(points: list[dict]) -> list[dict]:
+    """Regangkan titik dataset (foto persegi) ke bentuk frame kamera HP."""
+    return [
+        {"x": point["x"] * PHONE_ASPECT, "y": point["y"], "z": point["z"] * PHONE_ASPECT}
+        for point in points
+    ]
+
+
 def _accuracy(client, samples, point_count: int) -> float:
     correct = 0
     for label, values in samples:
-        points = _points_from_values(values, point_count)
+        points = _frame_hp(_points_from_values(values, point_count))
         data = client.post("/api/predict", json={"landmarks": points}).get_json()
         correct += data["prediction"] == label
     return correct / len(samples)
 
 
 def test_akurasi_satu_tangan_lewat_endpoint(client):
-    """Landmark mentah satu tangan harus dikenali minimal 90 persen."""
+    """Landmark mentah satu tangan (bentuk frame HP) harus dikenali minimal 90 persen."""
     samples = _spread_samples(two_handed=False, limit=60)
 
     accuracy = _accuracy(client, samples, 21)
@@ -601,7 +616,7 @@ def test_akurasi_satu_tangan_lewat_endpoint(client):
 
 
 def test_akurasi_dua_tangan_lewat_endpoint(client):
-    """Landmark mentah dua tangan harus dikenali minimal 90 persen."""
+    """Landmark mentah dua tangan (bentuk frame HP) harus dikenali minimal 90 persen."""
     samples = _spread_samples(two_handed=True, limit=60)
 
     accuracy = _accuracy(client, samples, 42)
@@ -615,7 +630,7 @@ def test_akurasi_dua_tangan_tetap_tinggi_saat_urutan_dibalik(client):
 
     correct = 0
     for label, values in samples:
-        points = _swap_point_blocks(_points_from_values(values, 42))
+        points = _frame_hp(_swap_point_blocks(_points_from_values(values, 42)))
         data = client.post("/api/predict", json={"landmarks": points}).get_json()
         correct += data["prediction"] == label
 
@@ -629,7 +644,7 @@ def test_akurasi_landmark_tercermin(client):
 
     correct = 0
     for label, values in samples:
-        points = _points_from_values(values, 42)
+        points = _frame_hp(_points_from_values(values, 42))
         tercermin = [{"x": -point["x"], "y": point["y"], "z": point["z"]} for point in points]
         data = client.post("/api/predict", json={"landmarks": tercermin}).get_json()
         correct += data["prediction"] == label
@@ -644,7 +659,7 @@ def test_akurasi_satu_tangan_tercermin(client):
 
     correct = 0
     for label, values in samples:
-        points = _points_from_values(values, 21)
+        points = _frame_hp(_points_from_values(values, 21))
         tercermin = [{"x": -point["x"], "y": point["y"], "z": point["z"]} for point in points]
         data = client.post("/api/predict", json={"landmarks": tercermin}).get_json()
         correct += data["prediction"] == label

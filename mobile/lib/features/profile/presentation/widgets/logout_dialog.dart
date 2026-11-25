@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_palette.dart';
-import '../providers/profile_provider.dart';
 
-class LogoutDialog extends ConsumerWidget {
+class LogoutDialog extends StatelessWidget {
   const LogoutDialog({super.key});
 
-  static Future<void> show(BuildContext context) {
-    return showDialog(
+  /// Menampilkan dialog konfirmasi keluar.
+  ///
+  /// Mengembalikan `true` bila pengguna memilih "Keluar". Proses logout
+  /// dijalankan oleh pemanggil agar memakai `BuildContext` halaman yang
+  /// masih terpasang, bukan context dialog yang sudah ikut hilang saat
+  /// dialog ditutup.
+  static Future<bool> show(BuildContext context) async {
+    final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => const LogoutDialog(),
     );
+    return confirmed ?? false;
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
@@ -92,12 +97,7 @@ class LogoutDialog extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    await ref
-                        .read(profileNotifierProvider.notifier)
-                        .logout(context);
-                  },
+                  onPressed: () => Navigator.pop(context, true),
                   child: Text(
                     'Keluar',
                     style: GoogleFonts.poppins(

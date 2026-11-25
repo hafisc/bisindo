@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../di/injection.dart';
+import '../providers/shared_preferences_provider.dart';
 import '../../features/auth/data/datasources/auth_remote_data_source_impl.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/pages/email_verification_page.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/legal_page.dart';
@@ -48,26 +48,22 @@ abstract class AppRoutes {
   static const String privacy = '/privacy';
 }
 
-/// Dibuat saat pertama kali diminta (`getIt<AppRouter>()` di `app.dart`),
-/// bukan saat `configureDependencies()`. Dengan `@singleton` biasa, injectable
-/// membuat router sebelum [AuthRepository] terdaftar sehingga aplikasi
-/// berhenti di splash screen.
-@lazySingleton
 class AppRouter {
   final AuthRepository _authRepository;
+  final SharedPreferences? _prefs;
 
-  @factoryMethod
-  AppRouter({AuthRepository? authRepository})
-    : _authRepository =
-          authRepository ??
-          AuthRepositoryImpl(remoteDataSource: AuthRemoteDataSourceImpl());
+  AppRouter({
+    AuthRepository? authRepository,
+    SharedPreferences? prefs,
+  })  : _authRepository = authRepository ??
+            AuthRepositoryImpl(remoteDataSource: AuthRemoteDataSourceImpl()),
+        _prefs = prefs;
 
   GoRouter get config => _router;
 
-  static String _getInitialLocation() {
-    final bool isOnboardingDone = getIt.isRegistered<SharedPreferences>()
-        ? (getIt<SharedPreferences>().getBool('onboarding_done') ?? false)
-        : false;
+  String _getInitialLocation() {
+    final bool isOnboardingDone =
+        _prefs?.getBool('onboarding_done') ?? false;
     return isOnboardingDone ? AppRoutes.login : AppRoutes.onboarding;
   }
 
@@ -83,9 +79,8 @@ class AppRouter {
 
       final location = state.uri.path;
 
-      final bool isOnboardingDone = getIt.isRegistered<SharedPreferences>()
-          ? (getIt<SharedPreferences>().getBool('onboarding_done') ?? false)
-          : false;
+      final bool isOnboardingDone =
+          _prefs?.getBool('onboarding_done') ?? false;
 
       // Routes that don't require auth
       const publicRoutes = [
@@ -206,6 +201,15 @@ class AppRouter {
           ),
         ],
       ),
+      // Detail Kamus juga harus di luar ShellRoute. DictionaryDetailPage
+      // punya bottomNavigationBar sendiri untuk tombol favorit, sehingga di
+      // dalam shell bar itu bertumpuk dengan bar navigasi utama.
+      GoRoute(
+        path: AppRoutes.dictionaryDetail,
+        name: 'dictionaryDetail',
+        builder: (context, state) =>
+            DictionaryDetailPage(id: state.pathParameters['id'] ?? ''),
+      ),
       GoRoute(
         path: AppRoutes.terms,
         name: 'terms',
@@ -230,14 +234,6 @@ class AppRouter {
             path: AppRoutes.dictionary,
             name: 'dictionary',
             builder: (context, state) => const DictionaryPage(),
-            routes: [
-              GoRoute(
-                path: ':id',
-                name: 'dictionaryDetail',
-                builder: (context, state) =>
-                    DictionaryDetailPage(id: state.pathParameters['id'] ?? ''),
-              ),
-            ],
           ),
           GoRoute(
             path: AppRoutes.history,
@@ -269,3 +265,16 @@ class _PlaceholderPage extends StatelessWidget {
     );
   }
 }
+
+/// Provider [AppRouter] berbasis Riverpod.
+final appRouterProvider = Provider<AppRouter>((ref) {
+  return AppRouter(
+    authRepository: ref.watch(authRepositoryProvider),
+    prefs: ref.watch(sharedPreferencesProvider),
+  );
+});
+
+/// Provider [GoRouter] yang siap dipakai di `MaterialApp.router`.
+final goRouterProvider = Provider<GoRouter>((ref) {
+  return ref.watch(appRouterProvider).config;
+});
