@@ -17,6 +17,10 @@ dependencies:
   # ── Navigation ────────────────────────────────────────────────
   go_router: ^14.0.0
 
+  # ── Dependency Injection ──────────────────────────────────────
+  get_it: ^9.3.0
+  injectable: ^2.4.4
+
   # ── Firebase ──────────────────────────────────────────────────
   firebase_core: ^4.15.0
   firebase_auth: ^6.7.0
@@ -43,6 +47,7 @@ dependencies:
 
   # ── UI & Assets ───────────────────────────────────────────────
   flutter_svg: ^2.0.17
+  flutter_screenutil: ^5.9.3
   google_fonts: ^6.2.1
 
   # ── Utils ─────────────────────────────────────────────────────
@@ -56,6 +61,7 @@ dev_dependencies:
 
   # ── Code Generation ───────────────────────────────────────────
   build_runner: ^2.4.15
+  injectable_generator: ^2.6.2
 
 flutter:
   uses-material-design: true

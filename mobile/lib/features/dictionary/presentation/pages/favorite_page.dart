@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/constants/app_palette.dart';
 import '../../../../core/router/app_router.dart';
 import '../../data/repositories/dummy_dictionary_repository.dart';
@@ -22,31 +23,31 @@ class FavoritePage extends ConsumerWidget {
         .whereType<DictionaryItem>()
         .toList();
 
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Favorit'),
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: items.isEmpty
-          ? const _EmptyFavorites()
-          : CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
-                    child: Text(
-                      '${items.length} gesture tersimpan',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+    return Theme(
+      data: AppTheme.light,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        appBar: AppBar(
+          title: const Text('Favorit'),
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: items.isEmpty
+            ? const _EmptyFavorites()
+            : CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+                      child: Text(
+                        '${items.length} gesture tersimpan',
+                        style: AppTheme.light.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
                     sliver: SliverGrid(
@@ -72,7 +73,8 @@ class FavoritePage extends ConsumerWidget {
                   ),
                 ],
               ),
-      );
+      ),
+    );
   }
 }
 

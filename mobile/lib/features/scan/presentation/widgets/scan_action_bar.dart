@@ -5,16 +5,12 @@ class ScanActionBar extends StatelessWidget {
   final VoidCallback onSpacePressed;
   final VoidCallback onBackspacePressed;
   final VoidCallback onResetPressed;
-  final VoidCallback? onSpeakPressed;
-  final VoidCallback? onCopyPressed;
 
   const ScanActionBar({
     required this.resultText,
     required this.onSpacePressed,
     required this.onBackspacePressed,
     required this.onResetPressed,
-    this.onSpeakPressed,
-    this.onCopyPressed,
     super.key,
   });
 
@@ -37,55 +33,15 @@ class ScanActionBar extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    resultText.isEmpty
-                        ? 'Hasil terjemahan akan muncul di sini'
-                        : resultText,
-                    style: TextStyle(
-                      color: resultText.isEmpty ? Colors.white54 : Colors.white,
-                      fontSize: 17,
-                      height: 1.35,
-                    ),
-                  ),
-                ),
-                if (resultText.isNotEmpty) ...[
-                  const SizedBox(width: 8),
-                  if (onSpeakPressed != null)
-                    IconButton(
-                      icon: const Icon(
-                        Icons.volume_up_rounded,
-                        color: Colors.white70,
-                        size: 22,
-                      ),
-                      tooltip: 'Bicara',
-                      onPressed: onSpeakPressed,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 32,
-                        minHeight: 32,
-                      ),
-                    ),
-                  if (onCopyPressed != null)
-                    IconButton(
-                      icon: const Icon(
-                        Icons.copy_rounded,
-                        color: Colors.white70,
-                        size: 20,
-                      ),
-                      tooltip: 'Salin',
-                      onPressed: onCopyPressed,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 32,
-                        minHeight: 32,
-                      ),
-                    ),
-                ],
-              ],
+            child: Text(
+              resultText.isEmpty
+                  ? 'Hasil terjemahan akan muncul di sini'
+                  : resultText,
+              style: TextStyle(
+                color: resultText.isEmpty ? Colors.white54 : Colors.white,
+                fontSize: 17,
+                height: 1.35,
+              ),
             ),
           ),
           const SizedBox(height: 14),

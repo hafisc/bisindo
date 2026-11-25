@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../domain/models/dictionary_item.dart';
 import '../../data/repositories/dummy_dictionary_repository.dart';
 import '../providers/favorites_provider.dart';
@@ -37,17 +38,21 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
           .toList();
     }
 
-    final theme = Theme.of(context);
+    final theme = AppTheme.light;
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Kamus BISINDO'),
-        centerTitle: false,
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-      ),
+    return Theme(
+      data: AppTheme.light,
+      child: Scaffold(
+        backgroundColor: const Color(
+          0xFFF8FAFC,
+        ), // Light blue-ish grey background
+        appBar: AppBar(
+          title: const Text('Kamus BISINDO'),
+          centerTitle: false,
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+        ),
         body: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
@@ -223,12 +228,13 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
             ],
           ],
         ),
-      );
+      ),
+    );
   }
 
   Widget _buildFilterChip(String label, DictionaryCategory? category) {
     final isSelected = _selectedCategory == category;
-    final theme = Theme.of(context);
+    final theme = AppTheme.light;
 
     return ChoiceChip(
       label: Text(label),
@@ -238,7 +244,7 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
           _selectedCategory = selected ? category : null;
         });
       },
-      selectedColor: theme.colorScheme.primary,
+      selectedColor: theme.primaryColor,
       labelStyle: TextStyle(
         color: isSelected ? Colors.white : Colors.grey[700],
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -247,7 +253,7 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
         side: BorderSide(
-          color: isSelected ? theme.colorScheme.primary : Colors.grey[300]!,
+          color: isSelected ? theme.primaryColor : Colors.grey[300]!,
         ),
       ),
       showCheckmark: false,

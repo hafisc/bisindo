@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:injectable/injectable.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../providers/shared_preferences_provider.dart';
+import '../di/injection.dart';
 import '../../features/auth/data/datasources/auth_remote_data_source_impl.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/pages/email_verification_page.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/legal_page.dart';
@@ -48,22 +48,26 @@ abstract class AppRoutes {
   static const String privacy = '/privacy';
 }
 
+/// Dibuat saat pertama kali diminta (`getIt<AppRouter>()` di `app.dart`),
+/// bukan saat `configureDependencies()`. Dengan `@singleton` biasa, injectable
+/// membuat router sebelum [AuthRepository] terdaftar sehingga aplikasi
+/// berhenti di splash screen.
+@lazySingleton
 class AppRouter {
   final AuthRepository _authRepository;
-  final SharedPreferences? _prefs;
 
-  AppRouter({
-    AuthRepository? authRepository,
-    SharedPreferences? prefs,
-  })  : _authRepository = authRepository ??
-            AuthRepositoryImpl(remoteDataSource: AuthRemoteDataSourceImpl()),
-        _prefs = prefs;
+  @factoryMethod
+  AppRouter({AuthRepository? authRepository})
+    : _authRepository =
+          authRepository ??
+          AuthRepositoryImpl(remoteDataSource: AuthRemoteDataSourceImpl());
 
   GoRouter get config => _router;
 
-  String _getInitialLocation() {
-    final bool isOnboardingDone =
-        _prefs?.getBool('onboarding_done') ?? false;
+  static String _getInitialLocation() {
+    final bool isOnboardingDone = getIt.isRegistered<SharedPreferences>()
+        ? (getIt<SharedPreferences>().getBool('onboarding_done') ?? false)
+        : false;
     return isOnboardingDone ? AppRoutes.login : AppRoutes.onboarding;
   }
 
@@ -79,8 +83,9 @@ class AppRouter {
 
       final location = state.uri.path;
 
-      final bool isOnboardingDone =
-          _prefs?.getBool('onboarding_done') ?? false;
+      final bool isOnboardingDone = getIt.isRegistered<SharedPreferences>()
+          ? (getIt<SharedPreferences>().getBool('onboarding_done') ?? false)
+          : false;
 
       // Routes that don't require auth
       const publicRoutes = [
@@ -264,16 +269,3 @@ class _PlaceholderPage extends StatelessWidget {
     );
   }
 }
-
-/// Provider [AppRouter] berbasis Riverpod.
-final appRouterProvider = Provider<AppRouter>((ref) {
-  return AppRouter(
-    authRepository: ref.watch(authRepositoryProvider),
-    prefs: ref.watch(sharedPreferencesProvider),
-  );
-});
-
-/// Provider [GoRouter] yang siap dipakai di `MaterialApp.router`.
-final goRouterProvider = Provider<GoRouter>((ref) {
-  return ref.watch(appRouterProvider).config;
-});

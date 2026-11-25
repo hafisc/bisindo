@@ -220,7 +220,6 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 DropdownButtonFormField<String>(
                   // `initialValue` baru ada di Flutter 3.35, sedangkan README
                   // menetapkan minimal 3.32. `value` jalan di kedua versi.
-                  // ignore: deprecated_member_use
                   value: _selectedRole,
                   decoration: _inputDecoration(
                     icon: Icons.groups_outlined,

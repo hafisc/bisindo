@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/app_router.dart';
 import '../../data/repositories/dummy_dictionary_repository.dart';
 import '../../data/repositories/letter_pose_repository.dart';
@@ -19,13 +20,16 @@ class DictionaryDetailPage extends ConsumerWidget {
     final item = DummyDictionaryRepository.getItemById(id);
 
     if (item == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Detail Gesture')),
-        body: const Center(child: Text('Item tidak ditemukan.')),
+      return Theme(
+        data: AppTheme.light,
+        child: Scaffold(
+          appBar: AppBar(title: const Text('Detail Gesture')),
+          body: const Center(child: Text('Item tidak ditemukan.')),
+        ),
       );
     }
 
-    final theme = Theme.of(context);
+    final theme = AppTheme.light;
     final isLetter = item.category == DictionaryCategory.huruf;
     final badgeColor = isLetter ? Colors.orange : Colors.blue;
     final posesAsync = isLetter ? ref.watch(letterPosesProvider) : null;
@@ -40,15 +44,17 @@ class DictionaryDetailPage extends ConsumerWidget {
     final tips = pose?.tips ?? item.tips;
     final confusedWith = pose?.confusedWith;
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Detail Gesture'),
-        centerTitle: true,
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-      ),
+    return Theme(
+      data: AppTheme.light,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          title: const Text('Detail Gesture'),
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+        ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
@@ -147,7 +153,8 @@ class DictionaryDetailPage extends ConsumerWidget {
             child: _FavoriteButton(itemId: item.id),
           ),
         ),
-      );
+      ),
+    );
   }
 }
 

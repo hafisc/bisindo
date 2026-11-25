@@ -2,11 +2,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
 import 'core/config/api_config.dart';
-import 'core/providers/shared_preferences_provider.dart';
+import 'core/di/injection.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,7 @@ void main() async {
 
   // Initialize SharedPreferences
   final prefs = await SharedPreferences.getInstance();
+  getIt.registerSingleton<SharedPreferences>(prefs);
 
   // Muat alamat server yang tersimpan di perangkat (bisa diubah di layar Scan).
   await ApiConfig.load();
@@ -33,12 +35,12 @@ void main() async {
     debugPrint('[Firebase] Tidak bisa init — pastikan google-services.json sudah ada: $e');
   }
 
+  // Initialize dependency injection
+  configureDependencies();
+
   runApp(
-    ProviderScope(
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(prefs),
-      ],
-      child: const BisindoApp(),
+    const ProviderScope(
+      child: BisindoApp(),
     ),
   );
 }
