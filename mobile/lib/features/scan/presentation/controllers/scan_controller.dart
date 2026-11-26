@@ -27,13 +27,17 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
     PredictionStabilizer? stabilizer,
     CameraService? cameraService,
     NativeHandLandmarkerService? landmarkerService,
+    DateTime Function()? now,
+    String? Function()? userIdProvider,
     this.onLetterCommitted,
     this.onLetterRecognized,
     this.recordHistory = true,
   })  : _apiClient = apiClient ?? PredictionApiClient(),
         _ttsService = ttsService ?? TtsService(),
         _stabilizer = stabilizer ?? PredictionStabilizer(),
-        _landmarkerService = landmarkerService ?? NativeHandLandmarkerService() {
+        _landmarkerService = landmarkerService ?? NativeHandLandmarkerService(),
+        _now = now ?? DateTime.now,
+        _userIdProvider = userIdProvider {
     WidgetsBinding.instance.addObserver(this);
     _resolveUser();
 
@@ -56,6 +60,8 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
   final TtsService _ttsService;
   final PredictionStabilizer _stabilizer;
   final NativeHandLandmarkerService _landmarkerService;
+  final DateTime Function() _now;
+  final String? Function()? _userIdProvider;
   late final CameraService _cameraService;
 
   /// Dipanggil setiap kali satu huruf dikunci, agar layar bisa menyimpannya ke
@@ -112,6 +118,10 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void _resolveUser() {
+    if (_userIdProvider != null) {
+      _userId = _userIdProvider();
+      return;
+    }
     try {
       final user = FirebaseAuth.instance.currentUser;
       _userId = user?.uid;
@@ -242,7 +252,7 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
     if (detectedHands.isEmpty) return;
     if (_cameraService.controller == null) return;
 
-    final now = DateTime.now();
+    final now = _now();
     if (now.isBefore(_retryAfter)) return;
     if (now.difference(_lastPredictAt) < _predictInterval) return;
 
@@ -280,14 +290,14 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
       } else {
         predictionStatus = PredictionStatus.error;
         predictionError = error.message;
-        _retryAfter = DateTime.now().add(_retryInterval);
+        _retryAfter = _now().add(_retryInterval);
       }
       notifyListeners();
     } catch (error) {
       if (_isDisposed) return;
       predictionStatus = PredictionStatus.error;
       predictionError = 'Gagal memproses prediksi: $error';
-      _retryAfter = DateTime.now().add(_retryInterval);
+      _retryAfter = _now().add(_retryInterval);
       notifyListeners();
     } finally {
       _isPredicting = false;
@@ -303,7 +313,7 @@ class ScanController extends ChangeNotifier with WidgetsBindingObserver {
       type: 'Huruf',
       category: category,
       mode: ttsEnabled ? 'BISINDO → Suara' : 'BISINDO → Teks',
-      timestamp: DateTime.now().toIso8601String(),
+      timestamp: _now().toIso8601String(),
       confidence: letterConfidence,
     );
 

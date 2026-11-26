@@ -91,37 +91,41 @@ class ProfileState {
 
 // ── Notifier ─────────────────────────────────────────────────────────────────
 
-class ProfileNotifier extends StateNotifier<ProfileState> {
-  ProfileNotifier({
-    required GetCurrentUserUseCase getCurrentUserUseCase,
-    required LogoutUseCase logoutUseCase,
-    required GetUserProfileUseCase getUserProfileUseCase,
-    required UpdateUserProfileUseCase updateUserProfileUseCase,
-    required UploadAvatarUseCase uploadAvatarUseCase,
-    required DeleteAvatarUseCase deleteAvatarUseCase,
-    required DeleteUserProfileUseCase deleteUserProfileUseCase,
-    required DeleteAccountUseCase deleteAccountUseCase,
-    required ReauthenticateUseCase reauthenticateUseCase,
-  })  : _getCurrentUserUseCase = getCurrentUserUseCase,
-        _logoutUseCase = logoutUseCase,
-        _getUserProfileUseCase = getUserProfileUseCase,
-        _updateUserProfileUseCase = updateUserProfileUseCase,
-        _uploadAvatarUseCase = uploadAvatarUseCase,
-        _deleteAvatarUseCase = deleteAvatarUseCase,
-        _deleteUserProfileUseCase = deleteUserProfileUseCase,
-        _deleteAccountUseCase = deleteAccountUseCase,
-        _reauthenticateUseCase = reauthenticateUseCase,
-        super(const ProfileState());
+class ProfileNotifier extends Notifier<ProfileState> {
+  late GetCurrentUserUseCase _getCurrentUserUseCase;
+  late LogoutUseCase _logoutUseCase;
+  late GetUserProfileUseCase _getUserProfileUseCase;
+  late UpdateUserProfileUseCase _updateUserProfileUseCase;
+  late UploadAvatarUseCase _uploadAvatarUseCase;
+  late DeleteAvatarUseCase _deleteAvatarUseCase;
+  late DeleteUserProfileUseCase _deleteUserProfileUseCase;
+  late DeleteAccountUseCase _deleteAccountUseCase;
+  late ReauthenticateUseCase _reauthenticateUseCase;
+  bool _isDisposed = false;
 
-  final GetCurrentUserUseCase _getCurrentUserUseCase;
-  final LogoutUseCase _logoutUseCase;
-  final GetUserProfileUseCase _getUserProfileUseCase;
-  final UpdateUserProfileUseCase _updateUserProfileUseCase;
-  final UploadAvatarUseCase _uploadAvatarUseCase;
-  final DeleteAvatarUseCase _deleteAvatarUseCase;
-  final DeleteUserProfileUseCase _deleteUserProfileUseCase;
-  final DeleteAccountUseCase _deleteAccountUseCase;
-  final ReauthenticateUseCase _reauthenticateUseCase;
+  @override
+  ProfileState build() {
+    _isDisposed = false;
+    ref.onDispose(() => _isDisposed = true);
+
+    _getCurrentUserUseCase = ref.watch(getCurrentUserUseCaseProvider);
+    _logoutUseCase = ref.watch(logoutUseCaseProvider);
+    _getUserProfileUseCase = ref.watch(getUserProfileUseCaseProvider);
+    _updateUserProfileUseCase = ref.watch(updateUserProfileUseCaseProvider);
+    _uploadAvatarUseCase = ref.watch(uploadAvatarUseCaseProvider);
+    _deleteAvatarUseCase = ref.watch(deleteAvatarUseCaseProvider);
+    _deleteUserProfileUseCase = ref.watch(deleteUserProfileUseCaseProvider);
+    _deleteAccountUseCase = ref.watch(deleteAccountUseCaseProvider);
+    _reauthenticateUseCase = ref.watch(reauthenticateUseCaseProvider);
+
+    // Muat ulang setiap kali status autentikasi berubah.
+    ref.listen<AsyncValue<UserEntity?>>(authStateProvider, (prev, next) {
+      next.whenData((_) => refreshProfile());
+    });
+
+    Future.microtask(load);
+    return const ProfileState();
+  }
 
   /// Profil sementara dari data Firebase Auth, dipakai saat dokumen Firestore
   /// belum ada atau gagal dimuat.
@@ -142,6 +146,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   /// Memuat profil dari Firestore. Jika dokumen belum ada, profil awal dibuat
   /// dari data Firebase Auth lalu langsung disimpan.
   Future<void> load() async {
+    if (_isDisposed) return;
     final user = _getCurrentUserUseCase();
 
     if (user == null || user.isEmpty) {
@@ -154,6 +159,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     final result = await _getUserProfileUseCase(
       GetUserProfileParams(uid: user.id),
     );
+    if (_isDisposed) return;
 
     result.fold(
       (failure) {
@@ -213,6 +219,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     final result = await _updateUserProfileUseCase(
       UpdateUserProfileParams(profile: updated),
     );
+    if (_isDisposed) return false;
 
     return result.fold(
       (failure) {
@@ -237,6 +244,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     final result = await _uploadAvatarUseCase(
       UploadAvatarParams(uid: uid, filePath: filePath),
     );
+    if (_isDisposed) return false;
 
     return result.fold(
       (failure) {
@@ -264,6 +272,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     state = state.copyWith(isUploadingAvatar: true, errorMessage: null);
 
     final result = await _deleteAvatarUseCase(DeleteAvatarParams(uid: uid));
+    if (_isDisposed) return false;
 
     return result.fold(
       (failure) {
@@ -299,6 +308,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       final reauth = await _reauthenticateUseCase(
         ReauthenticateParams(password: password),
       );
+      if (_isDisposed) return false;
 
       if (reauth.isLeft()) {
         final failure = reauth.fold((f) => f, (_) => null);
@@ -325,6 +335,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     final result = await _deleteAccountUseCase(
       DeleteAccountParams(password: password),
     );
+    if (_isDisposed) return false;
 
     return result.fold(
       (failure) {
@@ -344,7 +355,9 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   Future<void> logout(BuildContext context) async {
     state = state.copyWith(isLoading: true);
     await _logoutUseCase(const NoParams());
-    state = const ProfileState(profile: UserProfile.empty);
+    if (!_isDisposed) {
+      state = const ProfileState(profile: UserProfile.empty);
+    }
     if (context.mounted) {
       context.go(AppRoutes.login);
     }
@@ -352,26 +365,4 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 }
 
 final profileNotifierProvider =
-    StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
-  final notifier = ProfileNotifier(
-    getCurrentUserUseCase: ref.watch(getCurrentUserUseCaseProvider),
-    logoutUseCase: ref.watch(logoutUseCaseProvider),
-    getUserProfileUseCase: ref.watch(getUserProfileUseCaseProvider),
-    updateUserProfileUseCase: ref.watch(updateUserProfileUseCaseProvider),
-    uploadAvatarUseCase: ref.watch(uploadAvatarUseCaseProvider),
-    deleteAvatarUseCase: ref.watch(deleteAvatarUseCaseProvider),
-    deleteUserProfileUseCase: ref.watch(deleteUserProfileUseCaseProvider),
-    deleteAccountUseCase: ref.watch(deleteAccountUseCaseProvider),
-    reauthenticateUseCase: ref.watch(reauthenticateUseCaseProvider),
-  );
-
-  // Muat profil pertama kali.
-  notifier.load();
-
-  // Muat ulang setiap kali status autentikasi berubah.
-  ref.listen<AsyncValue<UserEntity?>>(authStateProvider, (prev, next) {
-    next.whenData((_) => notifier.refreshProfile());
-  });
-
-  return notifier;
-});
+    NotifierProvider<ProfileNotifier, ProfileState>(ProfileNotifier.new);

@@ -1,6 +1,3 @@
-import 'package:bisindo_translator/features/history/data/datasources/history_local_data_source.dart';
-import 'package:bisindo_translator/features/history/data/datasources/history_remote_data_source.dart';
-import 'package:bisindo_translator/features/history/data/repositories/history_repository.dart';
 import 'package:bisindo_translator/features/history/domain/models/history_item.dart';
 import 'package:bisindo_translator/features/history/presentation/pages/history_page.dart';
 import 'package:bisindo_translator/features/history/presentation/providers/history_provider.dart';
@@ -8,52 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _FakeLocalDataSource implements HistoryLocalDataSource {
-  @override
-  Future<List<HistoryItem>> getHistory(String userId) async => [];
-  @override
-  Future<List<HistoryItem>> getPendingDeletes(String userId) async => [];
-  @override
-  Future<List<HistoryItem>> getUnsynced(String userId) async => [];
-  @override
-  Future<HistoryItem> insert(String userId, HistoryItem item) async => item;
-  @override
-  Future<void> markSynced(int id, int remoteId) async {}
-  @override
-  Future<void> markPendingDelete(int id) async {}
-  @override
-  Future<void> delete(int id) async {}
-  @override
-  Future<void> clear(String userId) async {}
-  @override
-  Future<void> replaceSynced(String userId, List<HistoryItem> remoteItems) async {}
-}
-
-class _FakeRemoteDataSource implements HistoryRemoteDataSource {
-  @override
-  Future<List<HistoryItem>> fetch(HistoryOwner owner) async => [];
-  @override
-  Future<int> create(HistoryOwner owner, HistoryItem item) async => 1;
-  @override
-  Future<void> delete(HistoryOwner owner, int remoteId) async {}
-  @override
-  Future<void> clear(HistoryOwner owner) async {}
-}
-
 class _FakeHistoryNotifier extends HistoryNotifier {
-  _FakeHistoryNotifier(List<HistoryItem> initialItems)
-      : super(
-          repository: HistoryRepository(
-            local: _FakeLocalDataSource(),
-            remote: _FakeRemoteDataSource(),
-          ),
-          owner: null,
-        ) {
-    state = HistoryState(
-      items: initialItems,
-      isLoading: false,
-    );
-  }
+  _FakeHistoryNotifier(this._initialItems);
+
+  final List<HistoryItem> _initialItems;
+
+  @override
+  HistoryState build() => HistoryState(
+    items: _initialItems,
+    isLoading: false,
+  );
 
   @override
   Future<void> loadHistory() async {}
@@ -87,7 +48,7 @@ void main() {
     return ProviderScope(
       overrides: [
         historyNotifierProvider.overrideWith(
-          (ref) => _FakeHistoryNotifier(items),
+          () => _FakeHistoryNotifier(items),
         ),
       ],
       child: const MaterialApp(

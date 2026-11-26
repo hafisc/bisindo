@@ -13,7 +13,9 @@ class DatabaseHelper {
   /// Versi 2: riwayat dipisah per akun (`userId`), menyimpan id dari server
   /// (`remoteId`), dan bisa ditandai menunggu dihapus di server
   /// (`pendingDelete`). Data contoh dari versi 1 dibuang.
-  static const int schemaVersion = 2;
+  ///
+  /// Versi 3: menambah tabel `dictionary_items` untuk cache kamus BISINDO lokal.
+  static const int schemaVersion = 3;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -52,6 +54,22 @@ class DatabaseHelper {
     await db.execute(
       'CREATE INDEX idx_history_user ON history (userId, pendingDelete)',
     );
+    await _createDictionaryTable(db);
+  }
+
+  static Future<void> _createDictionaryTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS dictionary_items (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        category TEXT NOT NULL,
+        imageUrl TEXT NOT NULL DEFAULT '',
+        description TEXT NOT NULL DEFAULT '',
+        instructionsJson TEXT NOT NULL DEFAULT '[]',
+        tips TEXT NOT NULL DEFAULT '',
+        sortOrder INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
   }
 
   static Future<void> upgradeSchema(
@@ -81,6 +99,10 @@ class DatabaseHelper {
           OR (title = 'B' AND type = 'Huruf' AND category = 'Suara' AND confidence = 0.94)
         )
       ''');
+    }
+
+    if (oldVersion < 3) {
+      await _createDictionaryTable(db);
     }
   }
 }

@@ -1,18 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import '../../../../core/config/auth_config.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../models/user_model.dart';
 import 'auth_remote_data_source.dart';
 
 /// Implementation of [AuthRemoteDataSource] using Firebase Auth and Google Sign-In SDK.
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  /// Web Client ID dari Firebase Console (OAuth client_type: 3 pada google-services.json).
-  /// Wajib diberikan agar Google Play Services di Android mengembalikan `idToken`
-  /// yang dibutuhkan oleh Firebase Authentication.
-  static const String defaultServerClientId =
-      '345785652894-fci445o76jv5u4a41ql8kqnlr15i8ml9.apps.googleusercontent.com';
-
   final FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
 
@@ -24,7 +19,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         _googleSignIn = googleSignIn ??
             GoogleSignIn(
               scopes: ['email', 'profile'],
-              serverClientId: serverClientId ?? defaultServerClientId,
+              serverClientId:
+                  AuthConfig.resolveServerClientId(serverClientId) ??
+                      AuthConfig.googleServerClientId,
             );
 
   @override

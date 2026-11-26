@@ -55,34 +55,36 @@ class HistoryState {
   }
 }
 
-class HistoryNotifier extends StateNotifier<HistoryState> {
-  HistoryNotifier({
-    required HistoryRepository repository,
-    required HistoryOwner? owner,
-  })  : _repository = repository,
-        _owner = owner,
-        super(const HistoryState(isLoading: true)) {
-    loadHistory();
-  }
+class HistoryNotifier extends Notifier<HistoryState> {
+  late HistoryRepository _repository;
+  HistoryOwner? _owner;
+  bool _isDisposed = false;
 
-  final HistoryRepository _repository;
-  final HistoryOwner? _owner;
+  @override
+  HistoryState build() {
+    _isDisposed = false;
+    ref.onDispose(() => _isDisposed = true);
+    _repository = ref.watch(historyRepositoryProvider);
+    _owner = ref.watch(historyOwnerProvider);
+    Future.microtask(loadHistory);
+    return const HistoryState(isLoading: true);
+  }
 
   /// Tampilkan riwayat di HP lebih dulu, lalu samakan dengan server.
   Future<void> loadHistory() async {
     try {
       final local = await _repository.getLocal(_owner);
-      if (!mounted) return;
+      if (_isDisposed) return;
       state = state.copyWith(items: local, isLoading: false);
 
       final result = await _repository.sync(_owner);
-      if (!mounted) return;
+      if (_isDisposed) return;
       state = state.copyWith(
         items: result.items,
         syncError: () => result.syncError,
       );
     } catch (e) {
-      if (!mounted) return;
+      if (_isDisposed) return;
       state = state.copyWith(
         isLoading: false,
         errorMessage: 'Gagal memuat riwayat terjemahan: $e',
@@ -101,10 +103,10 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
   Future<void> addHistoryItem(HistoryItem item) async {
     try {
       final saved = await _repository.add(_owner, item);
-      if (!mounted) return;
+      if (_isDisposed) return;
       state = state.copyWith(items: [saved, ...state.items]);
     } catch (e) {
-      if (!mounted) return;
+      if (_isDisposed) return;
       state = state.copyWith(errorMessage: 'Gagal menyimpan riwayat: $e');
     }
   }
@@ -122,7 +124,7 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
     try {
       await _repository.delete(_owner, item);
     } catch (e) {
-      if (!mounted) return;
+      if (_isDisposed) return;
       state = state.copyWith(errorMessage: 'Gagal menghapus item: $e');
     }
   }
@@ -131,10 +133,10 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
   Future<bool> clearAll() async {
     try {
       await _repository.clear(_owner);
-      if (mounted) state = state.copyWith(items: []);
+      if (!_isDisposed) state = state.copyWith(items: []);
       return true;
     } on HistorySyncException catch (e) {
-      if (mounted) {
+      if (!_isDisposed) {
         state = state.copyWith(
           errorMessage: 'Riwayat di server belum terhapus: ${e.message}',
         );
@@ -165,9 +167,4 @@ final historyOwnerProvider = Provider<HistoryOwner?>((ref) {
 /// Dibuat ulang setiap kali akun berganti, sehingga riwayat satu akun tidak
 /// tampil di akun lain pada HP yang sama.
 final historyNotifierProvider =
-    StateNotifierProvider<HistoryNotifier, HistoryState>((ref) {
-  return HistoryNotifier(
-    repository: ref.watch(historyRepositoryProvider),
-    owner: ref.watch(historyOwnerProvider),
-  );
-});
+    NotifierProvider<HistoryNotifier, HistoryState>(HistoryNotifier.new);

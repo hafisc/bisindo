@@ -1,22 +1,47 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
-import '../../data/repositories/dummy_dictionary_repository.dart';
 import '../../data/repositories/letter_pose_repository.dart';
 import '../../domain/models/dictionary_item.dart';
 import '../../domain/models/letter_pose.dart';
+import '../providers/dictionary_provider.dart';
 import '../providers/favorites_provider.dart';
 import '../widgets/hand_pose_view.dart';
 
-class DictionaryDetailPage extends ConsumerWidget {
+class DictionaryDetailPage extends ConsumerStatefulWidget {
   final String id;
   const DictionaryDetailPage({super.key, required this.id});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final item = DummyDictionaryRepository.getItemById(id);
+  ConsumerState<DictionaryDetailPage> createState() =>
+      _DictionaryDetailPageState();
+}
+
+class _DictionaryDetailPageState extends ConsumerState<DictionaryDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+      () => ref.read(dictionaryProvider.notifier).refreshItemDetail(widget.id),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dictionaryState = ref.watch(dictionaryProvider);
+
+    if (dictionaryState.isLoading && dictionaryState.items.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Detail Gesture')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final item = dictionaryState.itemById(widget.id);
 
     if (item == null) {
       return Scaffold(
@@ -36,8 +61,10 @@ class DictionaryDetailPage extends ConsumerWidget {
 
     final instructions =
         pose?.instructions ??
-        (item.instructions.isEmpty ? null : item.instructions);
-    final tips = pose?.tips ?? item.tips;
+        (item.instructions.isNotEmpty
+            ? item.instructions
+            : (item.description.isNotEmpty ? [item.description] : null));
+    final tips = (pose?.tips.isNotEmpty == true) ? pose!.tips : item.tips;
     final confusedWith = pose?.confusedWith;
 
     return Scaffold(
@@ -95,6 +122,17 @@ class DictionaryDetailPage extends ConsumerWidget {
                   ),
                 ],
               ),
+              if (item.description.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text(
+                  item.description,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.grey[700],
+                    height: 1.5,
+                  ),
+                ),
+              ],
               const SizedBox(height: 32),
               Text(
                 'Cara Melakukan',

@@ -63,14 +63,12 @@ class AppStrings {
   static const String scannerHint = 'Arahkan kamera ke tangan Anda';
   static const String scannerDetecting = 'Mendeteksi...';
   static const String modeLetter = 'Huruf';
-  static const String modeWord = 'Kata';
 
   // ── Dictionary ────────────────────────────────────────────────
   static const String dictionaryTitle = 'Kamus BISINDO';
-  static const String dictionarySearch = 'Cari gestur...';
+  static const String dictionarySearch = 'Cari huruf...';
   static const String categoryAll = 'Semua';
   static const String categoryAlphabet = 'Alfabet';
-  static const String categoryWord = 'Kata Umum';
 
   // ── History ───────────────────────────────────────────────────
   static const String historyTitle = 'Riwayat Translasi';
