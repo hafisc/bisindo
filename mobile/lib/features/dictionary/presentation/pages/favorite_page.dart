@@ -32,7 +32,7 @@ class FavoritePage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Favorit'),
         backgroundColor: theme.appBarTheme.backgroundColor,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: AppPalette.transparent,
         elevation: 0,
       ),
       body: dictionaryState.isLoading && dictionaryState.items.isEmpty
@@ -114,7 +114,7 @@ class _EmptyFavorites extends StatelessWidget {
               'Buka gesture di Kamus lalu ketuk "Tambah ke Favorit" '
               'supaya mudah ditemukan saat latihan.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[600], height: 1.5),
+              style: const TextStyle(color: AppPalette.gray500, height: 1.5),
             ),
             const SizedBox(height: 24),
             FilledButton.icon(

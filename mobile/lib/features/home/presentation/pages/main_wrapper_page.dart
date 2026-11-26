@@ -92,12 +92,12 @@ class MainWrapperPage extends StatelessWidget {
             children: [
               Icon(
                 Icons.crop_free_rounded, // Camera/scan box
-                color: Colors.white,
+                color: AppPalette.white,
                 size: 30,
               ),
               Icon(
                 Icons.back_hand_rounded, // Small hand inside
-                color: Colors.white,
+                color: AppPalette.white,
                 size: 14,
               ),
             ],
@@ -107,7 +107,7 @@ class MainWrapperPage extends StatelessWidget {
       bottomNavigationBar: BottomAppBar(
         color: AppPalette.white,
         elevation: 0, // We'll rely on the crisp border instead of unreliable shadow
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: AppPalette.transparent,
         padding: EdgeInsets.zero,
         shape: const CircularNotchedRectangle(),
         notchMargin: 8,
@@ -205,7 +205,7 @@ class _NotchBorderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFFE2E8F0) // Subtle gray border (AppPalette.gray200)
+      ..color = AppPalette.gray200 // Subtle gray border
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 

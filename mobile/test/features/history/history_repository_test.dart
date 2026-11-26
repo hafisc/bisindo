@@ -1,9 +1,12 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:bisindo_translator/core/errors/failures.dart';
 import 'package:bisindo_translator/features/history/data/datasources/history_local_data_source.dart';
 import 'package:bisindo_translator/features/history/data/datasources/history_remote_data_source.dart';
-import 'package:bisindo_translator/features/history/data/repositories/history_repository.dart';
+import 'package:bisindo_translator/features/history/data/repositories/history_repository_impl.dart';
 import 'package:bisindo_translator/features/history/domain/models/history_item.dart';
+import 'package:bisindo_translator/features/history/domain/repositories/history_repository.dart';
 
 /// SQLite tiruan di memori dengan aturan yang sama seperti tabel `history`.
 class _MemoryLocal implements HistoryLocalDataSource {
@@ -33,8 +36,11 @@ class _MemoryLocal implements HistoryLocalDataSource {
     return saved;
   }
 
-  void _update(int id, HistoryItem Function(HistoryItem) change,
-      {bool? pendingDelete}) {
+  void _update(
+    int id,
+    HistoryItem Function(HistoryItem) change, {
+    bool? pendingDelete,
+  }) {
     final index = rows.indexWhere((r) => r.item.id == id);
     final row = rows[index];
     rows[index] = (
@@ -109,6 +115,13 @@ class _FakeServer implements HistoryRemoteDataSource {
   }
 }
 
+T _unwrapRight<T>(Either<Failure, T> result) {
+  return result.fold(
+    (failure) => fail('Expected Right, got Left(${failure.message})'),
+    (value) => value,
+  );
+}
+
 HistoryItem _letter(String title, {String time = '2026-11-15T10:00:00.000'}) =>
     HistoryItem(
       title: title,
@@ -128,29 +141,28 @@ void main() {
   setUp(() {
     local = _MemoryLocal();
     server = _FakeServer();
-    repository = HistoryRepository(local: local, remote: server);
+    repository = HistoryRepositoryImpl(local: local, remote: server);
   });
 
   test('riwayat baru tersimpan di HP dan terkirim ke server', () async {
-    final saved = await repository.add(owner, _letter('A'));
+    final saved = _unwrapRight(await repository.add(owner, _letter('A')));
 
     expect(saved.remoteId, isNotNull);
     expect(server.entries.values.single.title, 'A');
-    expect((await repository.getLocal(owner)).single.isSynced, isTrue);
+    expect(_unwrapRight(await repository.getLocal(owner)).single.isSynced, isTrue);
   });
 
-  test('saat server mati riwayat tetap tersimpan lalu terkirim saat sinkron',
-      () async {
+  test('saat server mati riwayat tetap tersimpan lalu terkirim saat sinkron', () async {
     server.online = false;
     await repository.add(owner, _letter('B'));
-    final offline = await repository.sync(owner);
+    final offline = _unwrapRight(await repository.sync(owner));
 
     expect(offline.items.single.title, 'B');
     expect(offline.syncError, isNotNull);
     expect(server.entries, isEmpty);
 
     server.online = true;
-    final online = await repository.sync(owner);
+    final online = _unwrapRight(await repository.sync(owner));
 
     expect(online.syncError, isNull);
     expect(server.entries.values.single.title, 'B');
@@ -160,31 +172,31 @@ void main() {
   test('sinkron mengambil riwayat yang ada di server', () async {
     server.entries[7] = _letter('C');
 
-    final result = await repository.sync(owner);
+    final result = _unwrapRight(await repository.sync(owner));
 
     expect(result.items.map((e) => e.title), ['C']);
     expect(result.items.single.remoteId, 7);
   });
 
   test('riwayat yang dihapus di server ikut hilang dari HP', () async {
-    final saved = await repository.add(owner, _letter('D'));
+    final saved = _unwrapRight(await repository.add(owner, _letter('D')));
     server.entries.remove(saved.remoteId);
 
-    final result = await repository.sync(owner);
+    final result = _unwrapRight(await repository.sync(owner));
 
     expect(result.items, isEmpty);
   });
 
   test('hapus saat server mati ditunda lalu dikirim saat sinkron', () async {
-    final saved = await repository.add(owner, _letter('E'));
+    final saved = _unwrapRight(await repository.add(owner, _letter('E')));
     server.online = false;
 
-    await repository.delete(owner, saved);
-    expect(await repository.getLocal(owner), isEmpty);
+    _unwrapRight(await repository.delete(owner, saved));
+    expect(_unwrapRight(await repository.getLocal(owner)), isEmpty);
     expect(server.entries, isNotEmpty);
 
     server.online = true;
-    await repository.sync(owner);
+    _unwrapRight(await repository.sync(owner));
     expect(server.entries, isEmpty);
     expect(local.rows, isEmpty);
   });
@@ -193,33 +205,40 @@ void main() {
     await repository.add(owner, _letter('F'));
     await repository.add(null, _letter('G'));
 
-    expect((await repository.getLocal(owner)).map((e) => e.title), ['F']);
-    expect((await repository.getLocal(null)).map((e) => e.title), ['G']);
     expect(
-      await repository.getLocal(const HistoryOwner(uid: 'uid-b')),
+      _unwrapRight(await repository.getLocal(owner)).map((e) => e.title),
+      ['F'],
+    );
+    expect(
+      _unwrapRight(await repository.getLocal(null)).map((e) => e.title),
+      ['G'],
+    );
+    expect(
+      _unwrapRight(await repository.getLocal(const HistoryOwner(uid: 'uid-b'))),
       isEmpty,
     );
   });
 
   test('tanpa login riwayat hanya disimpan di HP', () async {
     await repository.add(null, _letter('H'));
-    final result = await repository.sync(null);
+    final result = _unwrapRight(await repository.sync(null));
 
     expect(server.entries, isEmpty);
     expect(result.syncError, isNull);
     expect(result.items.single.title, 'H');
   });
 
-  test('hapus semua gagal saat server mati dan data HP tidak disentuh',
-      () async {
+  test('hapus semua gagal saat server mati dan data HP tidak disentuh', () async {
     await repository.add(owner, _letter('I'));
     server.online = false;
 
-    await expectLater(
-      repository.clear(owner),
-      throwsA(isA<HistorySyncException>()),
+    final clearResult = await repository.clear(owner);
+    expect(clearResult.isLeft(), isTrue);
+    clearResult.fold(
+      (failure) => expect(failure, isA<ServerFailure>()),
+      (_) => fail('Expected Left(ServerFailure)'),
     );
-    expect(await repository.getLocal(owner), isNotEmpty);
+    expect(_unwrapRight(await repository.getLocal(owner)), isNotEmpty);
   });
 
   group('HistoryItem dari dan ke server', () {

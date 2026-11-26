@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../core/router/app_router.dart';
 import '../../../../core/utils/use_case.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/domain/usecases/delete_account_usecase.dart';
@@ -352,15 +350,20 @@ class ProfileNotifier extends Notifier<ProfileState> {
   /// Muat ulang profil (mis. setelah login/logout).
   Future<void> refreshProfile() => load();
 
-  Future<void> logout(BuildContext context) async {
-    state = state.copyWith(isLoading: true);
-    await _logoutUseCase(const NoParams());
-    if (!_isDisposed) {
-      state = const ProfileState(profile: UserProfile.empty);
-    }
-    if (context.mounted) {
-      context.go(AppRoutes.login);
-    }
+  Future<bool> logout() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    final result = await _logoutUseCase(const NoParams());
+    if (_isDisposed) return false;
+    return result.fold(
+      (failure) {
+        state = state.copyWith(isLoading: false, errorMessage: failure.message);
+        return false;
+      },
+      (_) {
+        state = const ProfileState(profile: UserProfile.empty);
+        return true;
+      },
+    );
   }
 }
 

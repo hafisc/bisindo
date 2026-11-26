@@ -36,7 +36,7 @@ class AppTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppPalette.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppPalette.white,
         minimumSize: const Size(double.infinity, 52),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         textStyle: GoogleFonts.poppins(
@@ -47,7 +47,7 @@ class AppTheme {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Colors.white,
+      fillColor: AppPalette.white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -71,12 +71,12 @@ class AppTheme {
       ),
     ),
     cardTheme: CardThemeData(
-      color: Colors.white,
+      color: AppPalette.white,
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: Colors.white,
+      backgroundColor: AppPalette.white,
       selectedItemColor: AppPalette.primary,
       unselectedItemColor: AppPalette.gray400,
       type: BottomNavigationBarType.fixed,
@@ -114,7 +114,7 @@ class AppTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppPalette.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppPalette.white,
         minimumSize: const Size(double.infinity, 52),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         textStyle: GoogleFonts.poppins(

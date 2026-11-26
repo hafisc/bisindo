@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/app_palette.dart';
 import '../../../../core/router/app_router.dart';
 import '../../data/repositories/letter_pose_repository.dart';
 import '../../domain/models/dictionary_item.dart';
@@ -52,7 +53,7 @@ class _DictionaryDetailPageState extends ConsumerState<DictionaryDetailPage> {
 
     final theme = Theme.of(context);
     final isLetter = item.category == DictionaryCategory.huruf;
-    final badgeColor = isLetter ? Colors.orange : Colors.blue;
+    final badgeColor = isLetter ? AppPalette.orange : AppPalette.primary;
     final posesAsync = isLetter ? ref.watch(letterPosesProvider) : null;
     final poses = posesAsync?.valueOrNull;
     final LetterPose? pose = poses == null
@@ -73,7 +74,7 @@ class _DictionaryDetailPageState extends ConsumerState<DictionaryDetailPage> {
         title: const Text('Detail Gesture'),
         centerTitle: true,
         backgroundColor: theme.appBarTheme.backgroundColor,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: AppPalette.transparent,
         elevation: 0,
       ),
         body: SingleChildScrollView(
@@ -98,7 +99,7 @@ class _DictionaryDetailPageState extends ConsumerState<DictionaryDetailPage> {
                       item.title,
                       style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: AppPalette.black87,
                       ),
                     ),
                   ),
@@ -126,9 +127,9 @@ class _DictionaryDetailPageState extends ConsumerState<DictionaryDetailPage> {
                 const SizedBox(height: 12),
                 Text(
                   item.description,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 15,
-                    color: Colors.grey[700],
+                    color: AppPalette.gray600,
                     height: 1.5,
                   ),
                 ),
@@ -146,7 +147,7 @@ class _DictionaryDetailPageState extends ConsumerState<DictionaryDetailPage> {
                   posesAsync?.hasError == true
                       ? 'Panduan peragaan gagal dimuat. Tutup lalu buka lagi halaman ini.'
                       : 'Memuat panduan peragaan...',
-                  style: TextStyle(color: Colors.grey[600], height: 1.5),
+                  style: const TextStyle(color: AppPalette.gray500, height: 1.5),
                 )
               else
                 ...instructions.asMap().entries.map(
@@ -212,7 +213,7 @@ class _IllustrationBox extends StatelessWidget {
         child: Icon(
           isLetter ? Icons.back_hand : Icons.sign_language,
           size: 100,
-          color: isLetter ? Colors.orange[300] : Colors.blue[300],
+          color: isLetter ? AppPalette.orangeLight : AppPalette.blue300,
         ),
       );
     }
@@ -221,7 +222,7 @@ class _IllustrationBox extends StatelessWidget {
       width: double.infinity,
       height: 260,
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
+        color: AppPalette.gray100,
         borderRadius: BorderRadius.circular(24),
       ),
       child: content,
@@ -235,7 +236,7 @@ class _IllustrationCaption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = TextStyle(fontSize: 12, color: Colors.grey[600], height: 1.4);
+    const style = TextStyle(fontSize: 12, color: AppPalette.gray500, height: 1.4);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -286,7 +287,7 @@ class _LegendDot extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[700])),
+        Text(label, style: const TextStyle(fontSize: 12, color: AppPalette.gray600)),
       ],
     );
   }
@@ -329,30 +330,30 @@ class _TipsBox extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFEFF6FF),
+        color: AppPalette.blue50,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.blue.shade100),
+        border: Border.all(color: AppPalette.blue100),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.lightbulb, color: Colors.blue[600]),
+          const Icon(Icons.lightbulb, color: AppPalette.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Tips',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue[800],
+                    color: AppPalette.blue800,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   text,
-                  style: TextStyle(color: Colors.blue[900], height: 1.5),
+                  style: const TextStyle(color: AppPalette.blue900, height: 1.5),
                 ),
               ],
             ),
@@ -370,7 +371,7 @@ class _FavoriteButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isFavorite = ref.watch(favoritesProvider).contains(itemId);
-    final color = isFavorite ? Colors.red : Theme.of(context).primaryColor;
+    final color = isFavorite ? AppPalette.error : Theme.of(context).primaryColor;
 
     return OutlinedButton.icon(
       onPressed: () async {

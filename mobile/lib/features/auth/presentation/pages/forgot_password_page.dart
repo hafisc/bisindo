@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/constants/app_palette.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_primary_button.dart';
 import '../widgets/auth_text_field.dart';
@@ -40,7 +41,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     'Email reset password telah dikirim. Cek inbox kamu.',
                     style: GoogleFonts.poppins(fontSize: 13),
                   ),
-                  backgroundColor: const Color(0xFF22C55E),
+                  backgroundColor: AppPalette.success,
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -58,7 +59,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     next.errorMessage!,
                     style: GoogleFonts.poppins(fontSize: 13),
                   ),
-                  backgroundColor: const Color(0xFFEF4444),
+                  backgroundColor: AppPalette.error,
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -69,7 +70,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         });
 
         return Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: AppPalette.white,
           body: Stack(
             children: [
               // ── Dekorasi blob
@@ -80,7 +81,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   width: 150,
                   height: 150,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFEFF6FF),
+                    color: AppPalette.blue50,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -97,7 +98,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         icon: const Icon(
                           Icons.arrow_back_ios_new_rounded,
                           size: 20,
-                          color: Color(0xFF0F172A),
+                          color: AppPalette.darkBlue,
                         ),
                         onPressed: () => context.pop(),
                       ),
@@ -119,13 +120,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                 width: 64,
                                 height: 64,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFEFF6FF),
+                                  color: AppPalette.blue50,
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: const Icon(
                                   Icons.lock_reset_rounded,
                                   size: 32,
-                                  color: Color(0xFF2563EB),
+                                  color: AppPalette.primary,
                                 ),
                               ),
 
@@ -136,7 +137,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                 style: GoogleFonts.poppins(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF0F172A),
+                                  color: AppPalette.darkBlue,
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -145,7 +146,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                 'mengirimkan link untuk mereset password kamu.',
                                 style: GoogleFonts.poppins(
                                   fontSize: 14,
-                                  color: const Color(0xFF64748B),
+                                  color: AppPalette.gray500,
                                   height: 1.5,
                                 ),
                               ),

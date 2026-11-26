@@ -1,12 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../history/domain/models/history_item.dart';
-import '../../../history/presentation/providers/history_provider.dart';
+import '../../../../core/constants/app_palette.dart';
+import '../../../../core/router/app_router.dart';
 import '../controllers/scan_controller.dart';
 import '../widgets/camera_switch_button.dart';
 import '../widgets/connection_status_indicator.dart';
@@ -14,49 +12,34 @@ import '../widgets/detection_info_overlay.dart';
 import '../widgets/hand_landmarks_painter.dart';
 import '../widgets/scan_action_bar.dart';
 import '../widgets/scan_camera_view.dart';
+import '../widgets/scan_round_icon_button.dart';
 import '../widgets/server_settings_dialog.dart';
 
-class ScanPage extends ConsumerStatefulWidget {
+/// Layar kamera penerjemah huruf BISINDO secara real-time.
+class ScanPage extends ConsumerWidget {
   const ScanPage({super.key});
 
-  @override
-  ConsumerState<ScanPage> createState() => _ScanPageState();
-}
+  Future<void> _openServerSettings(BuildContext context, WidgetRef ref) async {
+    final controller =
+        ref.read(scanControllerProvider(ScanMode.translate).notifier);
+    final currentUrl =
+        ref.read(scanControllerProvider(ScanMode.translate)).serverUrl;
 
-class _ScanPageState extends ConsumerState<ScanPage> {
-  late final ScanController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = ScanController(onLetterCommitted: _saveToHistory)
-      ..initializeCamera();
-  }
-
-  void _saveToHistory(HistoryItem item) {
-    unawaited(ref.read(historyNotifierProvider.notifier).addHistoryItem(item));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> _openServerSettings() async {
     final saved = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => ServerSettingsDialog(
-        currentUrl: _controller.serverUrl,
-        onSave: _controller.setServerAddress,
-        onReset: _controller.resetServerAddress,
+        currentUrl: currentUrl,
+        onSave: controller.setServerAddress,
+        onReset: controller.resetServerAddress,
       ),
     );
 
-    if (saved == true && mounted) {
+    if (saved == true && context.mounted) {
+      final address =
+          ref.read(scanControllerProvider(ScanMode.translate)).serverAddress;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Alamat server dipakai: ${_controller.serverAddress}'),
+          content: Text('Alamat server dipakai: $address'),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -64,180 +47,141 @@ class _ScanPageState extends ConsumerState<ScanPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: _controller,
-      builder: (context, child) {
-        return Scaffold(
-          backgroundColor: Colors.black,
-          body: Stack(
-            fit: StackFit.expand,
-            children: [
-              ScanCameraView(
-                controller: _controller.cameraController,
-                errorMessage: _controller.cameraError,
-                onRetry: _controller.initializeCamera,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scanState = ref.watch(scanControllerProvider(ScanMode.translate));
+    final scanController =
+        ref.read(scanControllerProvider(ScanMode.translate).notifier);
+
+    return Scaffold(
+      backgroundColor: AppPalette.black,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          ScanCameraView(
+            controller: scanState.cameraController,
+            errorMessage: scanState.cameraError,
+            onRetry: scanController.initializeCamera,
+          ),
+          if (scanState.cameraError == null && scanState.showSkeleton)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(
+                  painter: HandLandmarksPainter(
+                    hands: scanState.detectedHands,
+                    isFrontCamera: scanState.isFrontCamera,
+                    imageSize: scanState.cameraController?.value.previewSize,
+                  ),
+                ),
               ),
-              if (_controller.cameraError == null && _controller.showSkeleton)
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: CustomPaint(
-                      painter: HandLandmarksPainter(
-                        hands: _controller.detectedHands,
-                        isFrontCamera: _controller.isFrontCamera,
-                        imageSize:
-                            _controller.cameraController?.value.previewSize,
-                      ),
-                    ),
-                  ),
-                ),
-              if (_controller.cameraError == null)
-                Positioned(
-                  right: 16,
-                  top: 80,
-                  child: SafeArea(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        _RoundIconButton(
-                          icon: _controller.showSkeleton
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          tooltip: _controller.showSkeleton
-                              ? 'Sembunyikan skeleton'
-                              : 'Tampilkan skeleton',
-                          onPressed: _controller.toggleSkeleton,
-                        ),
-                        const SizedBox(height: 16),
-                        _RoundIconButton(
-                          icon: _controller.ttsEnabled
-                              ? Icons.volume_up
-                              : Icons.volume_off,
-                          tooltip: _controller.ttsEnabled
-                              ? 'Matikan suara'
-                              : 'Nyalakan suara',
-                          onPressed: _controller.toggleTts,
-                        ),
-                        if (_controller.hasMultipleCameras) ...[
-                          const SizedBox(height: 16),
-                          CameraSwitchButton(
-                            isFrontCamera: _controller.isFrontCamera,
-                            isSwitching: _controller.isSwitchingCamera,
-                            isEnabled:
-                                _controller
-                                    .cameraController
-                                    ?.value
-                                    .isInitialized ==
-                                true,
-                            onPressed: _controller.switchCamera,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-              SafeArea(
+            ),
+          if (scanState.cameraError == null)
+            Positioned(
+              right: 16,
+              top: 80,
+              child: SafeArea(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    DetectionInfoOverlay(
-                      letter: _controller.detectedLetter,
-                      confidence: _controller.confidence,
+                    ScanRoundIconButton(
+                      icon: scanState.showSkeleton
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      tooltip: scanState.showSkeleton
+                          ? 'Sembunyikan skeleton'
+                          : 'Tampilkan skeleton',
+                      onPressed: scanController.toggleSkeleton,
                     ),
-                    ConnectionStatusIndicator(
-                      status: _controller.predictionStatus,
-                      serverAddress: _controller.serverAddress,
-                      errorMessage: _controller.predictionError,
-                      onRetry: _controller.refreshServer,
+                    const SizedBox(height: 16),
+                    ScanRoundIconButton(
+                      icon: scanState.ttsEnabled
+                          ? Icons.volume_up
+                          : Icons.volume_off,
+                      tooltip: scanState.ttsEnabled
+                          ? 'Matikan suara'
+                          : 'Nyalakan suara',
+                      onPressed: scanController.toggleTts,
                     ),
-                    const Spacer(),
-                    ScanActionBar(
-                      resultText: _controller.resultText,
-                      onSpacePressed: _controller.appendSpace,
-                      onBackspacePressed: _controller.removeLastCharacter,
-                      onResetPressed: _controller.resetResult,
-                      onSpeakPressed: _controller.speakSentence,
-                      onCopyPressed: () {
-                        Clipboard.setData(
-                          ClipboardData(text: _controller.resultText),
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Hasil terjemahan disalin ke clipboard',
-                            ),
-                            duration: Duration(seconds: 2),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      },
-                    ),
+                    if (scanState.hasMultipleCameras) ...[
+                      const SizedBox(height: 16),
+                      CameraSwitchButton(
+                        isFrontCamera: scanState.isFrontCamera,
+                        isSwitching: scanState.isSwitchingCamera,
+                        isEnabled:
+                            scanState.cameraController?.value.isInitialized ==
+                                true,
+                        onPressed: scanController.switchCamera,
+                      ),
+                    ],
                   ],
                 ),
               ),
-              Positioned(
-                left: 16,
-                top: 16,
-                child: SafeArea(
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.black45,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () {
-                        if (context.canPop()) {
-                          context.pop();
-                        } else {
-                          context.go('/home');
-                        }
-                      },
-                    ),
-                  ),
+            ),
+          SafeArea(
+            child: Column(
+              children: [
+                DetectionInfoOverlay(
+                  letter: scanState.detectedLetter,
+                  confidence: scanState.confidence,
                 ),
-              ),
-              Positioned(
-                right: 16,
-                top: 16,
-                child: SafeArea(
-                  child: _RoundIconButton(
-                    icon: Icons.settings,
-                    tooltip: 'Alamat server',
-                    onPressed: _openServerSettings,
-                  ),
+                ConnectionStatusIndicator(
+                  status: scanState.predictionStatus,
+                  serverAddress: scanState.serverAddress,
+                  errorMessage: scanState.predictionError,
+                  onRetry: scanController.refreshServer,
                 ),
-              ),
-            ],
+                const Spacer(),
+                ScanActionBar(
+                  resultText: scanState.resultText,
+                  onSpacePressed: scanController.appendSpace,
+                  onBackspacePressed: scanController.removeLastCharacter,
+                  onResetPressed: scanController.resetResult,
+                  onSpeakPressed: scanController.speakSentence,
+                  onCopyPressed: () {
+                    Clipboard.setData(
+                      ClipboardData(text: scanState.resultText),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Hasil terjemahan disalin ke clipboard'),
+                        duration: Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
-        );
-      },
-    );
-  }
-}
-
-class _RoundIconButton extends StatelessWidget {
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onPressed;
-
-  const _RoundIconButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.black45,
-        shape: BoxShape.circle,
-      ),
-      child: IconButton(
-        icon: Icon(icon, color: Colors.white),
-        tooltip: tooltip,
-        onPressed: onPressed,
+          Positioned(
+            left: 16,
+            top: 16,
+            child: SafeArea(
+              child: ScanRoundIconButton(
+                icon: Icons.arrow_back,
+                tooltip: 'Kembali',
+                onPressed: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go(AppRoutes.home);
+                  }
+                },
+              ),
+            ),
+          ),
+          Positioned(
+            right: 16,
+            top: 16,
+            child: SafeArea(
+              child: ScanRoundIconButton(
+                icon: Icons.settings,
+                tooltip: 'Alamat server',
+                onPressed: () => _openServerSettings(context, ref),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

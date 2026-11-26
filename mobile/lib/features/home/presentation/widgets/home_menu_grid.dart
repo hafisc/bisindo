@@ -20,11 +20,6 @@ class HomeMenuGrid extends StatelessWidget {
     required this.onFavoriteTap,
   });
 
-  static const Color _blueTile = Color(0xFFE3EEFD);
-  static const Color _amberTile = Color(0xFFFEF3C7);
-  static const Color _purpleTile = Color(0xFFEDE9FE);
-  static const Color _redTile = Color(0xFFFEE2E2);
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -32,7 +27,7 @@ class HomeMenuGrid extends StatelessWidget {
         Expanded(
           child: _MenuCard(
             label: AppStrings.homeMenuDictionary,
-            tileColor: _blueTile,
+            tileColor: AppPalette.blueTile,
             icon: SvgPicture.asset(
               'assets/icons/ic_book_bisindo.svg',
               width: 38,
@@ -45,11 +40,11 @@ class HomeMenuGrid extends StatelessWidget {
         Expanded(
           child: _MenuCard(
             label: AppStrings.homeMenuLearn,
-            tileColor: _amberTile,
+            tileColor: AppPalette.amberTile,
             icon: const Icon(
               Icons.school_rounded,
               size: 36,
-              color: Color(0xFFF59E0B),
+              color: AppPalette.yellow,
             ),
             onTap: onLearnTap,
           ),
@@ -58,11 +53,11 @@ class HomeMenuGrid extends StatelessWidget {
         Expanded(
           child: _MenuCard(
             label: AppStrings.homeMenuHistory,
-            tileColor: _purpleTile,
+            tileColor: AppPalette.purpleSoft,
             icon: const Icon(
               Icons.access_time_filled_rounded,
               size: 34,
-              color: Color(0xFF8B5CF6),
+              color: AppPalette.purple,
             ),
             onTap: onHistoryTap,
           ),
@@ -71,11 +66,11 @@ class HomeMenuGrid extends StatelessWidget {
         Expanded(
           child: _MenuCard(
             label: AppStrings.homeMenuFavorite,
-            tileColor: _redTile,
+            tileColor: AppPalette.redSoft,
             icon: const Icon(
               Icons.favorite_rounded,
               size: 34,
-              color: Color(0xFFF05252),
+              color: AppPalette.redAccent,
             ),
             onTap: onFavoriteTap,
           ),
@@ -105,17 +100,17 @@ class _MenuCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppPalette.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(color: AppPalette.gray100),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x0F0F172A),
+            color: AppPalette.shadowSoft,
             blurRadius: 14,
             offset: Offset(0, 5),
           ),
         ],
       ),
       child: Material(
-        color: Colors.transparent,
+        color: AppPalette.transparent,
         borderRadius: BorderRadius.circular(18),
         child: InkWell(
           borderRadius: BorderRadius.circular(18),

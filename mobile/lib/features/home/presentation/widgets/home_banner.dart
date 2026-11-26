@@ -24,12 +24,16 @@ class HomeBanner extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [Color(0xFF3384E0), Color(0xFF3384E0), AppPalette.primary],
+          colors: [
+            AppPalette.bannerBlue,
+            AppPalette.bannerBlue,
+            AppPalette.primary,
+          ],
           stops: [0, 0.38, 1],
         ),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x332563EB),
+            color: AppPalette.shadowPrimary,
             blurRadius: 16,
             offset: Offset(0, 8),
           ),
@@ -48,7 +52,11 @@ class HomeBanner extends StatelessWidget {
               shaderCallback: (rect) => const LinearGradient(
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
-                colors: [Colors.white, Colors.white, Colors.transparent],
+                colors: [
+                  AppPalette.white,
+                  AppPalette.white,
+                  AppPalette.transparent,
+                ],
                 stops: [0, 0.8, 1],
               ).createShader(rect),
               child: Image.asset(
@@ -74,7 +82,7 @@ class HomeBanner extends StatelessWidget {
                       fontSize: 13.5,
                       fontWeight: FontWeight.w600,
                       height: 1.55,
-                      color: Colors.white,
+                      color: AppPalette.white,
                     ),
                   ),
                 ),
@@ -98,7 +106,7 @@ class _ScanButton extends StatelessWidget {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 166),
       child: Material(
-        color: Colors.white,
+        color: AppPalette.white,
         borderRadius: BorderRadius.circular(15),
         child: InkWell(
           borderRadius: BorderRadius.circular(15),

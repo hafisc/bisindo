@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/constants/app_palette.dart';
 import '../../../../core/router/app_router.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_primary_button.dart';
@@ -67,7 +68,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                     'Email berhasil diverifikasi! Silakan masuk.',
                     style: GoogleFonts.poppins(fontSize: 13),
                   ),
-                  backgroundColor: const Color(0xFF22C55E),
+                  backgroundColor: AppPalette.success,
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -86,9 +87,8 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                     next.message!,
                     style: GoogleFonts.poppins(fontSize: 13),
                   ),
-                  backgroundColor: next.isSending
-                      ? const Color(0xFF22C55E)
-                      : const Color(0xFFF59E0B),
+                  backgroundColor:
+                      next.isSending ? AppPalette.success : AppPalette.warning,
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -99,7 +99,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
         });
 
         return Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: AppPalette.white,
           body: Stack(
             children: [
               // ── Dekorasi blob
@@ -110,7 +110,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                   width: 180,
                   height: 180,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFEFF6FF),
+                    color: AppPalette.blue50,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -122,7 +122,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                   width: 140,
                   height: 140,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFDBEAFE),
+                    color: AppPalette.blue100,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -140,17 +140,17 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                         width: 100,
                         height: 100,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEFF6FF),
+                          color: AppPalette.blue50,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFFDBEAFE),
+                            color: AppPalette.blue100,
                             width: 2,
                           ),
                         ),
                         child: const Icon(
                           Icons.mark_email_unread_outlined,
                           size: 48,
-                          color: Color(0xFF2563EB),
+                          color: AppPalette.primary,
                         ),
                       ),
 
@@ -161,7 +161,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                         style: GoogleFonts.poppins(
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF0F172A),
+                          color: AppPalette.darkBlue,
                         ),
                       ),
 
@@ -172,7 +172,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                         textAlign: TextAlign.center,
                         style: GoogleFonts.poppins(
                           fontSize: 14,
-                          color: const Color(0xFF64748B),
+                          color: AppPalette.gray500,
                           height: 1.5,
                         ),
                       ),
@@ -186,9 +186,9 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                           vertical: 10,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9),
+                          color: AppPalette.gray100,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          border: Border.all(color: AppPalette.gray200),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -196,7 +196,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                             const Icon(
                               Icons.mail_outline_rounded,
                               size: 18,
-                              color: Color(0xFF2563EB),
+                              color: AppPalette.primary,
                             ),
                             const SizedBox(width: 8),
                             Flexible(
@@ -205,7 +205,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                                 style: GoogleFonts.poppins(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF0F172A),
+                                  color: AppPalette.darkBlue,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -222,7 +222,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                         textAlign: TextAlign.center,
                         style: GoogleFonts.poppins(
                           fontSize: 13,
-                          color: const Color(0xFF64748B),
+                          color: AppPalette.gray500,
                           height: 1.5,
                         ),
                       ),
@@ -265,9 +265,9 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                                   _startCooldown();
                                 },
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF2563EB),
+                            foregroundColor: AppPalette.primary,
                             side: const BorderSide(
-                              color: Color(0xFFE2E8F0),
+                              color: AppPalette.gray200,
                               width: 1.5,
                             ),
                             shape: RoundedRectangleBorder(
@@ -304,7 +304,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF64748B),
+                            color: AppPalette.gray500,
                           ),
                         ),
                       ),

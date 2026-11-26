@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/constants/app_palette.dart';
 import '../../../../core/router/app_router.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_primary_button.dart';
@@ -42,7 +43,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             'Kamu harus menyetujui Syarat dan Ketentuan terlebih dahulu.',
             style: GoogleFonts.poppins(fontSize: 13),
           ),
-          backgroundColor: const Color(0xFFEF4444),
+          backgroundColor: AppPalette.error,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -99,7 +100,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 next.errorMessage!,
                 style: GoogleFonts.poppins(fontSize: 13),
               ),
-              backgroundColor: const Color(0xFFEF4444),
+              backgroundColor: AppPalette.error,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -110,7 +111,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     });
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppPalette.white,
       body: SizedBox.expand(
         child: Stack(
           children: [
@@ -122,7 +123,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 width: 160,
                 height: 160,
                 decoration: const BoxDecoration(
-                  color: Color(0xFFDBEAFE),
+                  color: AppPalette.blue100,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -136,7 +137,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 width: 140,
                 height: 140,
                 decoration: const BoxDecoration(
-                  color: Color(0xFFEFF6FF),
+                  color: AppPalette.blue50,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -153,7 +154,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       icon: const Icon(
                         Icons.arrow_back_ios_new_rounded,
                         size: 20,
-                        color: Color(0xFF0F172A),
+                        color: AppPalette.darkBlue,
                       ),
                       onPressed: () => context.pop(),
                     ),
@@ -195,7 +196,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                               style: GoogleFonts.poppins(
                                                 fontSize: 26,
                                                 fontWeight: FontWeight.w700,
-                                                color: const Color(0xFF0F172A),
+                                                color: AppPalette.darkBlue,
                                               ),
                                             ),
                                             const SizedBox(height: 6),
@@ -204,7 +205,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                               textAlign: TextAlign.center,
                                               style: GoogleFonts.poppins(
                                                 fontSize: 14,
-                                                color: const Color(0xFF64748B),
+                                                color: AppPalette.gray500,
                                                 height: 1.5,
                                               ),
                                             ),
@@ -312,9 +313,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                                   () => _agreeToTerms =
                                                       v ?? false,
                                                 ),
-                                                activeColor: const Color(
-                                                  0xFF2563EB,
-                                                ),
+                                                activeColor: AppPalette.primary,
                                                 materialTapTargetSize:
                                                     MaterialTapTargetSize
                                                         .shrinkWrap,
@@ -325,7 +324,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                                       BorderRadius.circular(4),
                                                 ),
                                                 side: const BorderSide(
-                                                  color: Color(0xFF94A3B8),
+                                                  color: AppPalette.gray400,
                                                   width: 1.3,
                                                 ),
                                               ),
@@ -342,9 +341,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                                 text: TextSpan(
                                                   style: GoogleFonts.poppins(
                                                     fontSize: 12.5,
-                                                    color: const Color(
-                                                      0xFF475569,
-                                                    ),
+                                                    color: AppPalette.gray600,
                                                     height: 1.5,
                                                   ),
                                                   children: [
@@ -424,7 +421,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                         children: [
                                           const Expanded(
                                             child: Divider(
-                                              color: Color(0xFFE2E8F0),
+                                              color: AppPalette.gray200,
                                             ),
                                           ),
                                           Padding(
@@ -435,13 +432,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                               'atau',
                                               style: GoogleFonts.poppins(
                                                 fontSize: 13,
-                                                color: const Color(0xFF94A3B8),
+                                                color: AppPalette.gray400,
                                               ),
                                             ),
                                           ),
                                           const Expanded(
                                             child: Divider(
-                                              color: Color(0xFFE2E8F0),
+                                              color: AppPalette.gray200,
                                             ),
                                           ),
                                         ],
@@ -465,7 +462,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                           text: TextSpan(
                                             style: GoogleFonts.poppins(
                                               fontSize: 13.5,
-                                              color: const Color(0xFF64748B),
+                                              color: AppPalette.gray500,
                                             ),
                                             children: [
                                               const TextSpan(
@@ -480,9 +477,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                                       fontSize: 13.5,
                                                       fontWeight:
                                                           FontWeight.w600,
-                                                      color: const Color(
-                                                        0xFF2563EB,
-                                                      ),
+                                                      color: AppPalette.primary,
                                                     ),
                                                   ),
                                                 ),

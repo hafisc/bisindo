@@ -34,7 +34,7 @@ class ProfileInfoTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppPalette.white,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFF1F5F9), width: 1),
+          border: Border.all(color: AppPalette.gray100, width: 1),
         ),
         child: Row(
           children: [

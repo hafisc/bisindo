@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_palette.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../profile/presentation/widgets/profile_avatar.dart';
-import '../notification_store.dart';
+import '../providers/notification_provider.dart';
 
 /// Baris atas Beranda: sapaan pengguna di kiri, lonceng notifikasi dan avatar di kanan.
 class HomeHeader extends StatelessWidget {
@@ -59,17 +60,19 @@ class HomeHeader extends StatelessWidget {
   }
 }
 
-class _NotificationButton extends StatelessWidget {
+class _NotificationButton extends ConsumerWidget {
   final VoidCallback? onTap;
   const _NotificationButton({this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hasUnread = ref.watch(hasUnreadNotificationsProvider);
+
     return Material(
       color: AppPalette.white,
       shape: const CircleBorder(),
       elevation: 2,
-      shadowColor: const Color(0x1A0F172A),
+      shadowColor: AppPalette.shadowMedium,
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
@@ -84,26 +87,19 @@ class _NotificationButton extends StatelessWidget {
                 size: 22,
                 color: AppPalette.gray800,
               ),
-              ListenableBuilder(
-                listenable: NotificationStore.instance,
-                builder: (context, _) {
-                  if (!NotificationStore.instance.hasUnread) {
-                    return const SizedBox.shrink();
-                  }
-                  return Positioned(
-                    top: 6,
-                    right: 7,
-                    child: Container(
-                      width: 7,
-                      height: 7,
-                      decoration: const BoxDecoration(
-                        color: AppPalette.yellow,
-                        shape: BoxShape.circle,
-                      ),
+              if (hasUnread)
+                Positioned(
+                  top: 6,
+                  right: 7,
+                  child: Container(
+                    width: 7,
+                    height: 7,
+                    decoration: const BoxDecoration(
+                      color: AppPalette.yellow,
+                      shape: BoxShape.circle,
                     ),
-                  );
-                },
-              ),
+                  ),
+                ),
             ],
           ),
         ),

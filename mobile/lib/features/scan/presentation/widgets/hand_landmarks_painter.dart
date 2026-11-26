@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_palette.dart';
 import '../../data/models/detected_hand.dart';
 import 'hand_skeleton_constants.dart';
 
@@ -80,7 +81,7 @@ class HandLandmarksPainter extends CustomPainter {
     final painter = TextPainter(
       text: TextSpan(
         text: text,
-        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+        style: const TextStyle(color: AppPalette.white, fontSize: 12, fontWeight: FontWeight.bold),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
@@ -94,7 +95,7 @@ class HandLandmarksPainter extends CustomPainter {
       const Radius.circular(4),
     );
 
-    canvas.drawRRect(bgRect, Paint()..color = Colors.black.withValues(alpha: 0.6));
+    canvas.drawRRect(bgRect, Paint()..color = AppPalette.scanStatusOverlay);
     painter.paint(canvas, Offset(pos.dx - painter.width / 2, pos.dy + 18 - painter.height / 2));
   }
 

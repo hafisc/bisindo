@@ -17,7 +17,7 @@ Future<void> showAvatarPicker(BuildContext context, WidgetRef ref) async {
 
   final action = await showModalBottomSheet<_AvatarAction>(
     context: context,
-    backgroundColor: Colors.transparent,
+    backgroundColor: AppPalette.transparent,
     builder: (sheetContext) => _AvatarSourceSheet(hasPhoto: hasPhoto),
   );
 
@@ -148,7 +148,7 @@ class _SheetTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = color ?? const Color(0xFF334155);
+    final effectiveColor = color ?? AppPalette.gray700;
 
     return ListTile(
       onTap: onTap,

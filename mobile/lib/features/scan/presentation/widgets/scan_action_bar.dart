@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_palette.dart';
+
 class ScanActionBar extends StatelessWidget {
   final String resultText;
   final VoidCallback onSpacePressed;
@@ -23,7 +25,7 @@ class ScanActionBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
       decoration: const BoxDecoration(
-        color: Color(0xF20F1117),
+        color: AppPalette.scanSurface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -34,7 +36,7 @@ class ScanActionBar extends StatelessWidget {
             constraints: const BoxConstraints(minHeight: 64),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: AppPalette.white10,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
@@ -46,7 +48,9 @@ class ScanActionBar extends StatelessWidget {
                         ? 'Hasil terjemahan akan muncul di sini'
                         : resultText,
                     style: TextStyle(
-                      color: resultText.isEmpty ? Colors.white54 : Colors.white,
+                      color: resultText.isEmpty
+                          ? AppPalette.white54
+                          : AppPalette.white,
                       fontSize: 17,
                       height: 1.35,
                     ),
@@ -58,7 +62,7 @@ class ScanActionBar extends StatelessWidget {
                     IconButton(
                       icon: const Icon(
                         Icons.volume_up_rounded,
-                        color: Colors.white70,
+                        color: AppPalette.white70,
                         size: 22,
                       ),
                       tooltip: 'Bicara',
@@ -73,7 +77,7 @@ class ScanActionBar extends StatelessWidget {
                     IconButton(
                       icon: const Icon(
                         Icons.copy_rounded,
-                        color: Colors.white70,
+                        color: AppPalette.white70,
                         size: 20,
                       ),
                       tooltip: 'Salin',
@@ -140,8 +144,8 @@ class _ActionButton extends StatelessWidget {
       icon: Icon(icon, size: 19),
       label: Text(label),
       style: FilledButton.styleFrom(
-        foregroundColor: Colors.white,
-        backgroundColor: const Color(0xFF2A3042),
+        foregroundColor: AppPalette.white,
+        backgroundColor: AppPalette.scanActionBg,
         padding: const EdgeInsets.symmetric(vertical: 13),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),

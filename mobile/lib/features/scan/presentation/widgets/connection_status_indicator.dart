@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_palette.dart';
 import '../../data/models/prediction_status.dart';
 
 /// Indikator status hubungan aplikasi dengan server prediksi.
@@ -30,22 +31,22 @@ class ConnectionStatusIndicator extends StatelessWidget {
 
     switch (status) {
       case PredictionStatus.ready:
-        color = const Color(0xFF22C55E);
+        color = AppPalette.success;
         label = 'Terhubung ke $serverAddress';
         icon = Icons.wifi;
         spinning = false;
       case PredictionStatus.connecting:
-        color = Colors.amber;
+        color = AppPalette.amber;
         label = 'Menghubungi $serverAddress...';
         icon = Icons.wifi_find;
         spinning = true;
       case PredictionStatus.error:
-        color = Colors.redAccent;
+        color = AppPalette.redAccent;
         label = 'Server tidak terhubung';
         icon = Icons.wifi_off;
         spinning = false;
       case PredictionStatus.idle:
-        color = Colors.white70;
+        color = AppPalette.white70;
         label = 'Server belum diperiksa';
         icon = Icons.wifi_tethering;
         spinning = false;
@@ -58,7 +59,7 @@ class ConnectionStatusIndicator extends StatelessWidget {
           margin: const EdgeInsets.fromLTRB(20, 8, 20, 0),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.6),
+            color: AppPalette.scanStatusOverlay,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: color.withValues(alpha: 0.6)),
           ),
@@ -95,9 +96,11 @@ class ConnectionStatusIndicator extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(12, 10, 8, 6),
             constraints: const BoxConstraints(maxWidth: 340),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.72),
+              color: AppPalette.scanBannerOverlay,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.redAccent.withValues(alpha: 0.4)),
+              border: Border.all(
+                color: AppPalette.redAccent.withValues(alpha: 0.4),
+              ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -106,7 +109,7 @@ class ConnectionStatusIndicator extends StatelessWidget {
                 Text(
                   errorMessage!,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppPalette.white,
                     fontSize: 12,
                     height: 1.35,
                   ),
@@ -117,7 +120,7 @@ class ConnectionStatusIndicator extends StatelessWidget {
                     child: TextButton(
                       onPressed: onRetry,
                       style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF9EE7D7),
+                        foregroundColor: AppPalette.scanConfidenceHigh,
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         minimumSize: const Size(0, 32),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,

@@ -44,11 +44,11 @@ class AppBottomNavBar extends StatelessWidget {
                 color: AppPalette.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
                 border: Border(
-                  top: BorderSide(color: Color(0xFFE8EEF6), width: 1),
+                  top: BorderSide(color: AppPalette.navBorder, width: 1),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Color(0x1A0F172A),
+                    color: AppPalette.shadowMedium,
                     blurRadius: 20,
                     offset: Offset(0, -4),
                   ),
@@ -173,7 +173,7 @@ class _ScanButton extends StatelessWidget {
             border: Border.all(color: AppPalette.white, width: 4),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x592563EB),
+                color: AppPalette.shadowPrimaryStrong,
                 blurRadius: 16,
                 offset: Offset(0, 6),
               ),
@@ -182,8 +182,8 @@ class _ScanButton extends StatelessWidget {
           child: const Stack(
             alignment: Alignment.center,
             children: [
-              Icon(Icons.crop_free_rounded, size: 32, color: Colors.white),
-              Icon(Icons.back_hand_rounded, size: 15, color: Colors.white),
+              Icon(Icons.crop_free_rounded, size: 32, color: AppPalette.white),
+              Icon(Icons.back_hand_rounded, size: 15, color: AppPalette.white),
             ],
           ),
         ),

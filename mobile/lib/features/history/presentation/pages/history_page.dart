@@ -33,11 +33,11 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     final filteredItems = historyState.filteredItems;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC), // AppPalette.lightGray
+      backgroundColor: AppPalette.lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF8FAFC),
+        backgroundColor: AppPalette.lightGray,
         elevation: 0,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: AppPalette.transparent,
         automaticallyImplyLeading: false,
         // Panah back hanya saat dibuka dari menu Beranda (context.push),
         // bukan dari tab bottom nav.
@@ -111,7 +111,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF64748B), // Slightly darker gray for better readability
+                      color: AppPalette.gray500,
                       height: 1.4,
                     ),
                   ),
@@ -119,17 +119,17 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                   // Search Bar
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppPalette.white,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: const Color(0xFFE2E8F0),
+                        color: AppPalette.gray200,
                         width: 1,
                       ),
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.02),
+                          color: AppPalette.subtleShadow,
                           blurRadius: 8,
-                          offset: const Offset(0, 2),
+                          offset: Offset(0, 2),
                         ),
                       ],
                     ),
@@ -147,18 +147,18 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                         hintText: 'Cari hasil terjemahan...',
                         hintStyle: GoogleFonts.poppins(
                           fontSize: 13,
-                          color: const Color(0xFF94A3B8),
+                          color: AppPalette.gray400,
                         ),
                         prefixIcon: const Icon(
                           Icons.search_rounded,
-                          color: Color(0xFF94A3B8),
+                          color: AppPalette.gray400,
                           size: 20,
                         ),
                         suffixIcon: _searchController.text.isNotEmpty
                             ? IconButton(
                                 icon: const Icon(
                                   Icons.close_rounded,
-                                  color: Color(0xFF94A3B8),
+                                  color: AppPalette.gray400,
                                   size: 18,
                                 ),
                                 onPressed: () {
@@ -246,9 +246,9 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppPalette.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE2E8F0), width: 1), // AppPalette.gray200
+        border: Border.all(color: AppPalette.gray200, width: 1),
       ),
       child: Row(
         children: filters.map((filter) {
@@ -261,7 +261,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppPalette.primary : Colors.transparent,
+                  color: isSelected ? AppPalette.primary : AppPalette.transparent,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 alignment: Alignment.center,
@@ -270,7 +270,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: isSelected ? Colors.white : const Color(0xFF64748B),
+                    color: isSelected ? AppPalette.white : AppPalette.gray500,
                   ),
                 ),
               ),
@@ -310,14 +310,14 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppPalette.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
-        boxShadow: [
+        border: Border.all(color: AppPalette.gray100, width: 1.5),
+        boxShadow: const [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: AppPalette.subtleShadow,
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -333,7 +333,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
           ),
           child: const Icon(
             Icons.delete_forever_rounded,
-            color: Colors.white,
+            color: AppPalette.white,
             size: 26,
           ),
         ),
@@ -350,7 +350,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
           );
         },
         child: Material(
-          color: Colors.transparent,
+          color: AppPalette.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
             onTap: copyToClipboard,
@@ -393,7 +393,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                                 style: GoogleFonts.poppins(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF0F172A), // AppPalette.darkBlue
+                                  color: AppPalette.darkBlue,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -450,7 +450,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                           style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF94A3B8), // AppPalette.gray400
+                            color: AppPalette.gray400,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -461,7 +461,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                           style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFFCBD5E1), // Very faint text
+                            color: AppPalette.gray300,
                           ),
                         ),
                       ],
@@ -472,7 +472,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                   PopupMenuButton<String>(
                     icon: const Icon(
                       Icons.more_vert_rounded,
-                      color: Color(0xFF64748B), // AppPalette.gray600
+                      color: AppPalette.gray500,
                       size: 24,
                     ),
                     padding: EdgeInsets.zero,
@@ -591,7 +591,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
               style: GoogleFonts.poppins(
                 fontSize: 13,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF94A3B8),
+                color: AppPalette.gray400,
               ),
             ),
           ],
@@ -631,16 +631,16 @@ class _SyncBanner extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF7E6),
+        color: AppPalette.warningBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFDE2A7)),
+        border: Border.all(color: AppPalette.warningBorder),
       ),
       child: Row(
         children: [
           const Icon(
             Icons.cloud_off_rounded,
             size: 18,
-            color: Color(0xFFB7791F),
+            color: AppPalette.warningIcon,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -650,7 +650,7 @@ class _SyncBanner extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 12,
                 height: 1.4,
-                color: const Color(0xFF8A5A12),
+                color: AppPalette.warningText,
               ),
             ),
           ),

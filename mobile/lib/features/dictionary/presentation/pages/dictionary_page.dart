@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/app_palette.dart';
 import '../../domain/models/dictionary_item.dart';
 import '../providers/dictionary_provider.dart';
 import '../providers/favorites_provider.dart';
@@ -47,7 +48,7 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
         title: const Text('Kamus BISINDO'),
         centerTitle: false,
         backgroundColor: theme.appBarTheme.backgroundColor,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: AppPalette.transparent,
         elevation: 0,
       ),
       body: RefreshIndicator(
@@ -60,14 +61,14 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
             SliverToBoxAdapter(
               child: Container(
                 padding: const EdgeInsets.all(24.0),
-                color: Colors.white,
+                color: AppPalette.white,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Pelajari gesture bahasa isyarat Indonesia secara lengkap.',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
+                        color: AppPalette.gray500,
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -88,7 +89,7 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
                               )
                             : null,
                         filled: true,
-                        fillColor: Colors.grey[100],
+                        fillColor: AppPalette.gray100,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide.none,
@@ -218,14 +219,14 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
       },
       selectedColor: theme.colorScheme.primary,
       labelStyle: TextStyle(
-        color: isSelected ? Colors.white : Colors.grey[700],
+        color: isSelected ? AppPalette.white : AppPalette.gray700,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: AppPalette.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
         side: BorderSide(
-          color: isSelected ? theme.colorScheme.primary : Colors.grey[300]!,
+          color: isSelected ? theme.colorScheme.primary : AppPalette.gray300,
         ),
       ),
       showCheckmark: false,

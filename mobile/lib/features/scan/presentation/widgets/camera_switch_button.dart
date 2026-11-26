@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_palette.dart';
+
 /// Tombol untuk mengganti antara kamera depan dan belakang.
 class CameraSwitchButton extends StatefulWidget {
   final bool isFrontCamera;
@@ -34,7 +36,7 @@ class _CameraSwitchButtonState extends State<CameraSwitchButton> {
   Widget build(BuildContext context) {
     final isEnabled = widget.isEnabled && !widget.isSwitching;
     return Material(
-      color: Colors.black.withValues(alpha: 0.55),
+      color: AppPalette.scanControlOverlay,
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
@@ -47,14 +49,14 @@ class _CameraSwitchButtonState extends State<CameraSwitchButton> {
                   height: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Colors.white,
+                    color: AppPalette.white,
                   ),
                 )
               : Icon(
                   widget.isFrontCamera
                       ? Icons.camera_rear_rounded
                       : Icons.camera_front_rounded,
-                  color: isEnabled ? Colors.white : Colors.white38,
+                  color: isEnabled ? AppPalette.white : AppPalette.white38,
                   size: 24,
                 ),
         ),

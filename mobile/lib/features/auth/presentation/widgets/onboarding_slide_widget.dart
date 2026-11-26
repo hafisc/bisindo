@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/constants/app_palette.dart';
 import '../pages/onboarding_data.dart';
 
 class OnboardingSlideWidget extends StatelessWidget {
@@ -38,7 +39,7 @@ class OnboardingSlideWidget extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 26,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF0F172A),
+                color: AppPalette.darkBlue,
                 height: 1.25,
               ),
             ),
@@ -51,7 +52,7 @@ class OnboardingSlideWidget extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF64748B),
+                color: AppPalette.gray500,
                 height: 1.6,
               ),
             ),
@@ -100,7 +101,7 @@ class OnboardingSlideWidget extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 26,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF0F172A),
+              color: AppPalette.darkBlue,
               height: 1.25,
             ),
           ),
@@ -113,7 +114,7 @@ class OnboardingSlideWidget extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF64748B),
+              color: AppPalette.gray500,
               height: 1.6,
             ),
           ),

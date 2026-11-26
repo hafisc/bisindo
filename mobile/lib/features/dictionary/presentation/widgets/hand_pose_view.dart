@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_palette.dart';
 import '../../domain/models/letter_pose.dart';
 
 /// Ilustrasi kerangka tangan untuk satu huruf, diskalakan agar pas di kotak.
@@ -47,8 +48,11 @@ class HandPoseView extends StatelessWidget {
 class HandPosePainter extends CustomPainter {
   /// Warna kulit tangan pertama dan kedua. Tangan kedua dibuat lebih terang
   /// agar dua tangan yang bertumpuk tetap bisa dibedakan.
-  static const List<Color> skinColors = [Color(0xFFE0A46E), Color(0xFFF6D2A8)];
-  static const Color outlineColor = Color(0xFF7A4A2A);
+  static const List<Color> skinColors = [
+    AppPalette.skinPrimary,
+    AppPalette.skinSecondary,
+  ];
+  static const Color outlineColor = AppPalette.skinOutline;
 
   static const List<int> _palm = [0, 1, 2, 5, 9, 13, 17];
 
