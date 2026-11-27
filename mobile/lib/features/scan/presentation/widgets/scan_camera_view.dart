@@ -1,6 +1,8 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_palette.dart';
+
 class ScanCameraView extends StatelessWidget {
   final CameraController? controller;
   final String? errorMessage;
@@ -30,7 +32,7 @@ class ScanCameraView extends StatelessWidget {
     }
     if (cameraController == null || value == null || !value.isInitialized) {
       return const Center(
-        child: CircularProgressIndicator(color: Colors.white),
+        child: CircularProgressIndicator(color: AppPalette.white),
       );
     }
 
@@ -83,7 +85,7 @@ class _CameraError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: Colors.black,
+      color: AppPalette.black,
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -92,21 +94,21 @@ class _CameraError extends StatelessWidget {
             children: [
               const Icon(
                 Icons.no_photography_outlined,
-                color: Colors.white,
+                color: AppPalette.white,
                 size: 48,
               ),
               const SizedBox(height: 16),
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white, fontSize: 15),
+                style: const TextStyle(color: AppPalette.white, fontSize: 15),
               ),
               const SizedBox(height: 20),
               OutlinedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
                 label: const Text('Coba lagi'),
-                style: OutlinedButton.styleFrom(foregroundColor: Colors.white),
+                style: OutlinedButton.styleFrom(foregroundColor: AppPalette.white),
               ),
             ],
           ),

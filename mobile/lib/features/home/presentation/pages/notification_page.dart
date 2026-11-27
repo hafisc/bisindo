@@ -1,65 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_palette.dart';
 import '../../../../core/constants/app_strings.dart';
-import '../notification_store.dart';
+import '../providers/notification_provider.dart';
 
 /// Halaman Notifikasi, dibuka dari ikon lonceng di Beranda.
-class NotificationPage extends StatelessWidget {
+class NotificationPage extends ConsumerWidget {
   const NotificationPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final store = NotificationStore.instance;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = ref.watch(notificationProvider);
+    final notifier = ref.read(notificationProvider.notifier);
+    final hasUnread = ref.watch(hasUnreadNotificationsProvider);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
+        statusBarColor: AppPalette.transparent,
       ),
       child: Scaffold(
         backgroundColor: AppPalette.lightGray,
         body: SafeArea(
-          child: ListenableBuilder(
-            listenable: store,
-            builder: (context, _) {
-              final items = store.items;
-              return Column(
-                children: [
-                  _TopBar(
-                    canMarkAll: store.hasUnread,
-                    onBack: () => context.pop(),
-                    onMarkAll: store.markAllRead,
-                  ),
-                  Expanded(
-                    child: items.isEmpty
-                        ? const _EmptyState()
-                        : ListView.separated(
-                            physics: const BouncingScrollPhysics(),
-                            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                            itemCount: items.length,
-                            separatorBuilder: (_, _) =>
-                                const SizedBox(height: 12),
-                            itemBuilder: (context, index) {
-                              final item = items[index];
-                              return Dismissible(
-                                key: ValueKey(item.id),
-                                direction: DismissDirection.endToStart,
-                                onDismissed: (_) => store.remove(item.id),
-                                background: const _DismissBackground(),
-                                child: _NotificationTile(
-                                  item: item,
-                                  onTap: () => store.markRead(item.id),
-                                ),
-                              );
-                            },
-                          ),
-                  ),
-                ],
-              );
-            },
+          child: Column(
+            children: [
+              _TopBar(
+                canMarkAll: hasUnread,
+                onBack: () => context.pop(),
+                onMarkAll: notifier.markAllRead,
+              ),
+              Expanded(
+                child: items.isEmpty
+                    ? const _EmptyState()
+                    : ListView.separated(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                        itemCount: items.length,
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final item = items[index];
+                          return Dismissible(
+                            key: ValueKey(item.id),
+                            direction: DismissDirection.endToStart,
+                            onDismissed: (_) => notifier.remove(item.id),
+                            background: const _DismissBackground(),
+                            child: _NotificationTile(
+                              item: item,
+                              onTap: () => notifier.markRead(item.id),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
           ),
         ),
       ),
@@ -88,7 +85,7 @@ class _TopBar extends StatelessWidget {
             color: AppPalette.white,
             shape: const CircleBorder(),
             elevation: 2,
-            shadowColor: const Color(0x1A0F172A),
+            shadowColor: AppPalette.shadowMedium,
             child: InkWell(
               customBorder: const CircleBorder(),
               onTap: onBack,
@@ -159,7 +156,7 @@ class _NotificationTile extends StatelessWidget {
             boxShadow: unread
                 ? const [
                     BoxShadow(
-                      color: Color(0x0F0F172A),
+                      color: AppPalette.shadowSoft,
                       blurRadius: 12,
                       offset: Offset(0, 4),
                     ),

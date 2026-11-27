@@ -106,11 +106,11 @@ class LegalPage extends StatelessWidget {
     final sections = isTerms ? _terms : _privacy;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppPalette.white,
       appBar: AppBar(
         title: Text(title),
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: AppPalette.white,
+        surfaceTintColor: AppPalette.transparent,
         elevation: 0,
       ),
       body: ListView(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_palette.dart';
 import '../../domain/models/dictionary_item.dart';
 import 'gesture_thumbnail.dart';
 
@@ -26,13 +27,13 @@ class DictionaryCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppPalette.white,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: AppPalette.cardShadow,
               blurRadius: 10,
-              offset: const Offset(0, 4),
+              offset: Offset(0, 4),
             ),
           ],
         ),
@@ -63,7 +64,7 @@ class DictionaryCard extends StatelessWidget {
                         child: Icon(
                           Icons.favorite,
                           size: 16,
-                          color: Colors.redAccent,
+                          color: AppPalette.redAccent,
                         ),
                       ),
                   ],

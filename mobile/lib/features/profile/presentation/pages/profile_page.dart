@@ -44,11 +44,11 @@ class ProfilePage extends ConsumerWidget {
     final hasPassword = ref.watch(currentUserProvider)?.hasPassword ?? false;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: AppPalette.gray100,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF1F5F9),
+        backgroundColor: AppPalette.gray100,
         elevation: 0,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: AppPalette.transparent,
         centerTitle: false,
         automaticallyImplyLeading: false,
         title: Text(
@@ -111,7 +111,7 @@ class ProfilePage extends ConsumerWidget {
                                 style: GoogleFonts.poppins(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
-                                  color: const Color(0xFF64748B),
+                                  color: AppPalette.gray500,
                                 ),
                               ),
                               const SizedBox(height: 12),
@@ -231,7 +231,7 @@ class ProfilePage extends ConsumerWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                             side: const BorderSide(
-                              color: Color(0xFFFECACA),
+                              color: AppPalette.redBorder,
                               width: 1,
                             ),
                           ),
@@ -240,9 +240,12 @@ class ProfilePage extends ConsumerWidget {
                           final bool confirmed =
                               await LogoutDialog.show(context);
                           if (!confirmed || !context.mounted) return;
-                          await ref
+                          final ok = await ref
                               .read(profileNotifierProvider.notifier)
-                              .logout(context);
+                              .logout();
+                          if (ok && context.mounted) {
+                            context.go(AppRoutes.login);
+                          }
                         },
                         icon: const Icon(
                           Icons.logout_rounded,
@@ -270,12 +273,12 @@ class ProfilePage extends ConsumerWidget {
   static BoxDecoration get _cardDecoration => BoxDecoration(
         color: AppPalette.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
-        boxShadow: [
+        border: Border.all(color: AppPalette.gray200, width: 1),
+        boxShadow: const [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: AppPalette.xsShadow,
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       );
@@ -361,7 +364,7 @@ class _InfoItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, color: const Color(0xFF64748B), size: 24),
+          Icon(icon, color: AppPalette.gray500, size: 24),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -381,7 +384,7 @@ class _InfoItem extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF334155),
+                    color: AppPalette.gray700,
                   ),
                 ),
               ],
@@ -405,7 +408,7 @@ class _ErrorBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppPalette.coral.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFECACA)),
+        border: Border.all(color: AppPalette.redBorder),
       ),
       child: Row(
         children: [

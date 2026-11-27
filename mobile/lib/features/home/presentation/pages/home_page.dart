@@ -33,7 +33,7 @@ class HomePage extends ConsumerWidget {
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
+        statusBarColor: AppPalette.transparent,
       ),
       child: Scaffold(
         backgroundColor: AppPalette.lightGray,

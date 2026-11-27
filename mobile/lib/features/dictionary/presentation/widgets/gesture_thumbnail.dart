@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/constants/app_palette.dart';
 import '../../data/repositories/letter_pose_repository.dart';
 import 'hand_pose_view.dart';
 
@@ -23,7 +24,7 @@ class GestureThumbnail extends ConsumerWidget {
 
   /// Warna latar yang dipakai Kamus: peach untuk huruf, biru muda untuk kata.
   static Color backgroundFor({required bool isLetter}) =>
-      isLetter ? const Color(0xFFFDEEE8) : const Color(0xFFE8F4FD);
+      isLetter ? AppPalette.peachSoft : AppPalette.skySoft;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,7 +42,7 @@ class GestureThumbnail extends ConsumerWidget {
       child: Icon(
         isLetter ? Icons.back_hand : Icons.sign_language,
         size: iconSize,
-        color: isLetter ? Colors.orange[300] : Colors.blue[300],
+        color: isLetter ? AppPalette.orangeLight : AppPalette.blue300,
       ),
     );
   }

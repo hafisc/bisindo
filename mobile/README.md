@@ -9,7 +9,8 @@ flutter pub get
 flutter run
 ```
 
-- `google-services.json` harus ada di `android/app/`.
+- `google-services.json` harus ada di `android/app/` (file ini di-ignore git; salin dari `android/app/google-services.json.example` atau unduh dari Firebase Console).
+- Opsional: salin `.env.example` menjadi `.env` lalu isi `API_BASE_URL` / `GOOGLE_SERVER_CLIENT_ID`, dan jalankan `flutter run --dart-define-from-file=.env` (bila `GOOGLE_SERVER_CLIENT_ID` kosong, Android membaca `default_web_client_id` dari `google-services.json`).
 - Fitur Scan dan Mode Belajar butuh HP Android asli, karena emulator x86_64 tidak punya MediaPipe native.
 
 ## Struktur Kode

@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_palette.dart';
 import '../../../../core/router/app_router.dart';
-import '../../data/repositories/dummy_dictionary_repository.dart';
 import '../../domain/models/dictionary_item.dart';
+import '../providers/dictionary_provider.dart';
 import '../providers/favorites_provider.dart';
 import '../widgets/dictionary_card.dart';
 
@@ -15,10 +15,13 @@ class FavoritePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final favoriteIds = ref.watch(favoritesProvider);
+    final dictionaryState = ref.watch(dictionaryProvider);
+
+    final byId = {for (final item in dictionaryState.items) item.id: item};
     // Id yang sudah tidak ada di kamus (data lama) diabaikan.
-    final items = ref
-        .watch(favoritesProvider)
-        .map(DummyDictionaryRepository.getItemById)
+    final items = favoriteIds
+        .map((id) => byId[id])
         .whereType<DictionaryItem>()
         .toList();
 
@@ -29,12 +32,14 @@ class FavoritePage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Favorit'),
         backgroundColor: theme.appBarTheme.backgroundColor,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: AppPalette.transparent,
         elevation: 0,
       ),
-      body: items.isEmpty
-          ? const _EmptyFavorites()
-          : CustomScrollView(
+      body: dictionaryState.isLoading && dictionaryState.items.isEmpty
+          ? const Center(child: CircularProgressIndicator())
+          : items.isEmpty
+              ? const _EmptyFavorites()
+              : CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
@@ -109,7 +114,7 @@ class _EmptyFavorites extends StatelessWidget {
               'Buka gesture di Kamus lalu ketuk "Tambah ke Favorit" '
               'supaya mudah ditemukan saat latihan.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[600], height: 1.5),
+              style: const TextStyle(color: AppPalette.gray500, height: 1.5),
             ),
             const SizedBox(height: 24),
             FilledButton.icon(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/config/api_config.dart';
+import '../../../../core/constants/app_palette.dart';
 
 /// Dialog untuk mengubah alamat server tanpa build ulang aplikasi.
 ///
@@ -73,10 +74,10 @@ class _ServerSettingsDialogState extends State<ServerSettingsDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: const Color(0xFF161A22),
+      backgroundColor: AppPalette.scanDialogBg,
       title: const Text(
         'Alamat Server',
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: AppPalette.white),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -86,7 +87,11 @@ class _ServerSettingsDialogState extends State<ServerSettingsDialog> {
             'Masukkan alamat server BISINDO. Lewat kabel USB, isi 127.0.0.1:5000 '
             'setelah menjalankan adb reverse. Lewat WiFi, isi alamat IP laptop '
             'yang tercetak di terminal saat server dijalankan.',
-            style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+            style: TextStyle(
+              color: AppPalette.white70,
+              fontSize: 13,
+              height: 1.4,
+            ),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -94,13 +99,13 @@ class _ServerSettingsDialogState extends State<ServerSettingsDialog> {
             enabled: !_saving,
             keyboardType: TextInputType.url,
             autocorrect: false,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: AppPalette.white),
             decoration: InputDecoration(
               hintText: '192.168.1.5:5000',
-              hintStyle: const TextStyle(color: Colors.white38),
+              hintStyle: const TextStyle(color: AppPalette.white38),
               errorText: _error,
               filled: true,
-              fillColor: Colors.black26,
+              fillColor: AppPalette.scanInputOverlay,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -111,7 +116,7 @@ class _ServerSettingsDialogState extends State<ServerSettingsDialog> {
           const SizedBox(height: 12),
           Text(
             'Alamat bawaan: ${ApiConfig.display(ApiConfig.buildTimeBaseUrl)}',
-            style: const TextStyle(color: Colors.white38, fontSize: 12),
+            style: const TextStyle(color: AppPalette.white38, fontSize: 12),
           ),
         ],
       ),

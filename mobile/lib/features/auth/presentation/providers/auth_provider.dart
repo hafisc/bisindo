@@ -128,16 +128,19 @@ class AuthState {
 
 // ── Login Notifier ──────────────────────────────────────────────────────────
 
-class LoginNotifier extends StateNotifier<AuthState> {
-  final LoginWithEmailUseCase _loginWithEmailUseCase;
-  final SignInWithGoogleUseCase _signInWithGoogleUseCase;
+class LoginNotifier extends Notifier<AuthState> {
+  late LoginWithEmailUseCase _loginWithEmailUseCase;
+  late SignInWithGoogleUseCase _signInWithGoogleUseCase;
+  bool _isDisposed = false;
 
-  LoginNotifier({
-    required LoginWithEmailUseCase loginWithEmailUseCase,
-    required SignInWithGoogleUseCase signInWithGoogleUseCase,
-  })  : _loginWithEmailUseCase = loginWithEmailUseCase,
-        _signInWithGoogleUseCase = signInWithGoogleUseCase,
-        super(const AuthState());
+  @override
+  AuthState build() {
+    _isDisposed = false;
+    ref.onDispose(() => _isDisposed = true);
+    _loginWithEmailUseCase = ref.watch(loginWithEmailUseCaseProvider);
+    _signInWithGoogleUseCase = ref.watch(signInWithGoogleUseCaseProvider);
+    return const AuthState();
+  }
 
   Future<void> loginWithEmail({
     required String email,
@@ -148,6 +151,7 @@ class LoginNotifier extends StateNotifier<AuthState> {
     final result = await _loginWithEmailUseCase(
       LoginWithEmailParams(email: email, password: password),
     );
+    if (_isDisposed) return;
 
     result.fold(
       (failure) {
@@ -178,6 +182,7 @@ class LoginNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
 
     final result = await _signInWithGoogleUseCase(const NoParams());
+    if (_isDisposed) return;
 
     result.fold(
       (failure) {
@@ -205,25 +210,23 @@ class LoginNotifier extends StateNotifier<AuthState> {
 }
 
 final loginNotifierProvider =
-    StateNotifierProvider<LoginNotifier, AuthState>((ref) {
-  return LoginNotifier(
-    loginWithEmailUseCase: ref.watch(loginWithEmailUseCaseProvider),
-    signInWithGoogleUseCase: ref.watch(signInWithGoogleUseCaseProvider),
-  );
-});
+    NotifierProvider<LoginNotifier, AuthState>(LoginNotifier.new);
 
 // ── Register Notifier ───────────────────────────────────────────────────────
 
-class RegisterNotifier extends StateNotifier<AuthState> {
-  final RegisterWithEmailUseCase _registerWithEmailUseCase;
-  final SignInWithGoogleUseCase _signInWithGoogleUseCase;
+class RegisterNotifier extends Notifier<AuthState> {
+  late RegisterWithEmailUseCase _registerWithEmailUseCase;
+  late SignInWithGoogleUseCase _signInWithGoogleUseCase;
+  bool _isDisposed = false;
 
-  RegisterNotifier({
-    required RegisterWithEmailUseCase registerWithEmailUseCase,
-    required SignInWithGoogleUseCase signInWithGoogleUseCase,
-  })  : _registerWithEmailUseCase = registerWithEmailUseCase,
-        _signInWithGoogleUseCase = signInWithGoogleUseCase,
-        super(const AuthState());
+  @override
+  AuthState build() {
+    _isDisposed = false;
+    ref.onDispose(() => _isDisposed = true);
+    _registerWithEmailUseCase = ref.watch(registerWithEmailUseCaseProvider);
+    _signInWithGoogleUseCase = ref.watch(signInWithGoogleUseCaseProvider);
+    return const AuthState();
+  }
 
   Future<void> registerWithEmail({
     required String name,
@@ -235,6 +238,7 @@ class RegisterNotifier extends StateNotifier<AuthState> {
     final result = await _registerWithEmailUseCase(
       RegisterWithEmailParams(name: name, email: email, password: password),
     );
+    if (_isDisposed) return;
 
     result.fold(
       (failure) {
@@ -257,6 +261,7 @@ class RegisterNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
 
     final result = await _signInWithGoogleUseCase(const NoParams());
+    if (_isDisposed) return;
 
     result.fold(
       (failure) {
@@ -284,12 +289,7 @@ class RegisterNotifier extends StateNotifier<AuthState> {
 }
 
 final registerNotifierProvider =
-    StateNotifierProvider<RegisterNotifier, AuthState>((ref) {
-  return RegisterNotifier(
-    registerWithEmailUseCase: ref.watch(registerWithEmailUseCaseProvider),
-    signInWithGoogleUseCase: ref.watch(signInWithGoogleUseCaseProvider),
-  );
-});
+    NotifierProvider<RegisterNotifier, AuthState>(RegisterNotifier.new);
 
 // ── Email Verification Notifier ─────────────────────────────────────────────
 
@@ -321,17 +321,20 @@ class EmailVerificationState {
   }
 }
 
-class EmailVerificationNotifier
-    extends StateNotifier<EmailVerificationState> {
-  final SendVerificationEmailUseCase _sendVerificationEmailUseCase;
-  final CheckEmailVerifiedUseCase _checkEmailVerifiedUseCase;
+class EmailVerificationNotifier extends Notifier<EmailVerificationState> {
+  late SendVerificationEmailUseCase _sendVerificationEmailUseCase;
+  late CheckEmailVerifiedUseCase _checkEmailVerifiedUseCase;
+  bool _isDisposed = false;
 
-  EmailVerificationNotifier({
-    required SendVerificationEmailUseCase sendVerificationEmailUseCase,
-    required CheckEmailVerifiedUseCase checkEmailVerifiedUseCase,
-  })  : _sendVerificationEmailUseCase = sendVerificationEmailUseCase,
-        _checkEmailVerifiedUseCase = checkEmailVerifiedUseCase,
-        super(const EmailVerificationState());
+  @override
+  EmailVerificationState build() {
+    _isDisposed = false;
+    ref.onDispose(() => _isDisposed = true);
+    _sendVerificationEmailUseCase =
+        ref.watch(sendVerificationEmailUseCaseProvider);
+    _checkEmailVerifiedUseCase = ref.watch(checkEmailVerifiedUseCaseProvider);
+    return const EmailVerificationState();
+  }
 
   Future<void> resendEmail({
     required String email,
@@ -342,6 +345,7 @@ class EmailVerificationNotifier
     final result = await _sendVerificationEmailUseCase(
       SendVerificationEmailParams(email: email, password: password),
     );
+    if (_isDisposed) return;
 
     result.fold(
       (failure) {
@@ -368,6 +372,7 @@ class EmailVerificationNotifier
     final result = await _checkEmailVerifiedUseCase(
       CheckEmailVerifiedParams(email: email, password: password),
     );
+    if (_isDisposed) return false;
 
     return result.fold(
       (failure) {
@@ -395,14 +400,10 @@ class EmailVerificationNotifier
   }
 }
 
-final emailVerificationProvider = StateNotifierProvider<
-    EmailVerificationNotifier, EmailVerificationState>((ref) {
-  return EmailVerificationNotifier(
-    sendVerificationEmailUseCase:
-        ref.watch(sendVerificationEmailUseCaseProvider),
-    checkEmailVerifiedUseCase: ref.watch(checkEmailVerifiedUseCaseProvider),
-  );
-});
+final emailVerificationProvider =
+    NotifierProvider<EmailVerificationNotifier, EmailVerificationState>(
+  EmailVerificationNotifier.new,
+);
 
 // ── Password Reset Notifier ─────────────────────────────────────────────────
 
@@ -418,13 +419,17 @@ class PasswordResetState {
   });
 }
 
-class PasswordResetNotifier extends StateNotifier<PasswordResetState> {
-  final SendPasswordResetUseCase _sendPasswordResetUseCase;
+class PasswordResetNotifier extends Notifier<PasswordResetState> {
+  late SendPasswordResetUseCase _sendPasswordResetUseCase;
+  bool _isDisposed = false;
 
-  PasswordResetNotifier({
-    required SendPasswordResetUseCase sendPasswordResetUseCase,
-  })  : _sendPasswordResetUseCase = sendPasswordResetUseCase,
-        super(const PasswordResetState());
+  @override
+  PasswordResetState build() {
+    _isDisposed = false;
+    ref.onDispose(() => _isDisposed = true);
+    _sendPasswordResetUseCase = ref.watch(sendPasswordResetUseCaseProvider);
+    return const PasswordResetState();
+  }
 
   Future<void> sendReset({required String email}) async {
     state = const PasswordResetState(isLoading: true);
@@ -432,6 +437,7 @@ class PasswordResetNotifier extends StateNotifier<PasswordResetState> {
     final result = await _sendPasswordResetUseCase(
       SendPasswordResetParams(email: email),
     );
+    if (_isDisposed) return;
 
     result.fold(
       (failure) {
@@ -449,11 +455,9 @@ class PasswordResetNotifier extends StateNotifier<PasswordResetState> {
 }
 
 final passwordResetProvider =
-    StateNotifierProvider<PasswordResetNotifier, PasswordResetState>((ref) {
-  return PasswordResetNotifier(
-    sendPasswordResetUseCase: ref.watch(sendPasswordResetUseCaseProvider),
-  );
-});
+    NotifierProvider<PasswordResetNotifier, PasswordResetState>(
+  PasswordResetNotifier.new,
+);
 
 // ── Account Security Notifier ────────────────────────────────────────────────
 // Menangani operasi sensitif pada akun: ganti password, verifikasi ulang,
@@ -471,19 +475,21 @@ class AccountSecurityState {
   });
 }
 
-class AccountSecurityNotifier extends StateNotifier<AccountSecurityState> {
-  final ChangePasswordUseCase _changePasswordUseCase;
-  final ReauthenticateUseCase _reauthenticateUseCase;
-  final DeleteAccountUseCase _deleteAccountUseCase;
+class AccountSecurityNotifier extends Notifier<AccountSecurityState> {
+  late ChangePasswordUseCase _changePasswordUseCase;
+  late ReauthenticateUseCase _reauthenticateUseCase;
+  late DeleteAccountUseCase _deleteAccountUseCase;
+  bool _isDisposed = false;
 
-  AccountSecurityNotifier({
-    required ChangePasswordUseCase changePasswordUseCase,
-    required ReauthenticateUseCase reauthenticateUseCase,
-    required DeleteAccountUseCase deleteAccountUseCase,
-  })  : _changePasswordUseCase = changePasswordUseCase,
-        _reauthenticateUseCase = reauthenticateUseCase,
-        _deleteAccountUseCase = deleteAccountUseCase,
-        super(const AccountSecurityState());
+  @override
+  AccountSecurityState build() {
+    _isDisposed = false;
+    ref.onDispose(() => _isDisposed = true);
+    _changePasswordUseCase = ref.watch(changePasswordUseCaseProvider);
+    _reauthenticateUseCase = ref.watch(reauthenticateUseCaseProvider);
+    _deleteAccountUseCase = ref.watch(deleteAccountUseCaseProvider);
+    return const AccountSecurityState();
+  }
 
   /// Mengganti password. Mengembalikan `true` bila berhasil.
   Future<bool> changePassword({
@@ -498,6 +504,7 @@ class AccountSecurityNotifier extends StateNotifier<AccountSecurityState> {
         newPassword: newPassword,
       ),
     );
+    if (_isDisposed) return false;
 
     return result.fold(
       (failure) {
@@ -520,6 +527,7 @@ class AccountSecurityNotifier extends StateNotifier<AccountSecurityState> {
     final result = await _reauthenticateUseCase(
       ReauthenticateParams(password: password),
     );
+    if (_isDisposed) return false;
 
     return result.fold(
       (failure) {
@@ -543,6 +551,7 @@ class AccountSecurityNotifier extends StateNotifier<AccountSecurityState> {
     final result = await _deleteAccountUseCase(
       DeleteAccountParams(password: password),
     );
+    if (_isDisposed) return false;
 
     return result.fold(
       (failure) {
@@ -562,10 +571,6 @@ class AccountSecurityNotifier extends StateNotifier<AccountSecurityState> {
 }
 
 final accountSecurityProvider =
-    StateNotifierProvider<AccountSecurityNotifier, AccountSecurityState>((ref) {
-  return AccountSecurityNotifier(
-    changePasswordUseCase: ref.watch(changePasswordUseCaseProvider),
-    reauthenticateUseCase: ref.watch(reauthenticateUseCaseProvider),
-    deleteAccountUseCase: ref.watch(deleteAccountUseCaseProvider),
-  );
-});
+    NotifierProvider<AccountSecurityNotifier, AccountSecurityState>(
+  AccountSecurityNotifier.new,
+);

@@ -105,11 +105,11 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     final profile = state.profile;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: AppPalette.gray100,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF1F5F9),
+        backgroundColor: AppPalette.gray100,
         elevation: 0,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: AppPalette.transparent,
         centerTitle: false,
         title: Text(
           'Edit Profil',
@@ -213,7 +213,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF334155),
+                    color: AppPalette.gray700,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -227,7 +227,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                   ),
                   style: GoogleFonts.poppins(
                     fontSize: 14,
-                    color: const Color(0xFF0F172A),
+                    color: AppPalette.darkBlue,
                   ),
                   items: _availableRoles
                       .map(
@@ -255,8 +255,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                     onPressed: state.isSaving ? null : _onSave,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppPalette.primary,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: const Color(0xFF93C5FD),
+                      foregroundColor: AppPalette.white,
+                      disabledBackgroundColor: AppPalette.blue300,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -267,7 +267,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                             width: 22,
                             height: 22,
                             child: CircularProgressIndicator(
-                              color: Colors.white,
+                              color: AppPalette.white,
                               strokeWidth: 2.5,
                             ),
                           )
@@ -290,17 +290,17 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
 
   InputDecoration _inputDecoration({required IconData icon}) {
     return InputDecoration(
-      prefixIcon: Icon(icon, color: const Color(0xFF64748B), size: 20),
+      prefixIcon: Icon(icon, color: AppPalette.gray500, size: 20),
       filled: true,
-      fillColor: const Color(0xFFF1F5F9),
+      fillColor: AppPalette.gray100,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF94A3B8)),
+        borderSide: const BorderSide(color: AppPalette.gray400),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF94A3B8)),
+        borderSide: const BorderSide(color: AppPalette.gray400),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -344,7 +344,7 @@ class _ProfileTextField extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF334155),
+            color: AppPalette.gray700,
           ),
         ),
         const SizedBox(height: 8),
@@ -357,30 +357,30 @@ class _ProfileTextField extends StatelessWidget {
           validator: validator,
           style: GoogleFonts.poppins(
             fontSize: 14,
-            color: enabled ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+            color: enabled ? AppPalette.darkBlue : AppPalette.gray500,
           ),
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: GoogleFonts.poppins(
               fontSize: 14,
-              color: const Color(0xFF94A3B8),
+              color: AppPalette.gray400,
             ),
-            prefixIcon: Icon(icon, color: const Color(0xFF64748B), size: 20),
+            prefixIcon: Icon(icon, color: AppPalette.gray500, size: 20),
             filled: true,
-            fillColor: enabled ? const Color(0xFFF1F5F9) : const Color(0xFFE2E8F0),
+            fillColor: enabled ? AppPalette.gray100 : AppPalette.gray200,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF94A3B8)),
+              borderSide: const BorderSide(color: AppPalette.gray400),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF94A3B8)),
+              borderSide: const BorderSide(color: AppPalette.gray400),
             ),
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+              borderSide: const BorderSide(color: AppPalette.gray300),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),

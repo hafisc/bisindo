@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/constants/app_palette.dart';
+
 class AuthPrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
@@ -21,9 +23,9 @@ class AuthPrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2563EB),
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: const Color(0xFF93C5FD),
+          backgroundColor: AppPalette.primary,
+          foregroundColor: AppPalette.white,
+          disabledBackgroundColor: AppPalette.blue300,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
@@ -34,7 +36,7 @@ class AuthPrimaryButton extends StatelessWidget {
                 width: 22,
                 height: 22,
                 child: CircularProgressIndicator(
-                  color: Colors.white,
+                  color: AppPalette.white,
                   strokeWidth: 2.5,
                 ),
               )

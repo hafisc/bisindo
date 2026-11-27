@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_palette.dart';
+
 abstract class HandSkeletonConstants {
   static const List<List<int>> connections = [
     [0, 1], [1, 2], [2, 3], [3, 4],       // Thumb
@@ -13,21 +15,21 @@ abstract class HandSkeletonConstants {
   static const Set<int> fingertips = {4, 8, 12, 16, 20};
 
   static final Paint linePaint = Paint()
-    ..color = const Color(0xFF00E5FF)
+    ..color = AppPalette.skeletonLine
     ..strokeWidth = 3.0
     ..strokeCap = StrokeCap.round
     ..style = PaintingStyle.stroke;
 
   static final Paint jointPaint = Paint()
-    ..color = const Color(0xFF00E676)
+    ..color = AppPalette.skeletonJoint
     ..style = PaintingStyle.fill;
 
   static final Paint wristPaint = Paint()
-    ..color = const Color(0xFFFFD600)
+    ..color = AppPalette.skeletonWrist
     ..style = PaintingStyle.fill;
 
   static final Paint fingertipPaint = Paint()
-    ..color = const Color(0xFFFF1744)
+    ..color = AppPalette.skeletonFingertip
     ..style = PaintingStyle.fill;
 }
 

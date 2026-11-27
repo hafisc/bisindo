@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_palette.dart';
@@ -9,6 +10,7 @@ import '../../../scan/presentation/controllers/scan_controller.dart';
 import '../../../scan/presentation/widgets/connection_status_indicator.dart';
 import '../../../scan/presentation/widgets/hand_landmarks_painter.dart';
 import '../../../scan/presentation/widgets/scan_camera_view.dart';
+import '../../../scan/presentation/widgets/scan_round_icon_button.dart';
 import '../../domain/learn_session.dart';
 
 /// Jeda setelah jawaban benar sebelum pindah ke huruf berikutnya.
@@ -16,15 +18,14 @@ const Duration _nextLetterDelay = Duration(milliseconds: 1000);
 
 /// Mode Belajar: pengguna memperagakan huruf target ke kamera dan model
 /// memeriksa apakah peragaannya benar.
-class LearnPage extends StatefulWidget {
+class LearnPage extends ConsumerStatefulWidget {
   const LearnPage({super.key});
 
   @override
-  State<LearnPage> createState() => _LearnPageState();
+  ConsumerState<LearnPage> createState() => _LearnPageState();
 }
 
-class _LearnPageState extends State<LearnPage> {
-  late final ScanController _controller;
+class _LearnPageState extends ConsumerState<LearnPage> {
   final LearnSession _session = LearnSession();
 
   /// Huruf yang baru saja dikenali model, untuk banner umpan balik.
@@ -41,16 +42,11 @@ class _LearnPageState extends State<LearnPage> {
   void initState() {
     super.initState();
     _shownTarget = _session.current;
-    _controller = ScanController(
-      recordHistory: false,
-      onLetterRecognized: _onLetterRecognized,
-    )..initializeCamera();
   }
 
   @override
   void dispose() {
     _nextTimer?.cancel();
-    _controller.dispose();
     super.dispose();
   }
 
@@ -112,114 +108,92 @@ class _LearnPageState extends State<LearnPage> {
 
   @override
   Widget build(BuildContext context) {
-    final finished = _shownTarget == null;
-
-    return ListenableBuilder(
-      listenable: _controller,
-      builder: (context, child) {
-        return Scaffold(
-          backgroundColor: Colors.black,
-          body: Stack(
-            fit: StackFit.expand,
-            children: [
-              ScanCameraView(
-                controller: _controller.cameraController,
-                errorMessage: _controller.cameraError,
-                onRetry: _controller.initializeCamera,
-              ),
-              if (_controller.cameraError == null)
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: CustomPaint(
-                      painter: HandLandmarksPainter(
-                        hands: _controller.detectedHands,
-                        isFrontCamera: _controller.isFrontCamera,
-                        imageSize:
-                            _controller.cameraController?.value.previewSize,
-                      ),
-                    ),
-                  ),
-                ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          _RoundButton(
-                            icon: Icons.arrow_back,
-                            tooltip: 'Kembali',
-                            onPressed: _goBack,
-                          ),
-                          const Spacer(),
-                          _ProgressChip(
-                            index: finished
-                                ? _session.length
-                                : _session.currentIndex +
-                                    (_waitingNext ? 0 : 1),
-                            total: _session.length,
-                            score: _session.score,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      ConnectionStatusIndicator(
-                        status: _controller.predictionStatus,
-                        serverAddress: _controller.serverAddress,
-                        errorMessage: _controller.predictionError,
-                        onRetry: _controller.refreshServer,
-                      ),
-                      const Spacer(),
-                      if (finished)
-                        _ResultCard(
-                          score: _session.score,
-                          total: _session.length,
-                          onRestart: _restart,
-                          onBack: _goBack,
-                        )
-                      else
-                        _TargetCard(
-                          target: _shownTarget!,
-                          detected: _controller.detectedLetter,
-                          answer: _lastAnswer,
-                          answeredLetter: _lastLetter,
-                          onSkip: _waitingNext ? null : _skip,
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
+    ref.listen<RecognizedLetterEvent?>(
+      scanControllerProvider(ScanMode.learn).select((s) => s.lastRecognized),
+      (previous, next) {
+        if (next != null && next != previous) {
+          _onLetterRecognized(next.letter, next.confidence);
+        }
       },
     );
-  }
-}
 
-class _RoundButton extends StatelessWidget {
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onPressed;
+    final scanState = ref.watch(scanControllerProvider(ScanMode.learn));
+    final scanController =
+        ref.read(scanControllerProvider(ScanMode.learn).notifier);
+    final finished = _shownTarget == null;
 
-  const _RoundButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.black45,
-        shape: BoxShape.circle,
-      ),
-      child: IconButton(
-        icon: Icon(icon, color: Colors.white),
-        tooltip: tooltip,
-        onPressed: onPressed,
+    return Scaffold(
+      backgroundColor: AppPalette.black,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          ScanCameraView(
+            controller: scanState.cameraController,
+            errorMessage: scanState.cameraError,
+            onRetry: scanController.initializeCamera,
+          ),
+          if (scanState.cameraError == null)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(
+                  painter: HandLandmarksPainter(
+                    hands: scanState.detectedHands,
+                    isFrontCamera: scanState.isFrontCamera,
+                    imageSize: scanState.cameraController?.value.previewSize,
+                  ),
+                ),
+              ),
+            ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      ScanRoundIconButton(
+                        icon: Icons.arrow_back,
+                        tooltip: 'Kembali',
+                        onPressed: _goBack,
+                      ),
+                      const Spacer(),
+                      _ProgressChip(
+                        index: finished
+                            ? _session.length
+                            : _session.currentIndex + (_waitingNext ? 0 : 1),
+                        total: _session.length,
+                        score: _session.score,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  ConnectionStatusIndicator(
+                    status: scanState.predictionStatus,
+                    serverAddress: scanState.serverAddress,
+                    errorMessage: scanState.predictionError,
+                    onRetry: scanController.refreshServer,
+                  ),
+                  const Spacer(),
+                  if (finished)
+                    _ResultCard(
+                      score: _session.score,
+                      total: _session.length,
+                      onRestart: _restart,
+                      onBack: _goBack,
+                    )
+                  else
+                    _TargetCard(
+                      target: _shownTarget!,
+                      detected: scanState.detectedLetter,
+                      answer: _lastAnswer,
+                      answeredLetter: _lastLetter,
+                      onSkip: _waitingNext ? null : _skip,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -241,13 +215,13 @@ class _ProgressChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.black54,
+        color: AppPalette.scanChipOverlay,
         borderRadius: BorderRadius.circular(24),
       ),
       child: Text(
         'Huruf $index/$total  ·  Skor $score',
         style: const TextStyle(
-          color: Colors.white,
+          color: AppPalette.white,
           fontWeight: FontWeight.w600,
         ),
       ),

@@ -14,7 +14,7 @@ class HomeTipsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,
+      color: AppPalette.transparent,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -26,13 +26,13 @@ class HomeTipsCard extends StatelessWidget {
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFFFFF8E1), Color(0xFFFFEFC2)],
+              colors: [AppPalette.amber50, AppPalette.amber100],
             ),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFFFAD27A), width: 1.2),
+            border: Border.all(color: AppPalette.amberBorder, width: 1.2),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x26F59E0B),
+                color: AppPalette.shadowAmber,
                 blurRadius: 14,
                 offset: Offset(0, 5),
               ),
@@ -74,7 +74,7 @@ class HomeTipsCard extends StatelessWidget {
               const Icon(
                 Icons.chevron_right_rounded,
                 size: 24,
-                color: Color(0xFFD97706),
+                color: AppPalette.amberDark,
               ),
             ],
           ),

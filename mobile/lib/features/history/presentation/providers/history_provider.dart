@@ -4,8 +4,14 @@ import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/history_local_data_source.dart';
 import '../../data/datasources/history_remote_data_source.dart';
-import '../../data/repositories/history_repository.dart';
+import '../../data/repositories/history_repository_impl.dart';
 import '../../domain/models/history_item.dart';
+import '../../domain/repositories/history_repository.dart';
+import '../../domain/usecases/add_history_item_usecase.dart';
+import '../../domain/usecases/clear_history_usecase.dart';
+import '../../domain/usecases/delete_history_item_usecase.dart';
+import '../../domain/usecases/get_local_history_usecase.dart';
+import '../../domain/usecases/sync_history_usecase.dart';
 
 class HistoryState {
   final List<HistoryItem> items;
@@ -55,39 +61,63 @@ class HistoryState {
   }
 }
 
-class HistoryNotifier extends StateNotifier<HistoryState> {
-  HistoryNotifier({
-    required HistoryRepository repository,
-    required HistoryOwner? owner,
-  })  : _repository = repository,
-        _owner = owner,
-        super(const HistoryState(isLoading: true)) {
-    loadHistory();
-  }
+class HistoryNotifier extends Notifier<HistoryState> {
+  late GetLocalHistoryUseCase _getLocalHistoryUseCase;
+  late SyncHistoryUseCase _syncHistoryUseCase;
+  late AddHistoryItemUseCase _addHistoryItemUseCase;
+  late DeleteHistoryItemUseCase _deleteHistoryItemUseCase;
+  late ClearHistoryUseCase _clearHistoryUseCase;
+  HistoryOwner? _owner;
+  bool _isDisposed = false;
 
-  final HistoryRepository _repository;
-  final HistoryOwner? _owner;
+  @override
+  HistoryState build() {
+    _isDisposed = false;
+    ref.onDispose(() => _isDisposed = true);
+    _getLocalHistoryUseCase = ref.watch(getLocalHistoryUseCaseProvider);
+    _syncHistoryUseCase = ref.watch(syncHistoryUseCaseProvider);
+    _addHistoryItemUseCase = ref.watch(addHistoryItemUseCaseProvider);
+    _deleteHistoryItemUseCase = ref.watch(deleteHistoryItemUseCaseProvider);
+    _clearHistoryUseCase = ref.watch(clearHistoryUseCaseProvider);
+    _owner = ref.watch(historyOwnerProvider);
+    Future.microtask(loadHistory);
+    return const HistoryState(isLoading: true);
+  }
 
   /// Tampilkan riwayat di HP lebih dulu, lalu samakan dengan server.
   Future<void> loadHistory() async {
-    try {
-      final local = await _repository.getLocal(_owner);
-      if (!mounted) return;
-      state = state.copyWith(items: local, isLoading: false);
+    final localResult = await _getLocalHistoryUseCase(
+      GetLocalHistoryParams(owner: _owner),
+    );
+    if (_isDisposed) return;
 
-      final result = await _repository.sync(_owner);
-      if (!mounted) return;
-      state = state.copyWith(
+    final failedLocal = localResult.fold(
+      (failure) {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: failure.message,
+        );
+        return true;
+      },
+      (items) {
+        state = state.copyWith(items: items, isLoading: false);
+        return false;
+      },
+    );
+    if (failedLocal) return;
+
+    final syncResult = await _syncHistoryUseCase(
+      SyncHistoryParams(owner: _owner),
+    );
+    if (_isDisposed) return;
+
+    syncResult.fold(
+      (failure) => state = state.copyWith(errorMessage: failure.message),
+      (result) => state = state.copyWith(
         items: result.items,
         syncError: () => result.syncError,
-      );
-    } catch (e) {
-      if (!mounted) return;
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Gagal memuat riwayat terjemahan: $e',
-      );
-    }
+      ),
+    );
   }
 
   void setFilter(String filter) {
@@ -99,14 +129,15 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
   }
 
   Future<void> addHistoryItem(HistoryItem item) async {
-    try {
-      final saved = await _repository.add(_owner, item);
-      if (!mounted) return;
-      state = state.copyWith(items: [saved, ...state.items]);
-    } catch (e) {
-      if (!mounted) return;
-      state = state.copyWith(errorMessage: 'Gagal menyimpan riwayat: $e');
-    }
+    final result = await _addHistoryItemUseCase(
+      AddHistoryItemParams(owner: _owner, item: item),
+    );
+    if (_isDisposed) return;
+
+    result.fold(
+      (failure) => state = state.copyWith(errorMessage: failure.message),
+      (saved) => state = state.copyWith(items: [saved, ...state.items]),
+    );
   }
 
   Future<void> deleteItem(int id) async {
@@ -119,36 +150,75 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
       items: state.items.where((entry) => entry.id != id).toList(),
     );
 
-    try {
-      await _repository.delete(_owner, item);
-    } catch (e) {
-      if (!mounted) return;
-      state = state.copyWith(errorMessage: 'Gagal menghapus item: $e');
-    }
+    final result = await _deleteHistoryItemUseCase(
+      DeleteHistoryItemParams(owner: _owner, item: item),
+    );
+    if (_isDisposed) return;
+
+    result.fold(
+      (failure) => state = state.copyWith(errorMessage: failure.message),
+      (_) {},
+    );
   }
 
-  /// Mengembalikan `false` bila server tidak bisa dihubungi.
+  /// Mengembalikan `false` bila server atau penyimpanan gagal dihapus.
   Future<bool> clearAll() async {
-    try {
-      await _repository.clear(_owner);
-      if (mounted) state = state.copyWith(items: []);
-      return true;
-    } on HistorySyncException catch (e) {
-      if (mounted) {
+    final result = await _clearHistoryUseCase(
+      ClearHistoryParams(owner: _owner),
+    );
+    if (_isDisposed) return false;
+
+    return result.fold(
+      (failure) {
         state = state.copyWith(
-          errorMessage: 'Riwayat di server belum terhapus: ${e.message}',
+          errorMessage: 'Riwayat di server belum terhapus: ${failure.message}',
         );
-      }
-      return false;
-    }
+        return false;
+      },
+      (_) {
+        state = state.copyWith(items: []);
+        return true;
+      },
+    );
   }
 }
 
+// ── Dependency Injection Providers ───────────────────────────────────────────
+
+final historyLocalDataSourceProvider = Provider<HistoryLocalDataSource>((ref) {
+  return HistoryLocalDataSourceImpl();
+});
+
+final historyRemoteDataSourceProvider = Provider<HistoryRemoteDataSource>((ref) {
+  return HistoryRemoteDataSourceImpl();
+});
+
 final historyRepositoryProvider = Provider<HistoryRepository>((ref) {
-  return HistoryRepository(
-    local: HistoryLocalDataSourceImpl(),
-    remote: HistoryRemoteDataSourceImpl(),
+  return HistoryRepositoryImpl(
+    local: ref.watch(historyLocalDataSourceProvider),
+    remote: ref.watch(historyRemoteDataSourceProvider),
   );
+});
+
+final getLocalHistoryUseCaseProvider = Provider<GetLocalHistoryUseCase>((ref) {
+  return GetLocalHistoryUseCase(ref.watch(historyRepositoryProvider));
+});
+
+final syncHistoryUseCaseProvider = Provider<SyncHistoryUseCase>((ref) {
+  return SyncHistoryUseCase(ref.watch(historyRepositoryProvider));
+});
+
+final addHistoryItemUseCaseProvider = Provider<AddHistoryItemUseCase>((ref) {
+  return AddHistoryItemUseCase(ref.watch(historyRepositoryProvider));
+});
+
+final deleteHistoryItemUseCaseProvider =
+    Provider<DeleteHistoryItemUseCase>((ref) {
+  return DeleteHistoryItemUseCase(ref.watch(historyRepositoryProvider));
+});
+
+final clearHistoryUseCaseProvider = Provider<ClearHistoryUseCase>((ref) {
+  return ClearHistoryUseCase(ref.watch(historyRepositoryProvider));
 });
 
 /// Pemilik riwayat yang sedang login, atau `null` bila belum login.
@@ -165,9 +235,4 @@ final historyOwnerProvider = Provider<HistoryOwner?>((ref) {
 /// Dibuat ulang setiap kali akun berganti, sehingga riwayat satu akun tidak
 /// tampil di akun lain pada HP yang sama.
 final historyNotifierProvider =
-    StateNotifierProvider<HistoryNotifier, HistoryState>((ref) {
-  return HistoryNotifier(
-    repository: ref.watch(historyRepositoryProvider),
-    owner: ref.watch(historyOwnerProvider),
-  );
-});
+    NotifierProvider<HistoryNotifier, HistoryState>(HistoryNotifier.new);

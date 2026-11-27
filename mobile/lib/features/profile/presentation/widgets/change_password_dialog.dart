@@ -174,7 +174,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
           onPressed: state.isProcessing ? null : _onSubmit,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppPalette.primary,
-            foregroundColor: Colors.white,
+            foregroundColor: AppPalette.white,
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -185,7 +185,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                   width: 18,
                   height: 18,
                   child: CircularProgressIndicator(
-                    color: Colors.white,
+                    color: AppPalette.white,
                     strokeWidth: 2.5,
                   ),
                 )
@@ -234,7 +234,7 @@ class _PasswordFieldState extends State<_PasswordField> {
         labelText: widget.label,
         labelStyle: GoogleFonts.poppins(fontSize: 13),
         filled: true,
-        fillColor: const Color(0xFFF1F5F9),
+        fillColor: AppPalette.gray100,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         suffixIcon: IconButton(
@@ -243,17 +243,17 @@ class _PasswordFieldState extends State<_PasswordField> {
                 ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined,
             size: 20,
-            color: const Color(0xFF64748B),
+            color: AppPalette.gray500,
           ),
           onPressed: () => setState(() => _obscure = !_obscure),
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF94A3B8)),
+          borderSide: const BorderSide(color: AppPalette.gray400),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF94A3B8)),
+          borderSide: const BorderSide(color: AppPalette.gray400),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

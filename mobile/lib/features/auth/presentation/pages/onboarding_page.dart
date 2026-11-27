@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/constants/app_palette.dart';
 import '../../../../core/router/app_router.dart';
 import '../widgets/onboarding_slide_widget.dart';
 import 'onboarding_data.dart';
@@ -17,9 +18,6 @@ class OnboardingPage extends StatefulWidget {
 class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
-
-  static const Color _primaryBlue = Color(0xFF2563EB);
-  static const Color _dotInactive = Color(0xFFCBD5E1);
 
   @override
   void dispose() {
@@ -53,7 +51,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final isLastPage = _currentIndex == onboardingSlides.length - 1;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppPalette.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -75,7 +73,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF94A3B8),
+                        color: AppPalette.gray400,
                       ),
                     ),
                   ),
@@ -111,8 +109,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     height: 8,
                     decoration: BoxDecoration(
                       color: _currentIndex == index
-                          ? _primaryBlue
-                          : _dotInactive,
+                          ? AppPalette.primary
+                          : AppPalette.gray300,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -129,8 +127,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 child: ElevatedButton(
                   onPressed: _nextPage,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _primaryBlue,
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppPalette.primary,
+                    foregroundColor: AppPalette.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),

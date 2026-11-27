@@ -85,11 +85,11 @@ class ProfileAvatar extends StatelessWidget {
         color: AppPalette.gray200,
         shape: BoxShape.circle,
         border: Border.all(color: AppPalette.white, width: 3),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: AppPalette.avatarShadow,
             blurRadius: 12,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -100,13 +100,13 @@ class ProfileAvatar extends StatelessWidget {
             photo(avatarUrl, size: size),
             if (isLoading)
               Container(
-                color: Colors.black.withValues(alpha: 0.35),
+                color: AppPalette.avatarOverlay,
                 child: const Center(
                   child: SizedBox(
                     width: 24,
                     height: 24,
                     child: CircularProgressIndicator(
-                      color: Colors.white,
+                      color: AppPalette.white,
                       strokeWidth: 2.5,
                     ),
                   ),
@@ -155,7 +155,7 @@ class ProfileAvatarEditBadge extends StatelessWidget {
       ),
       child: Icon(
         Icons.photo_camera_rounded,
-        color: Colors.white,
+        color: AppPalette.white,
         size: size * 0.5,
       ),
     );
